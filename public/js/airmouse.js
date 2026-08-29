@@ -1,22 +1,27 @@
-// Universal Wireless Control Hub - Endüstri Standardı Jiroskop Entegrasyon Motoru (Inertial Gyroscope Engine)
-// Gürültülü manyetik pusulayı (alpha) tamamen devre dışı bırakır.
-// Saf donanımsal jiroskop açısal hızını (rotationRate) entegre ederek SIFIR TİTREME sağlar.
+// Universal Wireless Control Hub - Otomatik Bias Dengeleyicili & Debriyajlı (Clutch) Jiroskop Motoru
+// Donanımsal sensör kaymasını (drift/bias) otomatik sıfırlar, masa üzerinde sıfır hareket garantisi verir.
 
 class GyroscopeAirMouse {
     constructor() {
         this.active = false;
+        this.clutchMode = true; // true: Ekrana dokunurken hareket et (Hold to Move), false: Surekli acik
+        this.isClutchEngaged = false;
 
         // Ayarlar
-        this.speedX = 3.2;         // Yatay hassasiyet
-        this.speedY = 3.2;         // Dikey hassasiyet
-        this.deadZone = 0.20;       // Durgunluk gürültü kapısı (deg/s): El sabitken titremeyi 0 yapar
-        this.accelFactor = 1.35;   // Hızlı kol hareketinde geniş ekranları rahat aşma ivmesi
+        this.speed = 2.4;
+        this.noiseThreshold = 0.65; // Gürültü eşiği (deg/s)
+
+        // Otomatik Bias / Durgunluk Kalibrasyonu (Sıfır Noktası Düzeltici)
+        this.biasYaw = 0.0;
+        this.biasPitch = 0.0;
+        this.biasSamples = [];
+        this.isCalibratedBias = false;
 
         this.invertX = false;
         this.invertY = false;
 
         this.lastTimestamp = null;
-        this.gyroCount = 0;
+        this.packetCount = 0;
 
         this.loadSettings();
         this.initUi();
@@ -24,18 +29,19 @@ class GyroscopeAirMouse {
     }
 
     initUi() {
-        const sliderX = document.getElementById('gyro-sens-slider');
-        const valX = document.getElementById('gyro-sens-val');
+        const sliderSens = document.getElementById('gyro-sens-slider');
+        const valSens = document.getElementById('gyro-sens-val');
         const checkInvY = document.getElementById('chk-invert-y');
         const checkInvX = document.getElementById('chk-invert-x');
-        const btnCenter = document.getElementById('btn-recenter-gyro');
+        const clutchToggle = document.getElementById('chk-clutch-mode');
+        const touchZone = document.getElementById('airmouse-touch-surface');
+        const btnCalibBias = document.getElementById('btn-calibrate-bias');
 
-        if (sliderX) {
-            sliderX.value = this.speedX;
-            sliderX.addEventListener('input', (e) => {
-                this.speedX = parseFloat(e.target.value);
-                this.speedY = parseFloat(e.target.value);
-                if (valX) valX.textContent = `${this.speedX.toFixed(1)}x`;
+        if (sliderSens) {
+            sliderSens.value = this.speed;
+            sliderSens.addEventListener('input', (e) => {
+                this.speed = parseFloat(e.target.value);
+                if (valSens) valSens.textContent = `${this.speed.toFixed(1)}x`;
                 this.saveSettings();
             });
         }
@@ -56,66 +62,94 @@ class GyroscopeAirMouse {
             });
         }
 
-        if (btnCenter) {
-            btnCenter.addEventListener('click', () => {
-                this.recenter();
+        if (clutchToggle) {
+            clutchToggle.checked = this.clutchMode;
+            clutchToggle.addEventListener('change', (e) => {
+                this.clutchMode = e.target.checked;
+                this.saveSettings();
+                this.updateClutchUi();
             });
         }
+
+        if (btnCalibBias) {
+            btnCalibBias.addEventListener('click', () => {
+                this.recalibrateBias();
+            });
+        }
+
+        // Debriyaj (Hold-to-Move) Dokunmatik Alanı
+        if (touchZone) {
+            touchZone.addEventListener('touchstart', (e) => {
+                this.isClutchEngaged = true;
+                this.updateClutchUi();
+                window.haptics.click();
+            }, { passive: true });
+
+            touchZone.addEventListener('touchend', (e) => {
+                this.isClutchEngaged = false;
+                this.updateClutchUi();
+            }, { passive: true });
+
+            touchZone.addEventListener('touchcancel', (e) => {
+                this.isClutchEngaged = false;
+                this.updateClutchUi();
+            }, { passive: true });
+        }
+    }
+
+    updateClutchUi() {
+        const hudState = document.getElementById('gyro-state-text');
+        const touchZone = document.getElementById('airmouse-touch-surface');
+
+        if (this.clutchMode) {
+            if (this.isClutchEngaged) {
+                if (hudState) hudState.textContent = 'Durum: AKTİF (TUTULUYOR)';
+                if (hudState) hudState.style.color = '#10b981';
+                if (touchZone) touchZone.style.borderColor = '#2563eb';
+            } else {
+                if (hudState) hudState.textContent = 'Durum: KİLİTLİ (Hareket için parmağınızı basılı tutun)';
+                if (hudState) hudState.style.color = '#888';
+                if (touchZone) touchZone.style.borderColor = '#333';
+            }
+        } else {
+            if (hudState) hudState.textContent = 'Durum: SÜREKLİ AÇIK';
+            if (hudState) hudState.style.color = '#38bdf8';
+            if (touchZone) touchZone.style.borderColor = '#38bdf8';
+        }
+    }
+
+    recalibrateBias() {
+        this.biasSamples = [];
+        this.isCalibratedBias = false;
+        const hudState = document.getElementById('gyro-state-text');
+        if (hudState) hudState.textContent = 'Kalibrasyon: 1 sn telefonu sabit tutun...';
+        window.haptics.click();
     }
 
     saveSettings() {
         try {
-            localStorage.setItem('gyro_speed', JSON.stringify(this.speedX));
+            localStorage.setItem('gyro_speed_val', JSON.stringify(this.speed));
             localStorage.setItem('gyro_inv_x', JSON.stringify(this.invertX));
             localStorage.setItem('gyro_inv_y', JSON.stringify(this.invertY));
+            localStorage.setItem('gyro_clutch', JSON.stringify(this.clutchMode));
         } catch (e) {}
     }
 
     loadSettings() {
         try {
-            const s = localStorage.getItem('gyro_speed');
+            const s = localStorage.getItem('gyro_speed_val');
             const ix = localStorage.getItem('gyro_inv_x');
             const iy = localStorage.getItem('gyro_inv_y');
-            if (s) {
-                this.speedX = JSON.parse(s);
-                this.speedY = this.speedX;
-            }
+            const c = localStorage.getItem('gyro_clutch');
+            if (s) this.speed = JSON.parse(s);
             if (ix) this.invertX = JSON.parse(ix);
             if (iy) this.invertY = JSON.parse(iy);
+            if (c) this.clutchMode = JSON.parse(c);
         } catch (e) {}
     }
 
-    recenter() {
-        window.haptics.click();
-        // Farenin merkez monitöre ışınlanması için
-        if (window.app && window.app.ws && window.app.ws.readyState === WebSocket.OPEN) {
-            window.app.send({
-                type: 'click',
-                button: 'middle',
-                state: 'click'
-            });
-        }
-    }
-
     bindEvents() {
-        // DeviceMotion içindeki pure gyroscope rotationRate olayını dinle
         window.addEventListener('devicemotion', (e) => this.handleDeviceMotion(e), true);
-        
-        // Generic Sensor API Gyroscope fallback
-        try {
-            if ('Gyroscope' in window) {
-                const gyro = new Gyroscope({ frequency: 60 });
-                gyro.addEventListener('reading', () => {
-                    if (!this.active) return;
-                    // rad/s to deg/s
-                    const degX = gyro.x * (180 / Math.PI);
-                    const degY = gyro.y * (180 / Math.PI);
-                    const degZ = gyro.z * (180 / Math.PI);
-                    this.processGyroRates(degZ, degX, performance.now());
-                });
-                gyro.start();
-            }
-        } catch (err) {}
     }
 
     handleDeviceMotion(e) {
@@ -130,53 +164,71 @@ class GyroscopeAirMouse {
             return;
         }
 
-        const dt = Math.max(0.002, Math.min(0.1, (now - this.lastTimestamp) / 1000));
+        const dt = Math.max(0.005, Math.min(0.05, (now - this.lastTimestamp) / 1000));
         this.lastTimestamp = now;
 
-        // rot.alpha: Z ekseni (Yaw - Sağa/Sola Dönüş)
-        // rot.beta:  X ekseni (Pitch - Yukarı/Aşağı Eğilme)
-        // rot.gamma: Y ekseni (Roll)
-        let rateYaw = rot.alpha || 0;
-        let ratePitch = rot.beta || 0;
+        let rawYaw = rot.alpha || 0;
+        let rawPitch = rot.beta || 0;
 
-        // Bazı Android cihazlarda Z ekseni yerine gamma veya beta atanır
-        if (Math.abs(rateYaw) < 0.05 && Math.abs(rot.gamma) > 0.1) {
-            rateYaw = rot.gamma;
+        if (Math.abs(rawYaw) < 0.05 && Math.abs(rot.gamma) > 0.1) {
+            rawYaw = rot.gamma;
         }
 
-        this.processGyroRates(rateYaw, ratePitch, now, dt);
-    }
-
-    processGyroRates(rateYaw, ratePitch, now, dt = 0.016) {
-        this.gyroCount++;
-
-        // 1. Durgunluk / Gürültü Kapısı (Deadband Filter): El sabitken SIFIR titreme
-        const angularSpeed = Math.hypot(rateYaw, ratePitch);
-        if (angularSpeed < this.deadZone) {
-            this.updateHud(0, 0, angularSpeed, 'DURGUN (Sabit)');
+        // 1. Otomatik Sıfır Noktası (Bias/Drift) Öğrenme
+        if (!this.isCalibratedBias) {
+            this.biasSamples.push({ yaw: rawYaw, pitch: rawPitch });
+            if (this.biasSamples.length >= 30) {
+                let sumY = 0, sumP = 0;
+                this.biasSamples.forEach(s => { sumY += s.yaw; sumP += s.pitch; });
+                this.biasYaw = sumY / this.biasSamples.length;
+                this.biasPitch = sumP / this.biasSamples.length;
+                this.isCalibratedBias = true;
+                this.updateClutchUi();
+            }
             return;
         }
 
-        // 2. Yönlendirme (Yukarı bakınca fare YUKARI gitmeli)
-        // Telefon yukarı kalkarken ratePitch pozitiftir. Windows'ta ekranın yukarısı eksi (-) Y'dir.
-        let rawDx = rateYaw;
-        let rawDy = -ratePitch;
+        // Bias Düzeltmesi (Sensör kaymasını çıkar)
+        const cleanYaw = rawYaw - this.biasYaw;
+        const cleanPitch = rawPitch - this.biasPitch;
+        const speed = Math.hypot(cleanYaw, cleanPitch);
 
-        if (this.invertX) rawDx = -rawDx;
-        if (this.invertY) rawDy = -rawDy;
-
-        // 3. İvmelenme Eğrisi (Geniş çift monitör geçişi için)
-        let multiplierX = this.speedX * 22.0;
-        let multiplierY = this.speedY * 22.0;
-
-        if (angularSpeed > 5.0) {
-            const boost = Math.pow(angularSpeed / 5.0, this.accelFactor - 1.0);
-            multiplierX *= Math.min(3.0, boost);
-            multiplierY *= Math.min(3.0, boost);
+        // 2. Debriyaj Kontrolü (Hold-to-Move aktifse ve basılmıyorsa hiçbir şey yollama)
+        if (this.clutchMode && !this.isClutchEngaged) {
+            return;
         }
 
-        const finalDx = rawDx * multiplierX * dt * 60.0;
-        const finalDy = rawDy * multiplierY * dt * 60.0;
+        // 3. Gürültü Eşiği (Telefon masada veya elde hareketsizken 0 paket yolla)
+        if (speed < this.noiseThreshold) {
+            // Yavaş harekette bias'ı yavaşça güncelle (Adaptive Drift Cancellation)
+            if (speed < 0.3) {
+                this.biasYaw = 0.98 * this.biasYaw + 0.02 * rawYaw;
+                this.biasPitch = 0.98 * this.biasPitch + 0.02 * rawPitch;
+            }
+            return;
+        }
+
+        // 4. Koordinat Hesaplama
+        let dx = cleanYaw;
+        let dy = -cleanPitch; // Yukarı kaldırma = Fare Yukarı
+
+        if (this.invertX) dx = -dx;
+        if (this.invertY) dy = -dy;
+
+        // Yumuşak İvmelenme Eğrisi (Power Curve)
+        let multiplier = this.speed * 14.0;
+        if (speed > 4.0) {
+            multiplier *= Math.min(2.5, Math.pow(speed / 4.0, 0.4));
+        }
+
+        let finalDx = dx * multiplier * dt * 60.0;
+        let finalDy = dy * multiplier * dt * 60.0;
+
+        // Ani anomalik sıçramaları (Glitch filter) engelle
+        if (Math.abs(finalDx) > 80) finalDx = Math.sign(finalDx) * 80;
+        if (Math.abs(finalDy) > 80) finalDy = Math.sign(finalDy) * 80;
+
+        this.packetCount++;
 
         if (window.app && window.app.ws && window.app.ws.readyState === WebSocket.OPEN) {
             window.app.send({
@@ -187,25 +239,19 @@ class GyroscopeAirMouse {
             });
         }
 
-        this.updateHud(finalDx, finalDy, angularSpeed, 'HAREKETLİ');
-    }
-
-    updateHud(dx, dy, speed, state) {
-        const hudStatus = document.getElementById('gyro-state-text');
         const hudMotion = document.getElementById('gyro-motion-text');
-
-        if (hudStatus) {
-            hudStatus.textContent = `Durum: ${state} (Hız: ${speed.toFixed(1)}°/s)`;
-            hudStatus.style.color = state.includes('DURGUN') ? '#10b981' : '#38bdf8';
-        }
         if (hudMotion) {
-            hudMotion.textContent = `Haraket: dX=${dx.toFixed(1)}px | dY=${dy.toFixed(1)}px | Paket: ${this.gyroCount}`;
+            hudMotion.textContent = `Haraket: dX=${finalDx.toFixed(1)}px | dY=${finalDy.toFixed(1)}px | Paket: ${this.packetCount}`;
         }
     }
 
     setActive(isActive) {
         this.active = isActive;
         this.lastTimestamp = null;
+        this.isClutchEngaged = false;
+        if (isActive) {
+            this.recalibrateBias();
+        }
     }
 }
 

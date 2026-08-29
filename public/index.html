@@ -41,34 +41,45 @@
             <div id="view-airmouse" class="airmouse-box">
                 <!-- Canlı Jiroskop Durumu -->
                 <div class="calib-card" style="border-color:#333; background:#141820;">
-                    <div style="font-size:12px; font-weight:700; color:#3b82f6; margin-bottom:4px;">
-                        <i class="fas fa-microchip"></i> DONANIMSAL JİROSKOP (Zero-Jitter)
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span style="font-size:12px; font-weight:700; color:#3b82f6;"><i class="fas fa-microchip"></i> JİROSKOP HAREKET MOTORU</span>
+                        <button id="btn-calibrate-bias" class="mini-btn" title="Masa üzerindeyken sıfırla">⚖️ Sıfırla</button>
                     </div>
-                    <div id="gyro-state-text" class="status-text" style="color:#10b981;">Durum: DURGUN (Sabit)</div>
+                    <div id="gyro-state-text" class="status-text" style="color:#10b981;">Durum: KİLİTLİ (Parmağınızı alana basılı tutun)</div>
                     <div id="gyro-motion-text" class="status-text">Haraket: dX=0.0px | dY=0.0px | Paket: 0</div>
                 </div>
 
-                <!-- Hassasiyet & Çoklu Monitör Çarpanı -->
-                <div class="calib-card">
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <span style="font-size:12px; color:#ddd; font-weight:600;">Hassasiyet (Monitör Geçiş Hızı):</span>
-                        <span id="gyro-sens-val" style="font-size:13px; font-weight:700; color:#3b82f6;">3.2x</span>
+                <!-- Debriyaj Dokunmatik Alanı (Hold-to-Move Grip Zone) -->
+                <div id="airmouse-touch-surface" class="calib-card" style="flex:1; min-height:140px; display:flex; align-items:center; justify-content:center; text-align:center; border:2px dashed #333; cursor:pointer; background:#161616;">
+                    <div style="pointer-events:none;">
+                        <i class="fas fa-hand-pointer" style="font-size:24px; color:#3b82f6; margin-bottom:6px;"></i><br>
+                        <strong style="color:#eee; font-size:13px;">Basılı Tut ve Hareket Ettir</strong><br>
+                        <small style="color:#777; font-size:11px;">Parmağınızı bu alana bastığınızda fare hareket eder, kaldırdığınızda sabit kilitlenir.</small>
                     </div>
-                    <input id="gyro-sens-slider" type="range" min="1.0" max="6.0" step="0.2" value="3.2" style="width:100%; accent-color:#2563eb; margin-top:6px;">
-                    <small style="color:#777; font-size:10px;">Geniş çift monitörler arasında bileğinizi hafif çevirerek gezinebilirsiniz.</small>
                 </div>
 
-                <!-- Eksen Kontrolleri -->
+                <!-- Mod ve Ayarlar -->
                 <div class="calib-card">
-                    <div style="font-size:12px; color:#aaa; font-weight:600; margin-bottom:4px;">Eksen Yönleri:</div>
-                    <div style="display:flex; gap:16px; font-size:12px; color:#ccc; justify-content:center;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <label style="display:flex; align-items:center; gap:6px; font-size:12px; color:#ccc; cursor:pointer;">
+                            <input type="checkbox" id="chk-clutch-mode" checked style="accent-color:#2563eb;">
+                            <span>Basılı Tutarken Hareket Et (Tavsiye Edilir)</span>
+                        </label>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px;">
+                        <span style="font-size:12px; color:#aaa;">Hassasiyet:</span>
+                        <span id="gyro-sens-val" style="font-size:12px; font-weight:700; color:#3b82f6;">2.4x</span>
+                    </div>
+                    <input id="gyro-sens-slider" type="range" min="1.0" max="5.0" step="0.2" value="2.4" style="width:100%; accent-color:#2563eb;">
+
+                    <div style="display:flex; gap:16px; font-size:12px; color:#aaa; justify-content:center; margin-top:6px;">
                         <label style="display:flex; align-items:center; gap:6px; cursor:pointer;">
                             <input type="checkbox" id="chk-invert-y" style="accent-color:#2563eb;">
-                            <span>⇅ Y Eksenini Ters Çevir</span>
+                            <span>⇅ Y Ters</span>
                         </label>
                         <label style="display:flex; align-items:center; gap:6px; cursor:pointer;">
                             <input type="checkbox" id="chk-invert-x" style="accent-color:#2563eb;">
-                            <span>⇄ X Eksenini Ters Çevir</span>
+                            <span>⇄ X Ters</span>
                         </label>
                     </div>
                 </div>
