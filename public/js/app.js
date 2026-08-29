@@ -128,7 +128,7 @@ class RemoteApp {
 
     // Üst Mod Değiştirme Sekmeleri
     initModeTabs() {
-        document.querySelectorAll('.mode-btn').forEach(btn => {
+        document.querySelectorAll('.tab-btn, .mode-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 const mode = btn.getAttribute('data-mode');
                 this.switchMode(mode);
@@ -140,7 +140,7 @@ class RemoteApp {
         this.currentMode = mode;
         window.haptics.modeSwitch();
 
-        document.querySelectorAll('.mode-btn').forEach(b => {
+        document.querySelectorAll('.tab-btn, .mode-btn').forEach(b => {
             if (b.getAttribute('data-mode') === mode) b.classList.add('active');
             else b.classList.remove('active');
         });
