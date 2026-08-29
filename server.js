@@ -46,32 +46,30 @@ const localIp = getLocalIpAddress();
 const httpUrl = `http://${localIp}:${HTTP_PORT}`;
 const httpsUrl = `https://${localIp}:${HTTPS_PORT}`;
 
-// Otomatik self-signed SSL sertifikasi olusturalim
-console.log('SSL sertifikasi hazirlaniyor...');
-let sslOptions = null;
-try {
-    const pems = selfsigned.generate([
-        { name: 'commonName', value: localIp },
-        { name: 'organizationName', value: 'RemotePC Plus' }
-    ], {
-        days: 365,
-        keySize: 2048,
-        extensions: [{
-            name: 'subjectAltName',
-            altNames: [
-                { type: 7, ip: localIp },
-                { type: 2, value: 'localhost' },
-                { type: 7, ip: '127.0.0.1' }
-            ]
-        }]
-    });
-    sslOptions = {
-        key: pems.private,
-        cert: pems.cert
-    };
-} catch (sslErr) {
-    console.log('SSL sertifikasi olusturulurken hata:', sslErr);
+// Gecerli modern TLS sertifikasi olustur veya yukle (ERR_SSL_VERSION_OR_CIPHER_MISMATCH hatasini onler)
+const { execSync } = require('child_process');
+
+function getOrGenerateCert(ip) {
+    const certPath = path.join(__dirname, 'server.pfx');
+    if (!fs.existsSync(certPath)) {
+        try {
+            console.log(`[SSL] Yeni TLS sertifikasi uretiliyor (IP: ${ip})...`);
+            const psCmd = `$cert = New-SelfSignedCertificate -DnsName "${ip}", "localhost", "127.0.0.1" -CertStoreLocation "cert:\\CurrentUser\\My" -KeyExportPolicy Exportable -KeyLength 2048 -KeyAlgorithm RSA -HashAlgorithm SHA256; $pwd = ConvertTo-SecureString -String "remotepc123" -Force -AsPlainText; Export-PfxCertificate -Cert $cert -FilePath "${certPath.replace(/\\/g, '\\\\')}" -Password $pwd`;
+            execSync(`powershell -Command "${psCmd}"`, { stdio: 'ignore' });
+        } catch (e) {
+            console.log('PowerShell sertifika olusturma hatasi:', e.message);
+        }
+    }
+    if (fs.existsSync(certPath)) {
+        return {
+            pfx: fs.readFileSync(certPath),
+            passphrase: 'remotepc123'
+        };
+    }
+    return null;
 }
+
+const sslOptions = getOrGenerateCert(localIp);
 
 // Gelismis Gelistirici Log Formatlayici (Developer Debug Logger)
 function log(level, subsystem, message, meta = null) {
