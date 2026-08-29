@@ -52,27 +52,36 @@
                 </div>
 
                 <div class="calib-card">
-                    <div class="card-title"><i class="fas fa-crosshairs"></i> LAZER KALİBRASYONU (Sol - Sağ Sınır)</div>
+                    <div class="card-title"><i class="fas fa-crosshairs"></i> 2 KÖŞE LAZER KALİBRASYONU</div>
                     <p style="font-size:11px; color:#888; line-height:1.4;">
-                        Telefonu sol ekranın en soluna doğrultup 1'e, ardından sağ ekranın en sağına doğrultup 2'ye dokunun (veya gezinip otomatik uygulayın):
+                        Telefonu sol monitörün <strong>Sol-Üst</strong> köşesine tutup 1'e, ardından sağ monitörün <strong>Sağ-Alt</strong> köşesine tutup 2'ye dokunun:
                     </p>
 
                     <div style="display:flex; flex-direction:column; gap:6px; margin-top:2px;">
-                        <button id="calib-set-left" class="action-btn">
-                            <span>📍 1. Sol Sınırı Kaydet</span>
-                            <small id="calib-left-indicator" style="color:#3b82f6;">Kaydedilmedi</small>
+                        <button id="calib-set-topleft" class="action-btn">
+                            <span>↖️ 1. Sol-Üst Köşeyi Kaydet</span>
+                            <small id="calib-topleft-ind" style="color:#3b82f6;">Kaydedilmedi</small>
                         </button>
-                        <button id="calib-set-right" class="action-btn">
-                            <span>📍 2. Sağ Sınırı Kaydet</span>
-                            <small id="calib-right-indicator" style="color:#3b82f6;">Kaydedilmedi</small>
-                        </button>
-                        <button id="btn-apply-autorange" class="action-btn" style="background:#1e293b; border-color:#334155; color:#38bdf8;">
-                            <span>⚡ Gezinilen Aralığı Otomatik Uygula</span>
+                        <button id="calib-set-bottomright" class="action-btn">
+                            <span>↘️ 2. Sağ-Alt Köşeyi Kaydet</span>
+                            <small id="calib-bottomright-ind" style="color:#3b82f6;">Kaydedilmedi</small>
                         </button>
                     </div>
 
+                    <!-- Eksen Ters Çevirme Seçenekleri -->
+                    <div style="display:flex; gap:16px; margin-top:6px; font-size:12px; color:#aaa; justify-content:center;">
+                        <label style="display:flex; align-items:center; gap:4px; cursor:pointer;">
+                            <input type="checkbox" id="chk-invert-y" style="accent-color:#2563eb;">
+                            <span>⇅ Y Eksenini Ters Çevir</span>
+                        </label>
+                        <label style="display:flex; align-items:center; gap:4px; cursor:pointer;">
+                            <input type="checkbox" id="chk-invert-x" style="accent-color:#2563eb;">
+                            <span>⇄ X Eksenini Ters Çevir</span>
+                        </label>
+                    </div>
+
                     <div id="calib-status-box" class="calib-status">
-                        Kalibre edilmedi. 1 ve 2. adımları yapın veya otomatik aralığı kullanın.
+                        Kalibre edilmedi. Lütfen 1 ve 2. adımları tamamlayın.
                     </div>
                 </div>
 
