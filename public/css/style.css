@@ -1,4 +1,4 @@
-/* RemotePC+ Sade ve Düz Stil */
+/* RemotePC+ Modern, Sade ve Zengin Özellikli Dokunmatik Arayüz */
 * {
     margin: 0;
     padding: 0;
@@ -14,7 +14,7 @@ body {
     overflow: hidden;
     position: fixed;
     inset: 0;
-    background: #141414;
+    background: #111418;
     color: #e5e5e5;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
@@ -26,51 +26,64 @@ body {
     height: 100%;
 }
 
-/* Üst Bar */
+/* Üst Başlık Çubuğu */
 .top-bar {
     height: 48px;
     padding: 0 12px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background: #1c1c1c;
-    border-bottom: 1px solid #2c2c2c;
+    background: #181c24;
+    border-bottom: 1px solid #283040;
+    z-index: 20;
 }
 
 .logo {
     font-size: 13px;
     font-weight: 700;
     color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.logo i {
+    color: #3b82f6;
 }
 
 .tabs {
     display: flex;
     gap: 4px;
-    background: #111;
+    background: #101216;
     padding: 3px;
     border-radius: 8px;
+    border: 1px solid #222a38;
 }
 
 .tab-btn {
     border: none;
     background: transparent;
-    color: #888;
+    color: #8892b0;
     padding: 5px 12px;
     border-radius: 6px;
     font-size: 12px;
     font-weight: 600;
     cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
 }
 
 .tab-btn.active {
-    background: #2c2c2c;
+    background: #2563eb;
     color: #fff;
 }
 
 .ping-badge {
     font-size: 11px;
-    color: #777;
+    color: #10b981;
     font-family: monospace;
+    font-weight: 600;
 }
 
 /* Ana Alan */
@@ -80,35 +93,6 @@ body {
     flex-direction: column;
     position: relative;
     overflow: hidden;
-}
-
-/* Touchpad */
-.touchpad-box {
-    flex: 1;
-    display: flex;
-    background: #181818;
-}
-
-.touchpad-pad {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #444;
-    font-size: 12px;
-    text-align: center;
-    line-height: 1.6;
-}
-
-.scroll-strip {
-    width: 36px;
-    background: #1a1a1a;
-    border-left: 1px solid #2c2c2c;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #555;
-    font-size: 11px;
 }
 
 /* Sürükleme Bildirimi */
@@ -124,52 +108,339 @@ body {
     padding: 3px 12px;
     border-radius: 6px;
     display: none;
-    z-index: 10;
+    z-index: 15;
+    box-shadow: 0 2px 8px rgba(220, 38, 38, 0.4);
 }
 
-/* Air Mouse / Lazer */
-.airmouse-box {
+/* === 1. TOUCHPAD EKRANI === */
+.touchpad-view {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: #111418;
+    overflow: hidden;
+}
+
+/* Monitör Seçim Çubuğu */
+.monitor-bar {
+    height: 38px;
+    padding: 0 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #141820;
+    border-bottom: 1px solid #222a38;
+    overflow-x: auto;
+}
+
+.mon-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: #8892b0;
+    white-space: nowrap;
+}
+
+.monitor-chips {
+    display: flex;
+    gap: 6px;
+    flex: 1;
+    overflow-x: auto;
+}
+
+.mon-chip-btn {
+    background: #1e2430;
+    border: 1px solid #2d3748;
+    color: #cbd5e1;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.mon-chip-btn.active {
+    background: #2563eb;
+    border-color: #3b82f6;
+    color: #fff;
+}
+
+.mon-chip-btn .mon-res {
+    font-size: 9px;
+    color: rgba(255,255,255,0.7);
+}
+
+/* Hızlı Araç Çubuğu (Quick Toolbar) */
+.quick-toolbar {
+    height: 38px;
+    padding: 0 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #161a22;
+    border-bottom: 1px solid #222a38;
+    overflow-x: auto;
+}
+
+.tool-btn {
+    background: #1f2532;
+    border: 1px solid #2f3b4f;
+    color: #cbd5e1;
+    padding: 4px 8px;
+    border-radius: 5px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.tool-btn:active, .tool-btn.active {
+    background: #2563eb;
+    color: #fff;
+}
+
+.tool-btn.recording {
+    background: #dc2626;
+    color: #fff;
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.6; }
+    100% { opacity: 1; }
+}
+
+/* Dokunmatik Alan Kapsayıcısı */
+.touchpad-wrapper {
+    flex: 1;
+    display: flex;
+    position: relative;
+    overflow: hidden;
+}
+
+.touchpad-surface {
+    flex: 1;
+    background: #111418;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: crosshair;
+}
+
+.touch-hint {
+    color: #3b4252;
+    font-size: 12px;
+    text-align: center;
+    line-height: 1.6;
+    pointer-events: none;
+}
+
+.touch-hint span {
+    font-weight: 700;
+    color: #4c566a;
+}
+
+.scroll-strip {
+    width: 38px;
+    background: #141820;
+    border-left: 1px solid #222a38;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #64748b;
+    font-size: 12px;
+}
+
+/* Canlı Büyüteç (Magnifier Overlay) */
+.magnifier-overlay {
+    position: absolute;
+    top: 10px;
+    right: 48px;
+    background: #181c24;
+    border: 2px solid #2563eb;
+    border-radius: 10px;
+    overflow: hidden;
+    display: none;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+    z-index: 25;
+}
+
+.magnifier-overlay.active {
+    display: block;
+}
+
+.mag-header {
+    height: 24px;
+    padding: 0 8px;
+    background: #2563eb;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.mag-close {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+#magnifier-canvas {
+    display: block;
+    width: 140px;
+    height: 140px;
+    background: #000;
+}
+
+/* === 2. MEDYA & SUNUM EKRANI === */
+.context-view {
     flex: 1;
     display: none;
     flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
-    padding: 16px;
-    gap: 12px;
+    padding: 12px;
+    gap: 10px;
     overflow-y: auto;
+    background: #111418;
 }
 
-.calib-card {
-    width: 100%;
-    max-width: 360px;
-    background: #1c1c1c;
-    border: 1px solid #2c2c2c;
+.card {
+    background: #161a22;
+    border: 1px solid #222a38;
     border-radius: 8px;
-    padding: 14px;
+    padding: 12px;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
 }
 
-.calib-status {
-    background: #111;
-    border: 1px solid #222;
-    border-radius: 6px;
-    padding: 8px 10px;
+.card-title {
     font-size: 11px;
-    color: #999;
-    line-height: 1.4;
-    text-align: center;
+    font-weight: 700;
+    color: #8892b0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
 }
 
-.clean-select {
-    background: #242424;
+.btn-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+}
+
+.round-btn {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: #2563eb;
     color: #fff;
-    border: 1px solid #383838;
-    padding: 5px 10px;
+    border: none;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+}
+
+.round-btn:active {
+    background: #1d4ed8;
+}
+
+.small-btn {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: #1f2532;
+    border: 1px solid #2f3b4f;
+    color: #fff;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.small-btn:active {
+    background: #2d3748;
+}
+
+.icon-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    background: #1f2532;
+    border: 1px solid #2f3b4f;
+    color: #cbd5e1;
+    cursor: pointer;
+}
+
+.pres-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.3fr;
+    gap: 8px;
+}
+
+.pres-nav-btn {
+    height: 64px;
+    background: #1f2532;
+    border: 1px solid #2f3b4f;
+    color: #fff;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.pres-nav-btn.primary {
+    background: #2563eb;
+    border-color: #3b82f6;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+.pres-nav-btn:active {
+    opacity: 0.85;
+}
+
+.macro-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+}
+
+.action-btn {
+    height: 38px;
+    background: #1f2532;
+    border: 1px solid #2f3b4f;
+    color: #fff;
     border-radius: 6px;
     font-size: 12px;
-    outline: none;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.action-btn:active {
+    background: #2d3748;
 }
 
 .mini-btn {
@@ -183,192 +454,40 @@ body {
     cursor: pointer;
 }
 
-.mini-btn:active {
-    background: #1d4ed8;
-}
-
-.warning-box {
-    width: 100%;
-    max-width: 360px;
-    background: #2a1f10;
-    border: 1px solid #d97706;
-    color: #fbbf24;
-    padding: 10px;
-    border-radius: 8px;
-    font-size: 12px;
-    line-height: 1.4;
-    display: none;
-    text-align: center;
-}
-
-.warning-box a {
-    color: #fff;
-    font-weight: 700;
-    text-decoration: underline;
-    display: block;
-    margin-top: 4px;
-}
-
-.status-text {
-    font-size: 12px;
-    color: #888;
-    font-family: monospace;
-}
-
-.action-btn {
-    width: 100%;
-    max-width: 340px;
-    height: 44px;
-    background: #242424;
-    border: 1px solid #383838;
-    color: #fff;
-    border-radius: 8px;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-}
-
-.action-btn:active {
-    background: #333;
-}
-
-.action-btn.primary {
-    background: #2563eb;
-    border-color: #3b82f6;
-}
-
-.slider-box {
-    width: 100%;
-    max-width: 340px;
-    background: #1c1c1c;
-    border: 1px solid #2c2c2c;
-    padding: 12px;
-    border-radius: 8px;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    font-size: 12px;
-    color: #aaa;
-}
-
-.slider-box input[type="range"] {
-    width: 100%;
-    accent-color: #2563eb;
-}
-
-/* Medya & Sunum */
-.context-box {
-    flex: 1;
-    display: none;
-    flex-direction: column;
-    padding: 16px;
-    gap: 12px;
-    overflow-y: auto;
-}
-
-.card {
-    background: #1c1c1c;
-    border: 1px solid #2c2c2c;
-    border-radius: 8px;
-    padding: 14px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-.card-title {
-    font-size: 12px;
-    font-weight: 700;
-    color: #aaa;
-}
-
-.btn-row {
-    display: flex;
-    gap: 8px;
-    justify-content: center;
-}
-
-.round-btn {
-    width: 54px;
-    height: 54px;
-    border-radius: 50%;
-    background: #2563eb;
-    color: #fff;
-    border: none;
-    font-size: 18px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-}
-
-.small-btn {
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    background: #242424;
-    border: 1px solid #333;
-    color: #fff;
-    font-size: 14px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-}
-
-.pres-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-}
-
-.pres-btn {
-    height: 70px;
-    background: #242424;
-    border: 1px solid #383838;
-    color: #fff;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-}
-
-/* Alt Tıklama Barı */
+/* Alt Tıklama Çubuğu (Bottom Bar) */
 .bottom-bar {
-    height: 64px;
-    padding: 8px 12px;
+    height: 56px;
+    padding: 6px 10px;
     display: flex;
-    gap: 8px;
-    background: #1c1c1c;
-    border-top: 1px solid #2c2c2c;
+    gap: 6px;
+    background: #181c24;
+    border-top: 1px solid #283040;
+    z-index: 20;
 }
 
 .click-btn {
     flex: 1;
-    background: #242424;
-    border: 1px solid #383838;
+    background: #1f2532;
+    border: 1px solid #2f3b4f;
     color: #fff;
     border-radius: 8px;
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 700;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
+    gap: 4px;
 }
 
 .click-btn.primary {
-    flex: 1.4;
-    background: #2a2a2a;
-    border-color: #444;
+    flex: 1.3;
+    background: #2563eb;
+    border-color: #3b82f6;
 }
 
 .click-btn:active, .click-btn.active {
-    background: #383838;
+    background: #1d4ed8;
 }
 
 .click-btn.locked {

@@ -1,9 +1,10 @@
 // RemotePC+ Mobil İstemci - Ana Uygulama Yöneticisi
+// Touchpad, Çoklu Monitör, Medya, Klavye, Sesle Yazma ve Canlı Büyüteç
 
 class RemoteApp {
     constructor() {
         this.ws = null;
-        this.currentMode = 'touchpad'; // 'touchpad', 'airmouse', 'context'
+        this.currentMode = 'touchpad'; // 'touchpad' veya 'context'
         this.isConnected = false;
         this.reconnectTimer = null;
         this.wakeLock = null;
@@ -11,6 +12,7 @@ class RemoteApp {
 
         this.isDragLocked = false;
         this.isLeftHolding = false;
+        this.monitors = [];
 
         this.init();
     }
@@ -19,13 +21,11 @@ class RemoteApp {
         this.connectWebSocket();
         this.initModeTabs();
         this.initBottomButtons();
+        this.initQuickActionToolbar();
+        this.initVirtualKeyboard();
+        this.initSpeechToText();
         this.initWakeLock();
         this.initHardwareKeys();
-
-        const httpsLink = document.getElementById('https-redirect-link');
-        if (httpsLink) {
-            httpsLink.href = `https://${location.hostname}:5443`;
-        }
     }
 
     // WebSocket Bağlantısı Kur
@@ -41,7 +41,7 @@ class RemoteApp {
             this.ws.onopen = () => {
                 this.isConnected = true;
                 this.updateStatus('connected');
-                console.log('[WS] Bağlandı!');
+                console.log('[WS] Sunucuya bağlandı!');
                 window.haptics.success();
                 this.startPing();
             };
@@ -85,8 +85,11 @@ class RemoteApp {
     handleMessage(msg) {
         switch (msg.type) {
             case 'init':
-                if (window.multiMonitor) window.multiMonitor.setMonitors(msg.monitors);
-                if (window.contextCards) window.contextCards.setContext(msg.context, msg.windowTitle, msg.processName);
+                this.monitors = msg.monitors || [];
+                if (window.multiMonitor) window.multiMonitor.setMonitors(this.monitors);
+                if (window.contextCards) {
+                    window.contextCards.setContext(msg.context, msg.windowTitle, msg.processName);
+                }
                 break;
 
             case 'context_update':
@@ -96,9 +99,8 @@ class RemoteApp {
                 break;
 
             case 'move_ack':
-                if (msg.boundaryHit) {
+                if (msg.boundaryHit && window.haptics) {
                     window.haptics.boundaryHit();
-                    if (window.multiMonitor) window.multiMonitor.showBoundaryFeedback();
                 }
                 if (msg.monId && window.multiMonitor) {
                     window.multiMonitor.currentMonitorId = msg.monId;
@@ -126,7 +128,7 @@ class RemoteApp {
         }, 2000);
     }
 
-    // Üst Mod Değiştirme Sekmeleri
+    // Üst Mod Sekmeleri (Touchpad & Medya)
     initModeTabs() {
         document.querySelectorAll('.tab-btn, .mode-btn').forEach(btn => {
             btn.addEventListener('click', () => {
@@ -146,39 +148,127 @@ class RemoteApp {
         });
 
         const viewTouchpad = document.getElementById('view-touchpad');
-        const viewAirmouse = document.getElementById('view-airmouse');
         const viewContext = document.getElementById('view-context');
 
         if (mode === 'touchpad') {
             if (viewTouchpad) viewTouchpad.style.display = 'flex';
-            if (viewAirmouse) viewAirmouse.style.display = 'none';
             if (viewContext) viewContext.style.display = 'none';
-            if (window.airMouse) window.airMouse.setActive(false);
-        } else if (mode === 'airmouse') {
-            if (viewTouchpad) viewTouchpad.style.display = 'none';
-            if (viewAirmouse) viewAirmouse.style.display = 'flex';
-            if (viewContext) viewContext.style.display = 'none';
-            if (window.airMouse) window.airMouse.setActive(true);
         } else if (mode === 'context') {
             if (viewTouchpad) viewTouchpad.style.display = 'none';
-            if (viewAirmouse) viewAirmouse.style.display = 'none';
             if (viewContext) viewContext.style.display = 'flex';
-            if (window.airMouse) window.airMouse.setActive(false);
         }
     }
 
-    // Alt Butonlar (Sol Tık / Sürükle Kilidi / Sağ Tık)
+    // Hızlı Kısayol Araç Çubuğu (Toolbar)
+    initQuickActionToolbar() {
+        document.querySelectorAll('[data-macro-key]').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                const macro = btn.getAttribute('data-macro-key');
+                if (macro) {
+                    const keys = macro.split('+');
+                    this.send({ type: 'macro', keys: keys });
+                    window.haptics.click();
+                }
+            });
+        });
+    }
+
+    // Sanal Klavye (Metin Girişi)
+    initVirtualKeyboard() {
+        const kbBtn = document.getElementById('btn-open-keyboard');
+        const hiddenInput = document.getElementById('hidden-text-input');
+
+        if (kbBtn && hiddenInput) {
+            kbBtn.addEventListener('click', () => {
+                hiddenInput.value = '';
+                hiddenInput.focus();
+                window.haptics.click();
+            });
+
+            hiddenInput.addEventListener('input', (e) => {
+                const text = hiddenInput.value;
+                if (text.length > 0) {
+                    this.send({ type: 'type', text: text });
+                    hiddenInput.value = '';
+                }
+            });
+
+            hiddenInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    this.send({ type: 'key', key: 'Return', state: 'press' });
+                } else if (e.key === 'Backspace') {
+                    this.send({ type: 'key', key: 'BackSpace', state: 'press' });
+                }
+            });
+        }
+    }
+
+    // Sesle Yazma (Speech-to-Text)
+    initSpeechToText() {
+        const voiceBtn = document.getElementById('btn-voice-input');
+        if (!voiceBtn) return;
+
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SpeechRecognition) {
+            voiceBtn.style.opacity = '0.4';
+            voiceBtn.title = 'Tarayıcınız sesle yazmayı desteklemiyor.';
+            return;
+        }
+
+        const recognition = new SpeechRecognition();
+        recognition.lang = 'tr-TR';
+        recognition.continuous = false;
+        recognition.interimResults = false;
+
+        let isListening = false;
+
+        voiceBtn.addEventListener('click', () => {
+            if (!isListening) {
+                try {
+                    recognition.start();
+                    isListening = true;
+                    voiceBtn.classList.add('recording');
+                    window.haptics.modeSwitch();
+                } catch (err) {}
+            } else {
+                recognition.stop();
+                isListening = false;
+                voiceBtn.classList.remove('recording');
+            }
+        });
+
+        recognition.onresult = (event) => {
+            const transcript = event.results[0][0].transcript;
+            if (transcript) {
+                console.log('[Voice] Yazılıyor:', transcript);
+                this.send({ type: 'type', text: transcript + ' ' });
+                window.haptics.success();
+            }
+        };
+
+        recognition.onend = () => {
+            isListening = false;
+            voiceBtn.classList.remove('recording');
+        };
+
+        recognition.onerror = () => {
+            isListening = false;
+            voiceBtn.classList.remove('recording');
+        };
+    }
+
+    // Alt Butonlar (Sol Tık / Orta Tık / Sürükle Kilidi / Sağ Tık)
     initBottomButtons() {
         const btnLeft = document.getElementById('btn-click-left');
+        const btnMiddle = document.getElementById('btn-click-middle');
         const btnRight = document.getElementById('btn-click-right');
         const btnDrag = document.getElementById('btn-drag-lock');
 
-        // Sol Tık - Dokunulduğunda 'down', bırakıldığında 'up' (İki elle tutarak sürüklemeye izin verir)
+        // Sol Tık - Dokunulduğunda 'down', bırakıldığında 'up'
         if (btnLeft) {
-            let leftDownTime = 0;
             const onDown = (e) => {
                 e.preventDefault();
-                leftDownTime = Date.now();
                 this.isLeftHolding = true;
                 this.send({ type: 'click', button: 'left', state: 'down' });
                 btnLeft.classList.add('active');
@@ -197,6 +287,15 @@ class RemoteApp {
             btnLeft.addEventListener('touchcancel', onUp, { passive: false });
             btnLeft.addEventListener('mousedown', onDown);
             btnLeft.addEventListener('mouseup', onUp);
+        }
+
+        // Orta Tık (Middle Click)
+        if (btnMiddle) {
+            btnMiddle.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.send({ type: 'click', button: 'middle', state: 'click' });
+                window.haptics.middleClick();
+            });
         }
 
         // Sağ Tık
@@ -240,7 +339,7 @@ class RemoteApp {
         }
     }
 
-    // Donanımsal Tuşlar
+    // Donanımsal Ses Tuşları ile Sunum/Medya Kontrolü
     initHardwareKeys() {
         window.addEventListener('keydown', (e) => {
             if (this.currentMode === 'context') {
@@ -258,9 +357,10 @@ class RemoteApp {
     }
 
     updateStatus(status) {
-        const dot = document.getElementById('status-dot');
-        if (!dot) return;
-        dot.className = `status-dot ${status}`;
+        const pingEl = document.getElementById('latency-val');
+        if (pingEl && status === 'disconnected') {
+            pingEl.textContent = 'Bağlantı koptu';
+        }
     }
 }
 
