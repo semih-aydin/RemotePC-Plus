@@ -24,6 +24,7 @@ class RemoteApp {
         this.initQuickActionToolbar();
         this.initVirtualKeyboard();
         this.initSpeechToText();
+        this.initFullscreenLandscape();
         this.initWakeLock();
         this.initHardwareKeys();
     }
@@ -196,12 +197,44 @@ class RemoteApp {
 
             hiddenInput.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter') {
-                    this.send({ type: 'key', key: 'Return', state: 'press' });
+                    this.send({ type: 'key', key: 'enter', state: 'press' });
                 } else if (e.key === 'Backspace') {
-                    this.send({ type: 'key', key: 'BackSpace', state: 'press' });
+                    this.send({ type: 'key', key: 'backspace', state: 'press' });
                 }
             });
         }
+    }
+
+    // Tam Ekran & Yatay Mod Yönetimi (Landscape Mode)
+    initFullscreenLandscape() {
+        const fsBtn = document.getElementById('btn-fullscreen-toggle');
+        if (!fsBtn) return;
+
+        fsBtn.addEventListener('click', async () => {
+            try {
+                if (!document.fullscreenElement) {
+                    if (document.documentElement.requestFullscreen) {
+                        await document.documentElement.requestFullscreen();
+                    }
+                    if (screen.orientation && screen.orientation.lock) {
+                        await screen.orientation.lock('landscape').catch(() => {});
+                    }
+                    fsBtn.innerHTML = '<i class="fas fa-compress"></i> Dikey';
+                    window.haptics.modeSwitch();
+                } else {
+                    if (document.exitFullscreen) {
+                        await document.exitFullscreen();
+                    }
+                    if (screen.orientation && screen.orientation.unlock) {
+                        screen.orientation.unlock();
+                    }
+                    fsBtn.innerHTML = '<i class="fas fa-expand"></i> Yatay';
+                    window.haptics.click();
+                }
+            } catch (err) {
+                console.log('Fullscreen/Orientation hatasi:', err);
+            }
+        });
     }
 
     // Sesle Yazma (Speech-to-Text)

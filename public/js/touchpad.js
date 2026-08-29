@@ -1,4 +1,5 @@
-// Universal Wireless Control Hub - Ultra Optimize Hassas Dokunmatik Motor (rAF Batching & Kinetic Physics)
+// Universal Wireless Control Hub - Hassas Dokunmatik Yüzey ve Güvenli Sürükleme Motoru
+// Yanlışlıkla sürükleme kilidini önleyen akıllı jest algılayıcı ve rAF optimizasyonu
 
 class TouchpadController {
     constructor() {
@@ -11,9 +12,11 @@ class TouchpadController {
         this.hasMoved = false;
         this.fingerCount = 0;
 
-        // Tutup Sürükleme (Drag & Drop)
+        // Tutup Sürükleme (Drag & Drop) Güvenli Durumları
         this.lastTapEndTime = 0;
-        this.isDoubleTapDragging = false;
+        this.lastTapPos = { x: 0, y: 0 };
+        this.isPotentialDrag = false;
+        this.isDragging = false;
 
         // 2 Parmak Pinch-Zoom & Scroll
         this.initialPinchDist = 0;
@@ -23,7 +26,7 @@ class TouchpadController {
         this.inertiaRafId = null;
         this.scrollAcc = 0;
 
-        // rAF (requestAnimationFrame) Paket Toplayıcı (Batching: 60Hz/120Hz Ekran Senkronizasyonu)
+        // rAF Paket Toplayıcı
         this.pendingDx = 0;
         this.pendingDy = 0;
         this.rafScheduled = false;
@@ -38,6 +41,12 @@ class TouchpadController {
         this.pad.addEventListener('touchmove', (e) => this.handleTouchMove(e), { passive: false });
         this.pad.addEventListener('touchend', (e) => this.handleTouchEnd(e), { passive: false });
         this.pad.addEventListener('touchcancel', (e) => this.handleTouchEnd(e), { passive: false });
+
+        // Güvenlik: Sayfa arka plana giderse sol tuşu daima serbest bırak
+        window.addEventListener('blur', () => this.forceReleaseDrag());
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) this.forceReleaseDrag();
+        });
 
         // Dikey Hassas Kaydırma Şeridi (Dedicated Scroll Strip)
         if (this.scrollStrip) {
@@ -77,16 +86,22 @@ class TouchpadController {
         this.touchStartPositions = Array.from(e.touches).map(t => ({ x: t.clientX, y: t.clientY }));
         this.lastPositions = [...this.touchStartPositions];
 
-        // === ÇİFT DOKUNUP TUTARAK SÜRÜKLEME (Double-Tap & Hold to Drag) ===
+        // === Akıllı Çift Dokunma Sürükleme Kontrolü ===
         if (this.fingerCount === 1) {
             const timeSinceLastTap = this.touchStartTime - this.lastTapEndTime;
+            const distFromLastTap = Math.hypot(
+                this.touchStartPositions[0].x - this.lastTapPos.x,
+                this.touchStartPositions[0].y - this.lastTapPos.y
+            );
 
-            if (timeSinceLastTap < 280) {
-                this.isDoubleTapDragging = true;
-                window.app.send({ type: 'click', button: 'left', state: 'down' });
-                window.haptics.click();
-                this.showDragIndicator(true);
+            // Sadece aynı noktaya (20px içi) ve çok hızlı (< 240ms) ikinci kez dokunulursa "potansiyel sürükleme" say
+            if (timeSinceLastTap < 240 && distFromLastTap < 20) {
+                this.isPotentialDrag = true;
+            } else {
+                this.isPotentialDrag = false;
             }
+        } else {
+            this.isPotentialDrag = false;
         }
 
         // 2 Parmak Başlangıcı (Pinch / Scroll)
@@ -102,22 +117,29 @@ class TouchpadController {
         e.preventDefault();
         const curPositions = Array.from(e.touches).map(t => ({ x: t.clientX, y: t.clientY }));
 
-        if (!this.hasMoved) {
-            const dist = Math.hypot(
-                curPositions[0].x - this.touchStartPositions[0].x,
-                curPositions[0].y - this.touchStartPositions[0].y
-            );
-            if (dist > 4) {
-                this.hasMoved = true;
-            }
+        const moveDist = Math.hypot(
+            curPositions[0].x - this.touchStartPositions[0].x,
+            curPositions[0].y - this.touchStartPositions[0].y
+        );
+
+        if (moveDist > 4) {
+            this.hasMoved = true;
         }
 
-        // === 1 PARMAK: Fareyi Hareket Ettir (rAF Toplayıcı ile Sıfır Ağ Şişmesi) ===
+        // Eğer potansiyel sürükleme modundaysa ve parmak bilinçli olarak hareket ettiyse sürüklemeyi başlat
+        if (this.isPotentialDrag && !this.isDragging && moveDist > 8) {
+            this.isDragging = true;
+            window.app.send({ type: 'click', button: 'left', state: 'down' });
+            this.showDragIndicator(true);
+            window.haptics.click();
+        }
+
+        // === 1 PARMAK: Fare Hareketi (Normal veya Sürükleme) ===
         if (e.touches.length === 1 && this.lastPositions.length >= 1) {
             const rawDx = curPositions[0].x - this.lastPositions[0].x;
             const rawDy = curPositions[0].y - this.lastPositions[0].y;
 
-            // Hassas İvmelenme Eğrisi (Power Curve)
+            // Hassas İvmelenme Eğrisi
             const speed = Math.hypot(rawDx, rawDy);
             let multiplier = 1.35;
             if (speed > 3.0) {
@@ -142,11 +164,9 @@ class TouchpadController {
             const pinchDelta = curPinchDist - this.lastPinchDist;
 
             if (Math.abs(pinchDelta) > 8) {
-                // Zoom
                 window.app.send({ type: 'zoom', delta: pinchDelta > 0 ? 1 : -1 });
                 this.lastPinchDist = curPinchDist;
             } else {
-                // 2 Parmak Kaydırma (Hem Dikey Hem Yatay)
                 const dy0 = curPositions[0].y - this.lastPositions[0].y;
                 const dy1 = curPositions[1].y - this.lastPositions[1].y;
                 const avgDy = (dy0 + dy1) * 0.5;
@@ -164,7 +184,7 @@ class TouchpadController {
             }
         }
 
-        // === 3 PARMAK: Ekranlar Arası Işınlanma (Flick Jump) ===
+        // === 3 PARMAK: Ekranlar Arası Işınlanma ===
         else if (e.touches.length === 3 && this.touchStartPositions.length >= 3) {
             const startX = (this.touchStartPositions[0].x + this.touchStartPositions[1].x + this.touchStartPositions[2].x) / 3;
             const currentX = (curPositions[0].x + curPositions[0].x + curPositions[2].x) / 3;
@@ -182,7 +202,6 @@ class TouchpadController {
         this.lastPositions = [...curPositions];
     }
 
-    // Toplanan mikro hareketleri tek bir ağ paketinde gönder
     flushMovement() {
         this.rafScheduled = false;
         if (Math.abs(this.pendingDx) > 0.01 || Math.abs(this.pendingDy) > 0.01) {
@@ -200,48 +219,62 @@ class TouchpadController {
     handleTouchEnd(e) {
         const duration = performance.now() - this.touchStartTime;
 
-        // Kalan hareket varsa hemen bas
         if (this.rafScheduled) {
             this.flushMovement();
         }
 
-        // Çift dokunup sürükleme modu bittiyse sol tuşu bırak
-        if (this.isDoubleTapDragging) {
-            this.isDoubleTapDragging = false;
+        // Sürükleme modundaysa mutlaka bırak
+        if (this.isDragging) {
+            this.isDragging = false;
+            this.isPotentialDrag = false;
             window.app.send({ type: 'click', button: 'left', state: 'up' });
             this.showDragIndicator(false);
             window.haptics.click();
         }
 
-        // Kısa dokunuşla tıklamalar (Tap to Click: 200ms altı dokunuş)
-        if (!this.hasMoved && duration < 220) {
+        // Kısa dokunuşla tıklamalar (Tap to Click)
+        if (!this.hasMoved && duration < 200) {
             if (this.fingerCount === 1) {
-                // 1 Parmak: Sol Tık
-                window.app.send({ type: 'click', button: 'left', state: 'click' });
-                window.haptics.click();
-                this.lastTapEndTime = performance.now();
+                // Eğer potansiyel çift tıklamaysa çift tık yap
+                if (this.isPotentialDrag) {
+                    window.app.send({ type: 'click', button: 'left', state: 'double' });
+                    window.haptics.click();
+                    this.lastTapEndTime = 0;
+                } else {
+                    window.app.send({ type: 'click', button: 'left', state: 'click' });
+                    window.haptics.click();
+                    this.lastTapEndTime = performance.now();
+                    if (this.touchStartPositions[0]) {
+                        this.lastTapPos = { x: this.touchStartPositions[0].x, y: this.touchStartPositions[0].y };
+                    }
+                }
             } else if (this.fingerCount === 2) {
-                // 2 Parmak: Sağ Tık
                 window.app.send({ type: 'click', button: 'right', state: 'click' });
                 window.haptics.rightClick();
             } else if (this.fingerCount === 3) {
-                // 3 Parmak: Orta Tık
                 window.app.send({ type: 'click', button: 'middle', state: 'click' });
                 window.haptics.middleClick();
             }
         } else {
-            if (this.fingerCount === 1) {
-                this.lastTapEndTime = performance.now();
-            }
+            this.isPotentialDrag = false;
         }
 
-        // 2 Parmak Ataletli Kaydırma (Kinetic Inertial Physics)
+        // 2 Parmak Ataletli Kaydırma
         if (this.fingerCount === 2 && Math.abs(this.scrollVelY) > 1.5) {
             this.startKineticInertia();
         }
 
         this.jumpTriggered = false;
         this.fingerCount = e.touches.length;
+    }
+
+    forceReleaseDrag() {
+        if (this.isDragging) {
+            this.isDragging = false;
+            this.isPotentialDrag = false;
+            window.app.send({ type: 'click', button: 'left', state: 'up' });
+            this.showDragIndicator(false);
+        }
     }
 
     startKineticInertia() {
