@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RemotePC+ Masaüstü Kontrol Merkezi</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="admin-header">
+        <div class="logo-area">
+            <i class="fas fa-satellite-dish"></i>
+            <span>Universal Wireless Control Hub (Remote-PC-Plus)</span>
+        </div>
+        <div class="server-stats">
+            <div class="stat-chip">
+                <i class="fas fa-mobile-alt"></i>
+                <span>Bağlı Telefon:</span>
+                <strong id="connected-clients-count">0</strong>
+            </div>
+            <div class="stat-chip">
+                <i class="fas fa-window-maximize"></i>
+                <span>Aktif Uygulama:</span>
+                <strong id="active-app-name">Masaüstü</strong>
+                <span id="active-context-badge" class="badge badge-desktop">DESKTOP</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Ana Izgara -->
+    <main class="dashboard-grid">
+        <!-- SOL KOLON: QR KOD & EKRAN YERLESIMI -->
+        <section class="card">
+            <div class="card-title">
+                <i class="fas fa-qrcode"></i>
+                <span>Telefon Eşleştirme (QR Kod)</span>
+            </div>
+            <div class="qr-box">
+                <img id="qr-image" class="qr-img" src="" alt="Eşleştirme QR Kodu">
+                <div class="qr-links">
+                    <div>Telefonunuzun kamerasını okutun veya tarayıcıda açın:</div>
+                    <div style="font-size:11px; color:var(--text-muted);">
+                        <strong>HTTPS (Önerilen - Gyro ve Titreşim İzni İçin):</strong>
+                    </div>
+                    <a id="https-link" href="#" target="_blank">https://...</a>
+                    <div style="font-size:11px; color:var(--text-muted); margin-top:4px;">
+                        <strong>HTTP (Alternatif):</strong>
+                    </div>
+                    <a id="http-link" href="#" target="_blank">http://...</a>
+                </div>
+            </div>
+
+            <!-- Coklu Monitor Gorsellestirici -->
+            <div class="card-title" style="margin-top:10px;">
+                <i class="fas fa-desktop"></i>
+                <span>Çoklu Monitör Uzamsal Yerleşimi (Spatial Layout)</span>
+            </div>
+            <div class="monitor-canvas-container">
+                <canvas id="monitor-canvas" width="600" height="180"></canvas>
+            </div>
+
+            <!-- Ekran Bazli Hassasiyet Ayarlari -->
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+                <div class="form-group">
+                    <label>Seçili Monitör:</label>
+                    <select id="monitor-select" class="form-control"></select>
+                </div>
+                <div class="form-group">
+                    <label>Monitör DPI Çarpanı:</label>
+                    <input id="monitor-dpi-input" type="number" step="0.1" min="0.5" max="4.0" class="form-control" value="1.5">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Hız İvmesi (Acceleration Curve):</label>
+                <input id="monitor-accel-input" type="number" step="0.1" min="1.0" max="3.0" class="form-control" value="1.2">
+            </div>
+        </section>
+
+        <!-- SAG KOLON: MIKNATIS, KURAL VE TANI -->
+        <section class="card">
+            <!-- Kenar Miknatisi (Boundary Magnetism) -->
+            <div class="card-title">
+                <i class="fas fa-magnet"></i>
+                <span>Monitör Sınır Direnci (Boundary Magnetism)</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:10px;">
+                <input id="magnetism-enabled" type="checkbox" checked style="accent-color:var(--primary); width:18px; height:18px;">
+                <label for="magnetism-enabled" style="font-size:13px; cursor:pointer;">
+                    Monitörler arası geçişte yumuşak sınır kilidi (İstem dışı taşmayı önler)
+                </label>
+            </div>
+            <div id="magnetism-options" class="form-group">
+                <label>Direnç Bölgesi Genişliği (Piksel):</label>
+                <input id="magnetism-resistance" type="range" min="5" max="40" value="15" class="form-control">
+            </div>
+
+            <!-- Canli Girdi Testi -->
+            <div class="card-title" style="margin-top:10px;">
+                <i class="fas fa-gamepad"></i>
+                <span>Canlı Giriş Test Alanı (Diagnostics)</span>
+            </div>
+            <div id="live-test-area" class="diagnostics-box">
+                <div id="live-test-cursor" class="diagnostics-cursor"></div>
+                <div style="position:absolute; bottom:8px; left:12px; font-size:11px; color:#666;">
+                    Telefondan fareyi hareket ettirip tıklamaları burada test edebilirsiniz.
+                </div>
+            </div>
+
+            <!-- Ayarlari Kaydet -->
+            <button id="save-settings-btn" class="btn-primary" style="margin-top:auto;">
+                <i class="fas fa-save"></i> Değişiklikleri Kaydet
+            </button>
+        </section>
+    </main>
+
+    <script src="/js/admin.js"></script>
+</body>
+</html>

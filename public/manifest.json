@@ -1,0 +1,17 @@
+{
+  "name": "Universal Wireless Control Hub",
+  "short_name": "RemotePC+",
+  "description": "Akilli telefonunuzu sifir gecikmeli, cok modlu kablosuz fare ve kumandaya donusturun.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0a0d14",
+  "theme_color": "#00e5ff",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%2300e5ff'/><polygon points='35,25 75,50 35,75' fill='%230a0d14'/></svg>",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml"
+    }
+  ]
+}

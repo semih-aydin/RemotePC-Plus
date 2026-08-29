@@ -1,0 +1,48 @@
+{
+  "httpPort": 5000,
+  "httpsPort": 5443,
+  "defaultDpi": 1.5,
+  "velocityCurve": 1.8,
+  "deadZone": 0.05,
+  "boundaryMagnetism": {
+    "enabled": true,
+    "resistance": 15,
+    "breakthroughVelocity": 25
+  },
+  "perMonitorProfiles": {
+    "1": {
+      "name": "Ana Monitor (1080p)",
+      "dpi": 1.5,
+      "acceleration": 1.2
+    },
+    "2": {
+      "name": "Ikinci Monitor (4K/Side)",
+      "dpi": 2.2,
+      "acceleration": 1.5
+    }
+  },
+  "customMacros": [
+    { "id": "copy", "name": "Kopyala", "keys": ["ctrl", "c"], "icon": "fa-copy" },
+    { "id": "paste", "name": "Yapistir", "keys": ["ctrl", "v"], "icon": "fa-paste" },
+    { "id": "undo", "name": "Geri Al", "keys": ["ctrl", "z"], "icon": "fa-undo" },
+    { "id": "redo", "name": "Yinele", "keys": ["ctrl", "y"], "icon": "fa-redo" },
+    { "id": "snip", "name": "Ekran Alintisi", "keys": ["win", "shift", "s"], "icon": "fa-camera" },
+    { "id": "taskview", "name": "Gorev Gorunumu", "keys": ["win", "tab"], "icon": "fa-th-large" },
+    { "id": "showdesktop", "name": "Masaustu", "keys": ["win", "d"], "icon": "fa-desktop" },
+    { "id": "lockpc", "name": "Bilgisayari Kilitle", "keys": ["win", "l"], "icon": "fa-lock" }
+  ],
+  "appContextRules": {
+    "spotify": "media",
+    "vlc": "media",
+    "wmplayer": "media",
+    "itunes": "media",
+    "powerpnt": "presentation",
+    "keynote": "presentation",
+    "acrobat": "presentation",
+    "chrome": "browser",
+    "msedge": "browser",
+    "firefox": "browser",
+    "code": "code",
+    "devenv": "code"
+  }
+}

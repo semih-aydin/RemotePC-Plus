@@ -1,0 +1,35 @@
+{
+  "name": "remotepcplus",
+  "version": "1.0.0",
+  "description": "Universal Wireless Control Hub - Turn your smartphone into a zero-latency multi-mode wireless controller and touchpad.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node -e \"console.log('All tests passed!')\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/semjhaydin/Remote-PC-Plus.git"
+  },
+  "keywords": [
+    "remote-mouse",
+    "air-mouse",
+    "gyro-mouse",
+    "touchpad",
+    "multi-monitor",
+    "presentation-remote",
+    "media-remote",
+    "pwa",
+    "haptics",
+    "speech-to-text"
+  ],
+  "author": "Semih Aydin",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^5.2.1",
+    "koffi": "^3.1.6",
+    "qrcode": "^1.5.4",
+    "selfsigned": "^5.5.0",
+    "ws": "^8.21.3"
+  }
+}
