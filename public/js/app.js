@@ -21,6 +21,11 @@ class RemoteApp {
         this.initBottomButtons();
         this.initWakeLock();
         this.initHardwareKeys();
+
+        const httpsLink = document.getElementById('https-redirect-link');
+        if (httpsLink) {
+            httpsLink.href = `https://${location.hostname}:5443`;
+        }
     }
 
     // WebSocket Bağlantısı Kur

@@ -1,20 +1,4 @@
-/* Universal Wireless Control Hub - Minimalist Modern UI */
-:root {
-    --bg-dark: #090c10;
-    --bg-card: rgba(22, 27, 34, 0.7);
-    --bg-surface: #161b22;
-    --primary: #00e5ff;
-    --primary-glow: rgba(0, 229, 255, 0.3);
-    --accent: #58a6ff;
-    --success: #3fb950;
-    --danger: #f85149;
-    --warning: #d29922;
-    --text: #f0f6fc;
-    --text-muted: #8b949e;
-    --border: rgba(255, 255, 255, 0.1);
-    --radius: 16px;
-}
-
+/* RemotePC+ Sade ve Düz Stil */
 * {
     margin: 0;
     padding: 0;
@@ -24,16 +8,15 @@
     -webkit-user-select: none;
 }
 
-html, body {
-    width: 100%;
-    height: 100%;
+body {
+    width: 100vw;
+    height: 100vh;
     overflow: hidden;
     position: fixed;
     inset: 0;
-    background-color: var(--bg-dark);
-    color: var(--text);
+    background: #141414;
+    color: #e5e5e5;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    touch-action: none;
 }
 
 #app-root {
@@ -41,515 +24,305 @@ html, body {
     flex-direction: column;
     width: 100%;
     height: 100%;
-    position: relative;
 }
 
-/* === 1. MINIMAL HEADER === */
-.header-bar {
-    height: 52px;
-    padding: 0 16px;
+/* Üst Bar */
+.top-bar {
+    height: 48px;
+    padding: 0 12px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background: rgba(9, 12, 16, 0.95);
-    border-bottom: 1px solid var(--border);
-    z-index: 20;
+    background: #1c1c1c;
+    border-bottom: 1px solid #2c2c2c;
 }
 
-.brand-title {
-    font-size: 14px;
+.logo {
+    font-size: 13px;
     font-weight: 700;
-    color: var(--primary);
-    letter-spacing: 0.5px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
+    color: #fff;
 }
 
-.segmented-control {
+.tabs {
     display: flex;
-    background: rgba(255, 255, 255, 0.06);
-    border-radius: 20px;
+    gap: 4px;
+    background: #111;
     padding: 3px;
-    gap: 2px;
+    border-radius: 8px;
 }
 
-.mode-btn {
+.tab-btn {
     border: none;
     background: transparent;
-    color: var(--text-muted);
-    padding: 6px 12px;
-    border-radius: 16px;
+    color: #888;
+    padding: 5px 12px;
+    border-radius: 6px;
     font-size: 12px;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    gap: 4px;
 }
 
-.mode-btn.active {
-    background: var(--primary);
-    color: #000;
-    box-shadow: 0 0 12px var(--primary-glow);
-}
-
-.status-box {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--text-muted);
-}
-
-.status-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: #666;
-}
-
-.status-dot.connected {
-    background: var(--success);
-    box-shadow: 0 0 8px var(--success);
-}
-
-.status-dot.connecting {
-    background: var(--warning);
-}
-
-.status-dot.disconnected {
-    background: var(--danger);
-}
-
-/* === 2. MAIN VIEWPORT === */
-.main-viewport {
-    flex: 1;
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-}
-
-/* Sürükleme Bildirimi */
-.drag-status-indicator {
-    position: absolute;
-    top: 12px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: var(--danger);
+.tab-btn.active {
+    background: #2c2c2c;
     color: #fff;
+}
+
+.ping-badge {
     font-size: 11px;
-    font-weight: 800;
-    padding: 4px 14px;
-    border-radius: 12px;
-    box-shadow: 0 0 16px rgba(248, 81, 73, 0.6);
-    z-index: 15;
-    display: none;
-    letter-spacing: 1px;
-    animation: pulse 1s infinite alternate;
-}
-
-@keyframes pulse {
-    from { opacity: 0.8; }
-    to { opacity: 1; transform: translateX(-50%) scale(1.05); }
-}
-
-/* TOUCHPAD GÖRÜNÜMÜ */
-.touchpad-view {
-    flex: 1;
-    display: flex;
-    position: relative;
-}
-
-.touchpad-surface {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    background: radial-gradient(circle at center, rgba(0, 229, 255, 0.02) 0%, transparent 70%);
-}
-
-.touchpad-hint {
-    color: rgba(255, 255, 255, 0.2);
-    font-size: 13px;
-    text-align: center;
-    pointer-events: none;
-    line-height: 1.6;
-}
-
-.touchpad-hint i {
-    font-size: 32px;
-    margin-bottom: 8px;
-    display: block;
-    color: rgba(0, 229, 255, 0.3);
-}
-
-/* Dikey Kaydırma Şeridi */
-.scroll-strip-v {
-    width: 32px;
-    background: rgba(255, 255, 255, 0.02);
-    border-left: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--text-muted);
-    font-size: 12px;
-}
-
-/* AIR MOUSE GÖRÜNÜMÜ */
-.airmouse-view {
-    flex: 1;
-    display: none;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-    gap: 16px;
-}
-
-.gyro-horizon-circle {
-    width: 140px;
-    height: 140px;
-    border-radius: 50%;
-    border: 2px solid rgba(0, 229, 255, 0.3);
-    background: rgba(0, 229, 255, 0.03);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    box-shadow: 0 0 30px rgba(0, 229, 255, 0.1);
-}
-
-.gyro-horizon-dot {
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    background: var(--primary);
-    box-shadow: 0 0 16px var(--primary-glow);
-    transition: transform 0.05s ease-out;
-}
-
-.gyro-stats-text {
-    font-size: 12px;
-    color: var(--text-muted);
+    color: #777;
     font-family: monospace;
 }
 
-.airmouse-btn-row {
+/* Ana Alan */
+.main-area {
+    flex: 1;
     display: flex;
-    gap: 10px;
-    width: 100%;
-    max-width: 320px;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
 }
 
-.minimal-btn {
+/* Touchpad */
+.touchpad-box {
     flex: 1;
+    display: flex;
+    background: #181818;
+}
+
+.touchpad-pad {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #444;
+    font-size: 12px;
+    text-align: center;
+    line-height: 1.6;
+}
+
+.scroll-strip {
+    width: 36px;
+    background: #1a1a1a;
+    border-left: 1px solid #2c2c2c;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #555;
+    font-size: 11px;
+}
+
+/* Sürükleme Bildirimi */
+.drag-indicator {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #dc2626;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 12px;
+    border-radius: 6px;
+    display: none;
+    z-index: 10;
+}
+
+/* Air Mouse */
+.airmouse-box {
+    flex: 1;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    gap: 14px;
+}
+
+.warning-box {
+    width: 100%;
+    max-width: 340px;
+    background: #2a1f10;
+    border: 1px solid #d97706;
+    color: #fbbf24;
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 12px;
+    line-height: 1.4;
+    display: none;
+    text-align: center;
+}
+
+.warning-box a {
+    color: #fff;
+    font-weight: 700;
+    text-decoration: underline;
+    display: block;
+    margin-top: 4px;
+}
+
+.status-text {
+    font-size: 12px;
+    color: #888;
+    font-family: monospace;
+}
+
+.action-btn {
+    width: 100%;
+    max-width: 340px;
     height: 44px;
-    background: var(--bg-surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    color: var(--text);
+    background: #242424;
+    border: 1px solid #383838;
+    color: #fff;
+    border-radius: 8px;
     font-size: 13px;
     font-weight: 600;
+    cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 6px;
-    cursor: pointer;
-    transition: all 0.15s;
 }
 
-.minimal-btn:active {
-    background: rgba(255, 255, 255, 0.1);
-    transform: scale(0.97);
+.action-btn:active {
+    background: #333;
 }
 
-.minimal-btn.primary {
-    background: rgba(0, 229, 255, 0.15);
-    border-color: var(--primary);
-    color: var(--primary);
+.action-btn.primary {
+    background: #2563eb;
+    border-color: #3b82f6;
 }
 
-.slider-container {
+.slider-box {
     width: 100%;
-    max-width: 320px;
-    background: var(--bg-surface);
-    padding: 12px 16px;
-    border-radius: var(--radius);
-    border: 1px solid var(--border);
+    max-width: 340px;
+    background: #1c1c1c;
+    border: 1px solid #2c2c2c;
+    padding: 12px;
+    border-radius: 8px;
     display: flex;
     flex-direction: column;
     gap: 6px;
-}
-
-.slider-header {
-    display: flex;
-    justify-content: space-between;
     font-size: 12px;
-    color: var(--text-muted);
-    font-weight: 600;
+    color: #aaa;
 }
 
-.slider-container input[type="range"] {
+.slider-box input[type="range"] {
     width: 100%;
-    accent-color: var(--primary);
+    accent-color: #2563eb;
 }
 
-/* Debriyaj Butonu (Opsiyonel Modda) */
-.clutch-zone-btn {
-    width: 100%;
-    max-width: 320px;
-    height: 70px;
-    border-radius: var(--radius);
-    background: linear-gradient(135deg, rgba(0, 229, 255, 0.15), rgba(88, 166, 255, 0.15));
-    border: 2px solid var(--primary);
-    color: var(--primary);
-    font-size: 14px;
-    font-weight: 800;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    cursor: pointer;
-    touch-action: none;
-}
-
-.clutch-zone-btn.active {
-    background: var(--primary);
-    color: #000;
-    box-shadow: 0 0 20px var(--primary-glow);
-}
-
-/* CONTEXT (MEDYA & SUNUM) GÖRÜNÜMÜ */
-.context-view {
+/* Medya & Sunum */
+.context-box {
     flex: 1;
     display: none;
     flex-direction: column;
     padding: 16px;
-    gap: 14px;
+    gap: 12px;
     overflow-y: auto;
 }
 
-.media-box {
-    background: var(--bg-surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 18px;
+.card {
+    background: #1c1c1c;
+    border: 1px solid #2c2c2c;
+    border-radius: 8px;
+    padding: 14px;
     display: flex;
     flex-direction: column;
-    gap: 16px;
-}
-
-.media-btn-circle {
-    width: 64px;
-    height: 64px;
-    border-radius: 50%;
-    background: var(--primary);
-    color: #000;
-    border: none;
-    font-size: 22px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-}
-
-.media-btn-small {
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid var(--border);
-    color: var(--text);
-    font-size: 16px;
-    cursor: pointer;
-}
-
-.pres-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
     gap: 12px;
 }
 
-.pres-btn-large {
-    height: 90px;
-    background: var(--bg-surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    color: var(--text);
-    font-size: 16px;
+.card-title {
+    font-size: 12px;
     font-weight: 700;
+    color: #aaa;
+}
+
+.btn-row {
     display: flex;
-    flex-direction: column;
+    gap: 8px;
+    justify-content: center;
+}
+
+.round-btn {
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    background: #2563eb;
+    color: #fff;
+    border: none;
+    font-size: 18px;
+    display: flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
     cursor: pointer;
 }
 
-.pres-btn-large.primary {
-    border-color: var(--primary);
-    color: var(--primary);
-    background: rgba(0, 229, 255, 0.08);
+.small-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: #242424;
+    border: 1px solid #333;
+    color: #fff;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
 }
 
-/* === 3. MINIMAL ALT TIKLAMA BAR (Click Zones Bar) === */
-.click-bar {
-    height: 68px;
-    padding: 8px 14px;
+.pres-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+.pres-btn {
+    height: 70px;
+    background: #242424;
+    border: 1px solid #383838;
+    color: #fff;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+/* Alt Tıklama Barı */
+.bottom-bar {
+    height: 64px;
+    padding: 8px 12px;
     display: flex;
     gap: 8px;
-    background: rgba(9, 12, 16, 0.95);
-    border-top: 1px solid var(--border);
-    z-index: 20;
+    background: #1c1c1c;
+    border-top: 1px solid #2c2c2c;
 }
 
 .click-btn {
     flex: 1;
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    background: var(--bg-surface);
-    color: var(--text);
+    background: #242424;
+    border: 1px solid #383838;
+    color: #fff;
+    border-radius: 8px;
     font-size: 13px;
     font-weight: 700;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
     cursor: pointer;
-    transition: all 0.1s;
-    touch-action: none;
 }
 
 .click-btn.primary {
     flex: 1.4;
-    background: rgba(0, 229, 255, 0.1);
-    border-color: rgba(0, 229, 255, 0.4);
-    color: var(--primary);
+    background: #2a2a2a;
+    border-color: #444;
 }
 
 .click-btn:active, .click-btn.active {
-    background: var(--primary);
-    color: #000;
-    transform: scale(0.97);
+    background: #383838;
 }
 
 .click-btn.locked {
-    background: var(--danger);
-    color: #fff;
-    border-color: var(--danger);
-    box-shadow: 0 0 16px rgba(248, 81, 73, 0.6);
-}
-
-/* === 4. YÜZEN ARAÇLAR BUTONU & ÇEKMECELER === */
-.floating-tool-pill {
-    position: absolute;
-    top: 60px;
-    right: 14px;
-    background: rgba(22, 27, 34, 0.85);
-    border: 1px solid var(--border);
-    padding: 6px 12px;
-    border-radius: 20px;
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--primary);
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    cursor: pointer;
-    backdrop-filter: blur(10px);
-    z-index: 15;
-}
-
-/* Alt Çekmece */
-.drawer-backdrop {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(4px);
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.2s ease;
-    z-index: 90;
-}
-
-.drawer-backdrop.active {
-    opacity: 1;
-    pointer-events: auto;
-}
-
-.bottom-sheet {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    max-height: 80%;
-    background: #11161f;
-    border-top: 1px solid var(--border);
-    border-radius: 24px 24px 0 0;
-    transform: translateY(100%);
-    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    z-index: 100;
-    display: flex;
-    flex-direction: column;
-    padding: 16px;
-    gap: 14px;
-}
-
-.bottom-sheet.open {
-    transform: translateY(0);
-}
-
-.sheet-handle {
-    width: 40px;
-    height: 4px;
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 2px;
-    align-self: center;
-    margin-bottom: 4px;
-}
-
-.quick-tools-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 8px;
-}
-
-.tool-chip {
-    height: 44px;
-    background: var(--bg-surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    color: var(--text);
-    font-size: 11px;
-    font-weight: 600;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-    cursor: pointer;
-}
-
-.tool-chip i {
-    font-size: 14px;
-    color: var(--primary);
-}
-
-/* Ekran Kenar Direnci Parlaması */
-.screen-edge-glow {
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    box-shadow: inset 0 0 0px var(--danger);
-    transition: box-shadow 0.15s ease;
-    z-index: 999;
-}
-
-.screen-edge-glow.active {
-    box-shadow: inset 0 0 25px var(--danger);
+    background: #dc2626;
+    border-color: #ef4444;
 }

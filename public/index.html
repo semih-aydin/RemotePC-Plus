@@ -2,268 +2,112 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>RemotePC+ Control Hub</title>
-    
-    <link rel="manifest" href="/manifest.json">
-    <meta name="theme-color" content="#090c10">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>RemotePC+</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
     <div id="app-root">
-        <div id="screen-edge-glow" class="screen-edge-glow"></div>
+        <!-- Üst Çubuk -->
+        <header class="top-bar">
+            <div class="logo">RemotePC+</div>
 
-        <!-- 1. MINIMAL HEADER -->
-        <header class="header-bar">
-            <div class="brand-title">
-                <i class="fas fa-satellite-dish"></i>
-                <span>RemotePC+</span>
+            <div class="tabs">
+                <button class="tab-btn active" data-mode="touchpad">Touchpad</button>
+                <button class="tab-btn" data-mode="airmouse">Air Mouse</button>
+                <button class="tab-btn" data-mode="context">Medya</button>
             </div>
 
-            <!-- Mod Butonları -->
-            <div class="segmented-control">
-                <button class="mode-btn active" data-mode="touchpad">
-                    <i class="fas fa-hand-pointer"></i> Touchpad
-                </button>
-                <button class="mode-btn" data-mode="airmouse">
-                    <i class="fas fa-compass"></i> Air Mouse
-                </button>
-                <button class="mode-btn" data-mode="context">
-                    <i class="fas fa-layer-group"></i> Medya
-                </button>
-            </div>
-
-            <!-- Ping / Durum -->
-            <div class="status-box">
-                <span id="status-dot" class="status-dot connecting"></span>
-                <span id="latency-val">0ms</span>
-            </div>
+            <div id="latency-val" class="ping-badge">0ms</div>
         </header>
 
-        <!-- 2. ANA ALAN (Viewport) -->
-        <main class="main-viewport">
-            <!-- Sürükleme Bildirimi -->
-            <div id="drag-status-indicator" class="drag-status-indicator">
-                <i class="fas fa-lock"></i> SÜRÜKLENİYOR
-            </div>
+        <!-- Ana Ekran -->
+        <main class="main-area">
+            <div id="drag-status-indicator" class="drag-indicator">SÜRÜKLENİYOR</div>
 
-            <!-- Yüzen Araçlar Butonu -->
-            <button id="floating-tools-btn" class="floating-tool-pill">
-                <i class="fas fa-sliders-h"></i> Araçlar
-            </button>
-
-            <!-- A. TOUCHPAD MODU -->
-            <div id="view-touchpad" class="touchpad-view">
-                <div id="touchpad-surface" class="touchpad-surface">
-                    <div class="touchpad-hint">
-                        <i class="fas fa-fingerprint"></i>
-                        <span><strong>1 Parmak:</strong> Fare & Tık<br><strong>Çift Dokun & Tut:</strong> Sürükle<br><strong>2 Parmak:</strong> Sağ Tık & Kaydırma</span>
-                    </div>
+            <!-- 1. TOUCHPAD -->
+            <div id="view-touchpad" class="touchpad-box">
+                <div id="touchpad-surface" class="touchpad-pad">
+                    Dokunmatik Alan<br>
+                    <small style="color:#666; font-size:11px;">Çift dokunup tutarak sürükleyin</small>
                 </div>
-                <div id="scroll-strip-v" class="scroll-strip-v">
-                    <i class="fas fa-sort"></i>
+                <div id="scroll-strip-v" class="scroll-strip">
+                    <i class="fas fa-arrows-alt-v"></i>
                 </div>
             </div>
 
-            <!-- B. AIR MOUSE (JİROSKOP) MODU -->
-            <div id="view-airmouse" class="airmouse-view">
-                <!-- Canlı Jiroskop Eğrilik Dairesi -->
-                <div class="gyro-horizon-circle">
-                    <div id="gyro-horizon-dot" class="gyro-horizon-dot"></div>
+            <!-- 2. AIR MOUSE -->
+            <div id="view-airmouse" class="airmouse-box">
+                <!-- HTTPS Uyarısı (Tarayıcı HTTP'de jiroskopu engelliyorsa) -->
+                <div id="https-warning-box" class="warning-box">
+                    ⚠️ Tarayıcı güvenlik kısıtlaması nedeniyle jiroskop için HTTPS gereklidir.
+                    <a href="https://192.168.1.103:5443" id="https-redirect-link">👉 HTTPS Portuna Geç (5443)</a>
                 </div>
-                <div id="gyro-stats-text" class="gyro-stats-text">Telefonu hareket ettirin...</div>
 
-                <!-- iOS İzin Butonu (Gerektiğinde Görünür) -->
-                <button id="sensor-perm-btn" class="minimal-btn primary" style="max-width:320px;">
-                    <i class="fas fa-shield-alt"></i> Sensör İznini Etkinleştir
+                <button id="start-gyro-btn" class="action-btn primary">
+                    <i class="fas fa-play"></i> Sensörleri Başlat / İzin Ver
                 </button>
 
-                <!-- Hassasiyet Ayarı -->
-                <div class="slider-container">
-                    <div class="slider-header">
-                        <span>Air Mouse Hassasiyeti:</span>
-                        <span id="airmouse-sens-val" style="color:var(--primary);">3.2x</span>
+                <div class="slider-box">
+                    <div style="display:flex; justify-content:space-between;">
+                        <span>Hassasiyet:</span>
+                        <span id="airmouse-sens-val" style="font-weight:700; color:#fff;">3.5x</span>
                     </div>
-                    <input id="airmouse-sens-slider" type="range" min="1.0" max="6.0" step="0.2" value="3.2">
+                    <input id="airmouse-sens-slider" type="range" min="1.0" max="6.0" step="0.2" value="3.5">
                 </div>
 
-                <!-- Mod ve Sıfırlama Butonları -->
-                <div class="airmouse-btn-row">
-                    <button id="airmouse-mode-toggle" class="minimal-btn">
-                        <i class="fas fa-bolt"></i> Mod: Sürekli Takip
-                    </button>
-                    <button id="recenter-btn" class="minimal-btn">
-                        <i class="fas fa-crosshairs"></i> Sıfırla
-                    </button>
-                </div>
+                <div id="gyro-debug-text" class="status-text">Sensör verisi bekleniyor...</div>
+                <div id="sensor-status-msg" style="font-size:11px; color:#aaa;"></div>
 
-                <!-- Opsiyonel Debriyaj Butonu -->
-                <div id="clutch-btn" class="clutch-zone-btn">
-                    <i class="fas fa-hand-paper"></i> TUT & OYNAT
-                </div>
-                <span id="recenter-hint" style="font-size:11px; color:var(--primary); opacity:0; transition:opacity 0.3s;">Merkezlendi!</span>
+                <button id="recenter-btn" class="action-btn">
+                    <i class="fas fa-crosshairs"></i> Merkezi Sıfırla
+                </button>
             </div>
 
-            <!-- C. MEDYA & SUNUM MODU -->
-            <div id="view-context" class="context-view">
-                <!-- Medya Kontrolleri -->
-                <div class="media-box">
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <span style="font-size:13px; font-weight:700; color:var(--primary);">MEDYA KONTROLÜ</span>
-                        <i class="fab fa-spotify" style="color:#1db954; font-size:18px;"></i>
+            <!-- 3. MEDYA & SUNUM -->
+            <div id="view-context" class="context-box">
+                <div class="card">
+                    <div class="card-title">MEDYA KONTROLLERİ</div>
+                    <div class="btn-row">
+                        <button class="small-btn" data-media-action="prev"><i class="fas fa-backward"></i></button>
+                        <button class="round-btn" data-media-action="play_pause"><i class="fas fa-play"></i></button>
+                        <button class="small-btn" data-media-action="next"><i class="fas fa-forward"></i></button>
                     </div>
-                    <div style="display:flex; align-items:center; justify-content:center; gap:20px;">
-                        <button class="media-btn-small" data-media-action="prev"><i class="fas fa-backward"></i></button>
-                        <button class="media-btn-circle" data-media-action="play_pause"><i class="fas fa-play"></i></button>
-                        <button class="media-btn-small" data-media-action="next"><i class="fas fa-forward"></i></button>
-                    </div>
-                    <div style="display:flex; gap:10px; align-items:center;">
+                    <div style="display:flex; gap:8px; align-items:center; margin-top:4px;">
                         <i class="fas fa-volume-down" data-media-action="vol_down"></i>
-                        <input id="media-vol-slider" type="range" min="0" max="100" value="50" style="flex:1; accent-color:var(--primary);">
+                        <input id="media-vol-slider" type="range" min="0" max="100" value="50" style="flex:1;">
                         <i class="fas fa-volume-up" data-media-action="vol_up"></i>
-                        <button class="minimal-btn" style="height:32px; width:38px;" data-media-action="mute"><i class="fas fa-volume-mute"></i></button>
                     </div>
                 </div>
 
-                <!-- Sunum Kontrolleri -->
-                <div class="media-box">
-                    <div style="font-size:13px; font-weight:700; color:var(--primary); margin-bottom:4px;">SUNUM KONTROLÜ</div>
-                    <div class="pres-grid">
-                        <button class="pres-btn-large" data-pres-action="prev">
-                            <i class="fas fa-chevron-left"></i> Önceki Slayt
-                        </button>
-                        <button class="pres-btn-large primary" data-pres-action="next">
-                            <i class="fas fa-chevron-right"></i> Sonraki Slayt
-                        </button>
+                <div class="card">
+                    <div class="card-title">SUNUM KONTROLLERİ</div>
+                    <div class="pres-row">
+                        <button class="pres-btn" data-pres-action="prev">Önceki Slayt</button>
+                        <button class="pres-btn" data-pres-action="next" style="background:#2563eb;">Sonraki Slayt</button>
                     </div>
-                    <div style="display:flex; gap:8px; margin-top:8px;">
-                        <button class="minimal-btn" data-pres-action="start"><i class="fas fa-play"></i> F5 Başlat</button>
-                        <button class="minimal-btn" data-pres-action="stop"><i class="fas fa-times"></i> Esc Çık</button>
-                        <button class="minimal-btn" data-pres-action="blank_black"><i class="fas fa-square"></i> Karart</button>
+                    <div style="display:flex; gap:8px; margin-top:4px;">
+                        <button class="action-btn" data-pres-action="start">F5 Başlat</button>
+                        <button class="action-btn" data-pres-action="stop">Esc Çık</button>
                     </div>
                 </div>
             </div>
         </main>
 
-        <!-- 3. MINIMAL ALT TIKLAMA BAR (Click Bar) -->
-        <footer class="click-bar">
-            <button id="btn-click-left" class="click-btn primary">
-                <i class="fas fa-mouse-pointer"></i> SOL TIK
-            </button>
-            <button id="btn-drag-lock" class="click-btn" style="flex:1;">
-                <i class="fas fa-lock"></i> SÜRÜKLE
-            </button>
-            <button id="btn-click-right" class="click-btn">
-                <i class="fas fa-mouse-pointer"></i> SAĞ TIK
-            </button>
+        <!-- Alt Tıklama Çubuğu -->
+        <footer class="bottom-bar">
+            <button id="btn-click-left" class="click-btn primary">Sol Tık</button>
+            <button id="btn-drag-lock" class="click-btn" style="flex:1;">Sürükle</button>
+            <button id="btn-click-right" class="click-btn">Sağ Tık</button>
         </footer>
-
-        <!-- 4. YÜZEN ALT ÇEKMECE (Klavye, Numpad, Makrolar) -->
-        <div id="tools-sheet-backdrop" class="drawer-backdrop"></div>
-        <div id="tools-bottom-sheet" class="bottom-sheet">
-            <div class="sheet-handle"></div>
-            
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <span style="font-size:13px; font-weight:700; color:var(--primary);">HIZLI ARAÇLAR & KLAVYE</span>
-                <button id="close-sheet-btn" class="minimal-btn" style="height:28px; width:28px; border-radius:50%;"><i class="fas fa-times"></i></button>
-            </div>
-
-            <!-- Sesle Yazma & Metin Girişi -->
-            <div style="display:flex; gap:8px; align-items:center;">
-                <input id="quick-text-input" type="text" placeholder="PC'ye yaz..." class="minimal-btn" style="flex:1; height:42px; text-align:left; padding:0 12px;">
-                <button id="quick-text-send" class="minimal-btn primary" style="width:48px; height:42px;"><i class="fas fa-paper-plane"></i></button>
-                <button id="voice-type-btn" class="minimal-btn" style="width:48px; height:42px; color:var(--danger);"><i class="fas fa-microphone"></i></button>
-            </div>
-
-            <!-- Hızlı Makro Butonları -->
-            <div class="quick-tools-grid">
-                <button class="tool-chip" data-macro="ctrl+c"><i class="fas fa-copy"></i> Kopyala</button>
-                <button class="tool-chip" data-macro="ctrl+v"><i class="fas fa-paste"></i> Yapıştır</button>
-                <button class="tool-chip" data-macro="ctrl+z"><i class="fas fa-undo"></i> Geri Al</button>
-                <button class="tool-chip" data-macro="ctrl+y"><i class="fas fa-redo"></i> Yinele</button>
-                <button class="tool-chip" data-macro="win+shift+s"><i class="fas fa-camera"></i> Kırp</button>
-                <button class="tool-chip" data-macro="win+tab"><i class="fas fa-th-large"></i> Görevler</button>
-                <button class="tool-chip" data-macro="win+d"><i class="fas fa-desktop"></i> Masaüstü</button>
-                <button class="tool-chip" data-macro="win+l"><i class="fas fa-lock"></i> Kilitle</button>
-            </div>
-
-            <!-- Ekran Işınlanması -->
-            <div style="font-size:11px; color:var(--text-muted); font-weight:700;">EKRANLAR ARASI GEÇİŞ</div>
-            <div id="monitor-chips-container" style="display:flex; gap:8px;">
-                <button class="minimal-btn" data-mon="1"><i class="fas fa-desktop"></i> Ekran 1</button>
-                <button class="minimal-btn" data-mon="2"><i class="fas fa-desktop"></i> Ekran 2</button>
-            </div>
-        </div>
     </div>
 
-    <!-- Modüller -->
     <script src="/js/haptics.js"></script>
     <script src="/js/multi_monitor.js"></script>
     <script src="/js/airmouse.js"></script>
     <script src="/js/touchpad.js"></script>
     <script src="/js/context_cards.js"></script>
     <script src="/js/app.js"></script>
-
-    <!-- Hızlı Çekmece Olayları -->
-    <script>
-        const sheet = document.getElementById('tools-bottom-sheet');
-        const backdrop = document.getElementById('tools-sheet-backdrop');
-        const openBtn = document.getElementById('floating-tools-btn');
-        const closeBtn = document.getElementById('close-sheet-btn');
-
-        function openSheet() {
-            sheet.classList.add('open');
-            backdrop.classList.add('active');
-            window.haptics.modeSwitch();
-        }
-        function closeSheet() {
-            sheet.classList.remove('open');
-            backdrop.classList.remove('active');
-        }
-
-        if (openBtn) openBtn.addEventListener('click', openSheet);
-        if (closeBtn) closeBtn.addEventListener('click', closeSheet);
-        if (backdrop) backdrop.addEventListener('click', closeSheet);
-
-        // Makro Butonları
-        document.querySelectorAll('[data-macro]').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const keys = btn.getAttribute('data-macro').split('+');
-                window.app.send({ type: 'macro', keys });
-                window.haptics.success();
-            });
-        });
-
-        // Metin Gönder
-        const textInput = document.getElementById('quick-text-input');
-        const sendBtn = document.getElementById('quick-text-send');
-        if (sendBtn && textInput) {
-            sendBtn.addEventListener('click', () => {
-                const txt = textInput.value;
-                if (txt) {
-                    window.app.send({ type: 'type', text: txt });
-                    textInput.value = '';
-                    window.haptics.click();
-                }
-            });
-            textInput.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') sendBtn.click();
-            });
-        }
-
-        // Ekran Işınlanması
-        document.querySelectorAll('[data-mon]').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const id = parseInt(btn.getAttribute('data-mon'));
-                window.app.send({ type: 'monitor_jump', monitorId: id });
-                window.haptics.monitorJump();
-                closeSheet();
-            });
-        });
-    </script>
 </body>
 </html>
