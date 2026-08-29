@@ -88,7 +88,8 @@ class AppDetector extends EventEmitter {
                 this.currentProcess = proc;
                 this.currentTitle = info.title;
 
-                console.log(`[AppDetector] Aktif Uygulama: ${proc} | Baslik: "${info.title}" -> Mod: [${detectedContext.toUpperCase()}]`);
+                const ts = new Date().toISOString().replace('T', ' ').substring(0, 23);
+                console.log(`[${ts}] [INFO ] [APP_DETECTOR] Context shifted -> proc="${proc}" title="${info.title.substring(0, 40)}" context=[${detectedContext.toUpperCase()}]`);
 
                 this.emit('contextChange', {
                     context: this.currentContext,

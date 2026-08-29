@@ -66,7 +66,11 @@ class MonitorManager {
             }];
         }
 
-        console.log(`[MonitorManager] ${this.monitors.length} adet ekran algilandi.`);
+        const ts = new Date().toISOString().replace('T', ' ').substring(0, 23);
+        console.log(`[${ts}] [INFO ] [MONITOR     ] Enumerated ${this.monitors.length} active displays:`);
+        this.monitors.forEach(m => {
+            console.log(`[${ts}] [INFO ] [MONITOR     ]   -> [Display ${m.id}] ${m.name} | ${m.width}x${m.height} @ (${m.x}, ${m.y}) | Primary=${m.isPrimary} | DPI=${m.dpi}x`);
+        });
         return this.monitors;
     }
 
@@ -145,7 +149,8 @@ class MonitorManager {
         const centerY = Math.round(mon.y + mon.height / 2);
 
         win32.setCursorPos(centerX, centerY);
-        console.log(`[Screen Jump] Fare Ekran ${mon.id}'in merkezine (${centerX}, ${centerY}) isinlandi.`);
+        const ts = new Date().toISOString().replace('T', ' ').substring(0, 23);
+        console.log(`[${ts}] [INFO ] [MONITOR     ] Screen jump executed: Display ${mon.id} -> center=(${centerX}, ${centerY})`);
         return { success: true, monitorId: mon.id, x: centerX, y: centerY };
     }
 

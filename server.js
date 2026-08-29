@@ -73,11 +73,18 @@ try {
     console.log('SSL sertifikasi olusturulurken hata:', sslErr);
 }
 
+// Gelismis Gelistirici Log Formatlayici (Developer Debug Logger)
+function log(level, subsystem, message, meta = null) {
+    const timestamp = new Date().toISOString().replace('T', ' ').substring(0, 23);
+    const metaStr = meta ? ' ' + JSON.stringify(meta) : '';
+    console.log(`[${timestamp}] [${level.padEnd(5)}] [${subsystem.padEnd(12)}] ${message}${metaStr}`);
+}
+
 // HTTP ve HTTPS Sunuculari olusturalim
 const httpServer = http.createServer(app);
 const httpsServer = https.createServer(sslOptions, app);
 
-// WebSocket sunuculari (Hem HTTP hem HTTPS baglantilarini kabul edelim)
+// WebSocket sunuculari
 const wssHttp = new WebSocketServer({ server: httpServer });
 const wssHttps = new WebSocketServer({ server: httpsServer });
 
@@ -87,7 +94,13 @@ const allClients = new Set();
 function handleWebSocketConnection(ws, req) {
     allClients.add(ws);
     const clientIp = req.socket.remoteAddress;
-    console.log(`[WebSocket] Yeni mobil baglanti kuruldu: ${clientIp} (Toplam: ${allClients.size})`);
+    const proto = req.socket.encrypted ? 'WSS (Secure)' : 'WS (Plain)';
+    const userAgent = req.headers['user-agent'] || 'unknown';
+
+    log('INFO', 'WS:CONN', `Client connected: ${clientIp} via ${proto}`, {
+        activeClients: allClients.size,
+        userAgent: userAgent.substring(0, 45) + '...'
+    });
 
     // Ilk baglantida monitorler ve mevcut context bilgisini yolla
     const initData = {
@@ -101,15 +114,17 @@ function handleWebSocketConnection(ws, req) {
     };
     ws.send(JSON.stringify(initData));
 
+    let packetCount = 0;
+    let lastLogTime = Date.now();
+
     ws.on('message', (msgBuffer) => {
         try {
             const data = JSON.parse(msgBuffer.toString());
+            packetCount++;
 
             switch (data.type) {
                 case 'move':
-                    // Fare hareketi (Touchpad veya Air Mouse Gyro)
                     const moveResult = monitorManager.processMovement(data.dx || 0, data.dy || 0);
-                    // Dilerseniz ping/latency takibi icin ack yollayalim
                     if (data.t) {
                         ws.send(JSON.stringify({
                             type: 'move_ack',
@@ -118,55 +133,63 @@ function handleWebSocketConnection(ws, req) {
                             monId: moveResult.currentMonitorId
                         }));
                     }
+                    // Debug hareket logu (konsolu bogmamak icin her 100ms'de bir logla)
+                    if (Date.now() - lastLogTime > 150) {
+                        log('DEBUG', 'INPUT:MOVE', `dx=${(data.dx || 0).toFixed(2)} dy=${(data.dy || 0).toFixed(2)}`, {
+                            monId: moveResult.currentMonitorId,
+                            boundary: moveResult.boundaryHit
+                        });
+                        lastLogTime = Date.now();
+                    }
                     break;
 
                 case 'click':
-                    // Fare tiklamasi (left, right, middle, down, up, double)
+                    log('INFO', 'INPUT:CLICK', `button=${data.button || 'left'} state=${data.state || 'click'}`);
                     win32.mouseClick(data.button || 'left', data.state || 'click');
                     break;
 
                 case 'scroll':
-                    // Hassas ve ataletli tekerlek kaydirma
+                    log('DEBUG', 'INPUT:SCROLL', `dy=${(data.dy || 0).toFixed(2)} dx=${(data.dx || 0).toFixed(2)}`);
                     win32.scrollWheel(data.dy || 0, data.dx || 0);
                     break;
 
                 case 'zoom':
-                    // Iki parmakla yaklastirma/uzaklastirma (Pinch to Zoom)
+                    log('INFO', 'INPUT:ZOOM', `delta=${data.delta}`);
                     win32.zoom(data.delta || 0);
                     break;
 
                 case 'key':
-                    // Tek tus basma / birakma
+                    log('INFO', 'INPUT:KEY', `key=${data.key} state=${data.state || 'press'}`);
                     win32.keyPress(data.key, data.state || 'press');
                     break;
 
                 case 'type':
-                    // Metin yazma (orn: Sesle yazma veya sanal klavye)
+                    log('INFO', 'INPUT:TYPE', `text="${data.text}"`);
                     if (data.text) {
                         win32.typeString(data.text);
                     }
                     break;
 
                 case 'macro':
-                    // Ozel tus kombinasyonu calistir
+                    log('INFO', 'INPUT:MACRO', `keys=${JSON.stringify(data.keys)}`);
                     if (data.keys && Array.isArray(data.keys)) {
                         win32.runCombo(data.keys);
                     }
                     break;
 
                 case 'media':
-                    // Medya kontrolu (Play, Pause, Next, Vol Up/Down)
+                    log('INFO', 'INPUT:MEDIA', `action=${data.action}`);
                     win32.mediaControl(data.action);
                     break;
 
                 case 'presentation':
-                    // Sunum modu (Next slide, Prev slide, F5, Esc, B/W)
+                    log('INFO', 'INPUT:PRES', `action=${data.action}`);
                     win32.presentationControl(data.action);
                     break;
 
                 case 'monitor_jump':
-                    // Baska ekrana isinlanma (Screen Jump)
                     const jumpRes = monitorManager.jumpToMonitor(data.monitorId);
+                    log('INFO', 'MONITOR:JUMP', `Target Display ID=${data.monitorId}`, jumpRes);
                     if (jumpRes) {
                         ws.send(JSON.stringify({
                             type: 'monitor_jumped',
@@ -178,7 +201,6 @@ function handleWebSocketConnection(ws, req) {
                     break;
 
                 case 'loupe_req':
-                    // Farenin etrafindaki kucuk ekran goruntusunu al ve mobilde goster
                     const loupe = win32.captureLoupeAroundCursor(data.width || 120, data.height || 120);
                     if (loupe) {
                         ws.send(JSON.stringify({
@@ -193,30 +215,28 @@ function handleWebSocketConnection(ws, req) {
                     break;
 
                 case 'ping':
-                    // Latency / Ping olcumu
                     ws.send(JSON.stringify({
                         type: 'pong',
                         t: data.t,
                         serverTime: Date.now()
                     }));
                     break;
-
-                default:
-                    // Bilinmeyen paket
-                    break;
             }
         } catch (err) {
-            console.log('Mesaj islenirken hata olustu:', err);
+            log('ERROR', 'WS:MSG_ERR', err.message);
         }
     });
 
-    ws.on('close', () => {
+    ws.on('close', (code, reason) => {
         allClients.delete(ws);
-        console.log(`[WebSocket] Mobil baglanti koptu. (Kalan: ${allClients.size})`);
+        log('WARN', 'WS:DISCONN', `Client disconnected: ${clientIp} code=${code}`, {
+            totalPacketsProcessed: packetCount,
+            remainingClients: allClients.size
+        });
     });
 
     ws.on('error', (err) => {
-        console.log('WebSocket hatasi:', err);
+        log('ERROR', 'WS:SOCKET_ERR', err.message);
     });
 }
 
