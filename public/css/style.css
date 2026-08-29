@@ -127,20 +127,54 @@ body {
     z-index: 10;
 }
 
-/* Air Mouse */
+/* Air Mouse / Lazer */
 .airmouse-box {
     flex: 1;
     display: none;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     padding: 16px;
-    gap: 14px;
+    gap: 12px;
+    overflow-y: auto;
+}
+
+.calib-card {
+    width: 100%;
+    max-width: 360px;
+    background: #1c1c1c;
+    border: 1px solid #2c2c2c;
+    border-radius: 8px;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.calib-status {
+    background: #111;
+    border: 1px solid #222;
+    border-radius: 6px;
+    padding: 8px 10px;
+    font-size: 11px;
+    color: #999;
+    line-height: 1.4;
+    text-align: center;
+}
+
+.clean-select {
+    background: #242424;
+    color: #fff;
+    border: 1px solid #383838;
+    padding: 5px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    outline: none;
 }
 
 .warning-box {
     width: 100%;
-    max-width: 340px;
+    max-width: 360px;
     background: #2a1f10;
     border: 1px solid #d97706;
     color: #fbbf24;

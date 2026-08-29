@@ -131,12 +131,20 @@ function handleWebSocketConnection(ws, req) {
                             monId: moveResult.currentMonitorId
                         }));
                     }
-                    // Debug hareket logu (konsolu bogmamak icin her 100ms'de bir logla)
                     if (Date.now() - lastLogTime > 150) {
                         log('DEBUG', 'INPUT:MOVE', `dx=${(data.dx || 0).toFixed(2)} dy=${(data.dy || 0).toFixed(2)}`, {
                             monId: moveResult.currentMonitorId,
                             boundary: moveResult.boundaryHit
                         });
+                        lastLogTime = Date.now();
+                    }
+                    break;
+
+                case 'move_abs':
+                    // Mutlak Lazer Konumlandirma (Laser Pointer Raycasting)
+                    win32.setCursorPos(data.x, data.y);
+                    if (Date.now() - lastLogTime > 150) {
+                        log('DEBUG', 'INPUT:LASER', `abs_x=${Math.round(data.x)} abs_y=${Math.round(data.y)}`);
                         lastLogTime = Date.now();
                     }
                     break;
