@@ -1,364 +1,212 @@
-// Universal Wireless Control Hub - 3D Uzamsal Lazer Kumanda Motoru (3D Spatial Raycaster)
-// 1 Euro Titreme Önleme Filtresi ve 2 Köşe (Sol-Üst / Sağ-Alt) Mutlak Kalibrasyon
+// Universal Wireless Control Hub - Endüstri Standardı Jiroskop Entegrasyon Motoru (Inertial Gyroscope Engine)
+// Gürültülü manyetik pusulayı (alpha) tamamen devre dışı bırakır.
+// Saf donanımsal jiroskop açısal hızını (rotationRate) entegre ederek SIFIR TİTREME sağlar.
 
-class OneEuroFilter {
-    constructor(freq = 60, minCutoff = 0.4, beta = 0.06, dCutoff = 1.0) {
-        this.freq = freq;
-        this.minCutoff = minCutoff;
-        this.beta = beta;
-        this.dCutoff = dCutoff;
-        this.xPrev = null;
-        this.dxPrev = 0;
-        this.tPrev = null;
-    }
-
-    alpha(cutoff, dt) {
-        const tau = 1.0 / (2 * Math.PI * cutoff);
-        return 1.0 / (1.0 + tau / dt);
-    }
-
-    filter(x, timestamp = performance.now() / 1000) {
-        if (this.tPrev === null) {
-            this.tPrev = timestamp;
-            this.xPrev = x;
-            this.dxPrev = 0;
-            return x;
-        }
-
-        const dt = Math.max(0.001, timestamp - this.tPrev);
-        this.tPrev = timestamp;
-
-        const dx = (x - this.xPrev) / dt;
-        const alphaD = this.alpha(this.dCutoff, dt);
-        const dxHat = alphaD * dx + (1 - alphaD) * this.dxPrev;
-        this.dxPrev = dxHat;
-
-        const cutoff = this.minCutoff + this.beta * Math.abs(dxHat);
-        const alpha = this.alpha(cutoff, dt);
-        const xHat = alpha * x + (1 - alpha) * this.xPrev;
-        this.xPrev = xHat;
-
-        return xHat;
-    }
-
-    reset() {
-        this.xPrev = null;
-        this.tPrev = null;
-        this.dxPrev = 0;
-    }
-}
-
-class AirMouseController {
+class GyroscopeAirMouse {
     constructor() {
         this.active = false;
-        this.mode = 'laser'; // 'laser' (mutlak lazer) veya 'relative' (goreli yumusak)
 
-        // 2 Köşe Kalibrasyon Değerleri
-        this.calib = {
-            yawLeft: null,
-            pitchTop: null,
-            yawRight: null,
-            pitchBottom: null
-        };
-        this.isCalibrated = false;
+        // Ayarlar
+        this.speedX = 3.2;         // Yatay hassasiyet
+        this.speedY = 3.2;         // Dikey hassasiyet
+        this.deadZone = 0.20;       // Durgunluk gürültü kapısı (deg/s): El sabitken titremeyi 0 yapar
+        this.accelFactor = 1.35;   // Hızlı kol hareketinde geniş ekranları rahat aşma ivmesi
 
-        // Eksen Ters Çevirme (Inversion) Ayarları
         this.invertX = false;
         this.invertY = false;
 
-        // 1 Euro Filtreleri
-        this.filterX = new OneEuroFilter(60, 0.4, 0.06, 1.0);
-        this.filterY = new OneEuroFilter(60, 0.4, 0.06, 1.0);
+        this.lastTimestamp = null;
+        this.gyroCount = 0;
 
-        // Sanal Masaüstü Bounding Box
-        this.screenBounds = { minX: 0, maxX: 1920, minY: 0, maxY: 1080, width: 1920, height: 1080 };
-
-        // Canlı Açı Değerleri
-        this.currentRay = { yaw: 0, pitch: 0 };
-        this.lastRaw = { alpha: 0, beta: 0, gamma: 0 };
-
-        this.loadSavedSettings();
-        this.init();
+        this.loadSettings();
+        this.initUi();
+        this.bindEvents();
     }
 
-    init() {
-        // Kalibrasyon Butonları
-        const btnSetTopLeft = document.getElementById('calib-set-topleft');
-        const btnSetBottomRight = document.getElementById('calib-set-bottomright');
-        const btnResetCalib = document.getElementById('calib-reset-btn');
-        const checkInvertY = document.getElementById('chk-invert-y');
-        const checkInvertX = document.getElementById('chk-invert-x');
-        const modeToggle = document.getElementById('laser-mode-select');
+    initUi() {
+        const sliderX = document.getElementById('gyro-sens-slider');
+        const valX = document.getElementById('gyro-sens-val');
+        const checkInvY = document.getElementById('chk-invert-y');
+        const checkInvX = document.getElementById('chk-invert-x');
+        const btnCenter = document.getElementById('btn-recenter-gyro');
 
-        if (btnSetTopLeft) {
-            btnSetTopLeft.addEventListener('click', () => this.recordCorner('topleft'));
-        }
-        if (btnSetBottomRight) {
-            btnSetBottomRight.addEventListener('click', () => this.recordCorner('bottomright'));
-        }
-        if (btnResetCalib) {
-            btnResetCalib.addEventListener('click', () => this.resetCalibration());
+        if (sliderX) {
+            sliderX.value = this.speedX;
+            sliderX.addEventListener('input', (e) => {
+                this.speedX = parseFloat(e.target.value);
+                this.speedY = parseFloat(e.target.value);
+                if (valX) valX.textContent = `${this.speedX.toFixed(1)}x`;
+                this.saveSettings();
+            });
         }
 
-        if (checkInvertY) {
-            checkInvertY.checked = this.invertY;
-            checkInvertY.addEventListener('change', (e) => {
+        if (checkInvY) {
+            checkInvY.checked = this.invertY;
+            checkInvY.addEventListener('change', (e) => {
                 this.invertY = e.target.checked;
                 this.saveSettings();
             });
         }
-        if (checkInvertX) {
-            checkInvertX.checked = this.invertX;
-            checkInvertX.addEventListener('change', (e) => {
+
+        if (checkInvX) {
+            checkInvX.checked = this.invertX;
+            checkInvX.addEventListener('change', (e) => {
                 this.invertX = e.target.checked;
                 this.saveSettings();
             });
         }
 
-        if (modeToggle) {
-            modeToggle.addEventListener('change', (e) => {
-                this.mode = e.target.value;
-                this.filterX.reset();
-                this.filterY.reset();
+        if (btnCenter) {
+            btnCenter.addEventListener('click', () => {
+                this.recenter();
             });
-        }
-
-        window.addEventListener('deviceorientation', (e) => this.handleOrientation(e), true);
-        window.addEventListener('deviceorientationabsolute', (e) => this.handleOrientation(e), true);
-    }
-
-    // Telefonun 3 Boyutlu İleri Doğrultu Vektörünü Hesapla (Ray Vector)
-    calculatePointerRay(alpha, beta, gamma) {
-        const deg2rad = Math.PI / 180;
-        const a = (alpha || 0) * deg2rad;
-        const b = (beta || 0) * deg2rad;
-        const g = (gamma || 0) * deg2rad;
-
-        // Telefonun tepe vektörü (0, 1, 0)
-        const vx = -Math.sin(a) * Math.cos(b) - Math.sin(g) * Math.cos(a) * Math.sin(b);
-        const vy =  Math.cos(a) * Math.cos(b) - Math.sin(g) * Math.sin(a) * Math.sin(b);
-        const vz =  Math.cos(g) * Math.sin(b);
-
-        // Yatay Yaw (Sol/Sağ) ve Dikey Pitch (Yukarı/Aşağı)
-        const yaw = Math.atan2(vx, vy) * (180 / Math.PI);
-        const pitch = Math.asin(Math.max(-1, Math.min(1, vz))) * (180 / Math.PI);
-
-        return { yaw, pitch };
-    }
-
-    // Ekran Sınırlarını Güncelle
-    updateScreenBounds(monitors) {
-        if (!monitors || monitors.length === 0) return;
-
-        let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-        monitors.forEach(m => {
-            if (m.x < minX) minX = m.x;
-            if (m.y < minY) minY = m.y;
-            if (m.x + m.width > maxX) maxX = m.x + m.width;
-            if (m.y + m.height > maxY) maxY = m.y + m.height;
-        });
-
-        this.screenBounds = {
-            minX, minY, maxX, maxY,
-            width: maxX - minX || 1920,
-            height: maxY - minY || 1080
-        };
-    }
-
-    // 2 Köşe Kaydetme (Sol-Üst & Sağ-Alt)
-    recordCorner(corner) {
-        const ray = this.currentRay;
-        if (ray.yaw === 0 && ray.pitch === 0) {
-            alert('Sensör verisi bekleniyor. Lütfen telefonu hareket ettirin.');
-            return;
-        }
-
-        if (corner === 'topleft') {
-            this.calib.yawLeft = ray.yaw;
-            this.calib.pitchTop = ray.pitch;
-            const ind = document.getElementById('calib-topleft-ind');
-            if (ind) ind.textContent = `✓ (${ray.yaw.toFixed(1)}°, ${ray.pitch.toFixed(1)}°)`;
-        } else if (corner === 'bottomright') {
-            this.calib.yawRight = ray.yaw;
-            this.calib.pitchBottom = ray.pitch;
-            const ind = document.getElementById('calib-bottomright-ind');
-            if (ind) ind.textContent = `✓ (${ray.yaw.toFixed(1)}°, ${ray.pitch.toFixed(1)}°)`;
-        }
-
-        if (this.calib.yawLeft !== null && this.calib.yawRight !== null) {
-            this.isCalibrated = true;
-            this.saveSettings();
-            const statusBox = document.getElementById('calib-status-box');
-            if (statusBox) statusBox.textContent = '🎉 Kalibrasyon Tamam! Telefon artık ekranlarınızı tam olarak hedefliyor.';
-            window.haptics.success();
-        } else {
-            window.haptics.click();
         }
     }
 
     saveSettings() {
         try {
-            localStorage.setItem('laser_calib_data', JSON.stringify(this.calib));
-            localStorage.setItem('laser_invert_x', JSON.stringify(this.invertX));
-            localStorage.setItem('laser_invert_y', JSON.stringify(this.invertY));
+            localStorage.setItem('gyro_speed', JSON.stringify(this.speedX));
+            localStorage.setItem('gyro_inv_x', JSON.stringify(this.invertX));
+            localStorage.setItem('gyro_inv_y', JSON.stringify(this.invertY));
         } catch (e) {}
     }
 
-    loadSavedSettings() {
+    loadSettings() {
         try {
-            const c = localStorage.getItem('laser_calib_data');
-            const ix = localStorage.getItem('laser_invert_x');
-            const iy = localStorage.getItem('laser_invert_y');
-            if (c) {
-                this.calib = JSON.parse(c);
-                if (this.calib.yawLeft !== null && this.calib.yawRight !== null) {
-                    this.isCalibrated = true;
-                }
+            const s = localStorage.getItem('gyro_speed');
+            const ix = localStorage.getItem('gyro_inv_x');
+            const iy = localStorage.getItem('gyro_inv_y');
+            if (s) {
+                this.speedX = JSON.parse(s);
+                this.speedY = this.speedX;
             }
             if (ix) this.invertX = JSON.parse(ix);
             if (iy) this.invertY = JSON.parse(iy);
         } catch (e) {}
     }
 
-    resetCalibration() {
-        this.calib = { yawLeft: null, pitchTop: null, yawRight: null, pitchBottom: null };
-        this.isCalibrated = false;
-        try {
-            localStorage.removeItem('laser_calib_data');
-        } catch (e) {}
-
-        const ind1 = document.getElementById('calib-topleft-ind');
-        const ind2 = document.getElementById('calib-bottomright-ind');
-        const statusBox = document.getElementById('calib-status-box');
-
-        if (ind1) ind1.textContent = 'Kaydedilmedi';
-        if (ind2) ind2.textContent = 'Kaydedilmedi';
-        if (statusBox) statusBox.textContent = 'Kalibre edilmedi. Lütfen 1 ve 2. adımları tamamlayın.';
+    recenter() {
         window.haptics.click();
+        // Farenin merkez monitöre ışınlanması için
+        if (window.app && window.app.ws && window.app.ws.readyState === WebSocket.OPEN) {
+            window.app.send({
+                type: 'click',
+                button: 'middle',
+                state: 'click'
+            });
+        }
     }
 
-    handleOrientation(e) {
-        if (!this.active) return;
-        if (e.beta === null || e.gamma === null) return;
-
-        this.lastRaw = { alpha: e.alpha, beta: e.beta, gamma: e.gamma };
-
-        // 3D İleri Yön Işın Açısını Hesapla
-        const ray = this.calculatePointerRay(e.alpha, e.beta, e.gamma);
-        this.currentRay = ray;
-
-        const curYaw = ray.yaw;
-        const curPitch = ray.pitch;
-
-        // === 1. MUTLAK LAZER MODU ===
-        if (this.mode === 'laser' && this.isCalibrated && this.calib.yawLeft !== null && this.calib.yawRight !== null) {
-            const yawSpan = this.calib.yawRight - this.calib.yawLeft;
-            const pitchSpan = this.calib.pitchTop - this.calib.pitchBottom;
-
-            if (Math.abs(yawSpan) > 1 && Math.abs(pitchSpan) > 1) {
-                // X Oranı (0.0: Sol Ekran Sınırı, 1.0: Sağ Ekran Sınırı)
-                let tX = (curYaw - this.calib.yawLeft) / yawSpan;
-
-                // Y Oranı: Yukarı baktığında (pitch = pitchTop) -> tY = 0.0 (Ekranın Üstü)
-                //          Aşağı baktığında (pitch = pitchBottom) -> tY = 1.0 (Ekranın Altı)
-                let tY = (this.calib.pitchTop - curPitch) / pitchSpan;
-
-                // Eksen Ters Çevirme Kontrolleri
-                if (this.invertX) tX = 1.0 - tX;
-                if (this.invertY) tY = 1.0 - tY;
-
-                // Ekran Taşma Toleransı
-                tX = Math.max(-0.02, Math.min(1.02, tX));
-                tY = Math.max(-0.02, Math.min(1.02, tY));
-
-                const rawTargetX = this.screenBounds.minX + tX * this.screenBounds.width;
-                const rawTargetY = this.screenBounds.minY + tY * this.screenBounds.height;
-
-                // 1 Euro Titreme Önleme Filtresi
-                const nowSec = performance.now() / 1000;
-                const filteredX = this.filterX.filter(rawTargetX, nowSec);
-                const filteredY = this.filterY.filter(rawTargetY, nowSec);
-
-                if (window.app && window.app.ws && window.app.ws.readyState === WebSocket.OPEN) {
-                    window.app.send({
-                        type: 'move_abs',
-                        x: filteredX,
-                        y: filteredY,
-                        yaw: curYaw,
-                        pitch: curPitch,
-                        t: Date.now()
-                    });
-                }
-
-                this.renderHud(curYaw, curPitch, filteredX, filteredY);
-                return;
+    bindEvents() {
+        // DeviceMotion içindeki pure gyroscope rotationRate olayını dinle
+        window.addEventListener('devicemotion', (e) => this.handleDeviceMotion(e), true);
+        
+        // Generic Sensor API Gyroscope fallback
+        try {
+            if ('Gyroscope' in window) {
+                const gyro = new Gyroscope({ frequency: 60 });
+                gyro.addEventListener('reading', () => {
+                    if (!this.active) return;
+                    // rad/s to deg/s
+                    const degX = gyro.x * (180 / Math.PI);
+                    const degY = gyro.y * (180 / Math.PI);
+                    const degZ = gyro.z * (180 / Math.PI);
+                    this.processGyroRates(degZ, degX, performance.now());
+                });
+                gyro.start();
             }
-        }
+        } catch (err) {}
+    }
 
-        // === 2. GÖRELİ MOD ===
-        if (this.lastYawRel === undefined) {
-            this.lastYawRel = curYaw;
-            this.lastPitchRel = curPitch;
+    handleDeviceMotion(e) {
+        if (!this.active) return;
+
+        const rot = e.rotationRate;
+        if (!rot) return;
+
+        const now = performance.now();
+        if (this.lastTimestamp === null) {
+            this.lastTimestamp = now;
             return;
         }
 
-        let dYaw = curYaw - this.lastYawRel;
-        let dPitch = curPitch - this.lastPitchRel;
-        this.lastYawRel = curYaw;
-        this.lastPitchRel = curPitch;
+        const dt = Math.max(0.002, Math.min(0.1, (now - this.lastTimestamp) / 1000));
+        this.lastTimestamp = now;
 
-        if (this.invertX) dYaw = -dYaw;
-        if (this.invertY) dPitch = -dPitch;
+        // rot.alpha: Z ekseni (Yaw - Sağa/Sola Dönüş)
+        // rot.beta:  X ekseni (Pitch - Yukarı/Aşağı Eğilme)
+        // rot.gamma: Y ekseni (Roll)
+        let rateYaw = rot.alpha || 0;
+        let ratePitch = rot.beta || 0;
 
-        if (Math.abs(dYaw) > 60) dYaw = 0;
-        if (Math.abs(dPitch) > 60) dPitch = 0;
+        // Bazı Android cihazlarda Z ekseni yerine gamma veya beta atanır
+        if (Math.abs(rateYaw) < 0.05 && Math.abs(rot.gamma) > 0.1) {
+            rateYaw = rot.gamma;
+        }
 
-        if (Math.hypot(dYaw, dPitch) < 0.03) return;
+        this.processGyroRates(rateYaw, ratePitch, now, dt);
+    }
 
-        const nowSec = performance.now() / 1000;
-        const smoothDx = this.filterX.filter(dYaw * 32.0, nowSec);
-        // Pitch yukarı çıktığında fareyi yukarı götür (Windows koordinatında Y eksiye gider)
-        const smoothDy = this.filterY.filter(-dPitch * 32.0, nowSec);
+    processGyroRates(rateYaw, ratePitch, now, dt = 0.016) {
+        this.gyroCount++;
+
+        // 1. Durgunluk / Gürültü Kapısı (Deadband Filter): El sabitken SIFIR titreme
+        const angularSpeed = Math.hypot(rateYaw, ratePitch);
+        if (angularSpeed < this.deadZone) {
+            this.updateHud(0, 0, angularSpeed, 'DURGUN (Sabit)');
+            return;
+        }
+
+        // 2. Yönlendirme (Yukarı bakınca fare YUKARI gitmeli)
+        // Telefon yukarı kalkarken ratePitch pozitiftir. Windows'ta ekranın yukarısı eksi (-) Y'dir.
+        let rawDx = rateYaw;
+        let rawDy = -ratePitch;
+
+        if (this.invertX) rawDx = -rawDx;
+        if (this.invertY) rawDy = -rawDy;
+
+        // 3. İvmelenme Eğrisi (Geniş çift monitör geçişi için)
+        let multiplierX = this.speedX * 22.0;
+        let multiplierY = this.speedY * 22.0;
+
+        if (angularSpeed > 5.0) {
+            const boost = Math.pow(angularSpeed / 5.0, this.accelFactor - 1.0);
+            multiplierX *= Math.min(3.0, boost);
+            multiplierY *= Math.min(3.0, boost);
+        }
+
+        const finalDx = rawDx * multiplierX * dt * 60.0;
+        const finalDy = rawDy * multiplierY * dt * 60.0;
 
         if (window.app && window.app.ws && window.app.ws.readyState === WebSocket.OPEN) {
             window.app.send({
                 type: 'move',
-                dx: smoothDx,
-                dy: smoothDy,
+                dx: finalDx,
+                dy: finalDy,
                 t: Date.now()
             });
         }
 
-        this.renderHud(curYaw, curPitch);
+        this.updateHud(finalDx, finalDy, angularSpeed, 'HAREKETLİ');
     }
 
-    renderHud(yaw, pitch, targetX = null, targetY = null) {
-        const hudAngles = document.getElementById('hud-angles');
-        const hudTarget = document.getElementById('hud-target');
+    updateHud(dx, dy, speed, state) {
+        const hudStatus = document.getElementById('gyro-state-text');
+        const hudMotion = document.getElementById('gyro-motion-text');
 
-        if (hudAngles) {
-            hudAngles.textContent = `Açı (Yaw / Pitch): ${yaw.toFixed(1)}° / ${pitch.toFixed(1)}°`;
+        if (hudStatus) {
+            hudStatus.textContent = `Durum: ${state} (Hız: ${speed.toFixed(1)}°/s)`;
+            hudStatus.style.color = state.includes('DURGUN') ? '#10b981' : '#38bdf8';
         }
-        if (hudTarget) {
-            if (targetX !== null && targetY !== null) {
-                hudTarget.textContent = `Hedef Koordinat: (${Math.round(targetX)}, ${Math.round(targetY)})`;
-            } else {
-                hudTarget.textContent = `Mod: Göreli Yumuşak`;
-            }
+        if (hudMotion) {
+            hudMotion.textContent = `Haraket: dX=${dx.toFixed(1)}px | dY=${dy.toFixed(1)}px | Paket: ${this.gyroCount}`;
         }
     }
 
     setActive(isActive) {
         this.active = isActive;
-        if (isActive) {
-            this.filterX.reset();
-            this.filterY.reset();
-            this.lastYawRel = undefined;
-            if (window.app && window.app.monitors) {
-                this.updateScreenBounds(window.app.monitors);
-            }
-        }
+        this.lastTimestamp = null;
     }
 }
 
-window.airMouse = new AirMouseController();
+window.airMouse = new GyroscopeAirMouse();

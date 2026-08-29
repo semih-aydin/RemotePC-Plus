@@ -37,67 +37,41 @@
                 </div>
             </div>
 
-            <!-- 2. LAZER / AIR MOUSE -->
+            <!-- 2. AIR MOUSE -->
             <div id="view-airmouse" class="airmouse-box">
-                <!-- Canlı Telemetri Debug HUD -->
+                <!-- Canlı Jiroskop Durumu -->
                 <div class="calib-card" style="border-color:#333; background:#141820;">
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <span style="font-size:12px; font-weight:700; color:#3b82f6;"><i class="fas fa-terminal"></i> CANLI SENSÖR DEBUG HUD</span>
-                        <button id="btn-send-telemetry" class="mini-btn" title="Sunucuya kaydet">📤 Kaydet</button>
+                    <div style="font-size:12px; font-weight:700; color:#3b82f6; margin-bottom:4px;">
+                        <i class="fas fa-microchip"></i> DONANIMSAL JİROSKOP (Zero-Jitter)
                     </div>
-                    <div id="hud-angles" class="status-text">Açı: Yaw=0.0° Pitch=0.0°</div>
-                    <div id="hud-target" class="status-text">Hedef Piksel: Bekleniyor</div>
-                    <div id="hud-range" class="status-text" style="color:#fbbf24;">Gezinme Aralığı: [0° ➔ 0°]</div>
-                    <div id="hud-rate" class="status-text" style="color:#10b981;">Örnek Hızı: 0 FPS | Paket: 0</div>
+                    <div id="gyro-state-text" class="status-text" style="color:#10b981;">Durum: DURGUN (Sabit)</div>
+                    <div id="gyro-motion-text" class="status-text">Haraket: dX=0.0px | dY=0.0px | Paket: 0</div>
                 </div>
 
+                <!-- Hassasiyet & Çoklu Monitör Çarpanı -->
                 <div class="calib-card">
-                    <div class="card-title"><i class="fas fa-crosshairs"></i> 2 KÖŞE LAZER KALİBRASYONU</div>
-                    <p style="font-size:11px; color:#888; line-height:1.4;">
-                        Telefonu sol monitörün <strong>Sol-Üst</strong> köşesine tutup 1'e, ardından sağ monitörün <strong>Sağ-Alt</strong> köşesine tutup 2'ye dokunun:
-                    </p>
-
-                    <div style="display:flex; flex-direction:column; gap:6px; margin-top:2px;">
-                        <button id="calib-set-topleft" class="action-btn">
-                            <span>↖️ 1. Sol-Üst Köşeyi Kaydet</span>
-                            <small id="calib-topleft-ind" style="color:#3b82f6;">Kaydedilmedi</small>
-                        </button>
-                        <button id="calib-set-bottomright" class="action-btn">
-                            <span>↘️ 2. Sağ-Alt Köşeyi Kaydet</span>
-                            <small id="calib-bottomright-ind" style="color:#3b82f6;">Kaydedilmedi</small>
-                        </button>
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span style="font-size:12px; color:#ddd; font-weight:600;">Hassasiyet (Monitör Geçiş Hızı):</span>
+                        <span id="gyro-sens-val" style="font-size:13px; font-weight:700; color:#3b82f6;">3.2x</span>
                     </div>
+                    <input id="gyro-sens-slider" type="range" min="1.0" max="6.0" step="0.2" value="3.2" style="width:100%; accent-color:#2563eb; margin-top:6px;">
+                    <small style="color:#777; font-size:10px;">Geniş çift monitörler arasında bileğinizi hafif çevirerek gezinebilirsiniz.</small>
+                </div>
 
-                    <!-- Eksen Ters Çevirme Seçenekleri -->
-                    <div style="display:flex; gap:16px; margin-top:6px; font-size:12px; color:#aaa; justify-content:center;">
-                        <label style="display:flex; align-items:center; gap:4px; cursor:pointer;">
+                <!-- Eksen Kontrolleri -->
+                <div class="calib-card">
+                    <div style="font-size:12px; color:#aaa; font-weight:600; margin-bottom:4px;">Eksen Yönleri:</div>
+                    <div style="display:flex; gap:16px; font-size:12px; color:#ccc; justify-content:center;">
+                        <label style="display:flex; align-items:center; gap:6px; cursor:pointer;">
                             <input type="checkbox" id="chk-invert-y" style="accent-color:#2563eb;">
                             <span>⇅ Y Eksenini Ters Çevir</span>
                         </label>
-                        <label style="display:flex; align-items:center; gap:4px; cursor:pointer;">
+                        <label style="display:flex; align-items:center; gap:6px; cursor:pointer;">
                             <input type="checkbox" id="chk-invert-x" style="accent-color:#2563eb;">
                             <span>⇄ X Eksenini Ters Çevir</span>
                         </label>
                     </div>
-
-                    <div id="calib-status-box" class="calib-status">
-                        Kalibre edilmedi. Lütfen 1 ve 2. adımları tamamlayın.
-                    </div>
                 </div>
-
-                <div class="calib-card" style="margin-top:2px;">
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <span style="font-size:12px; color:#aaa;">Çalışma Modu:</span>
-                        <select id="laser-mode-select" class="clean-select">
-                            <option value="laser">Mutlak Lazer Modu</option>
-                            <option value="relative">Göreli Yumuşak Mod</option>
-                        </select>
-                    </div>
-                </div>
-
-                <button id="calib-reset-btn" class="action-btn" style="background:#1e1e1e; border-color:#333;">
-                    <i class="fas fa-undo"></i> Kalibrasyonu Sıfırla
-                </button>
             </div>
 
             <!-- 3. MEDYA & SUNUM -->
