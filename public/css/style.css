@@ -172,6 +172,21 @@ body {
     outline: none;
 }
 
+.mini-btn {
+    background: #2563eb;
+    border: none;
+    color: #fff;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.mini-btn:active {
+    background: #1d4ed8;
+}
+
 .warning-box {
     width: 100%;
     max-width: 360px;

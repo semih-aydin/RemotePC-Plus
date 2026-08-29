@@ -39,13 +39,25 @@
 
             <!-- 2. LAZER / AIR MOUSE -->
             <div id="view-airmouse" class="airmouse-box">
+                <!-- Canlı Telemetri Debug HUD -->
+                <div class="calib-card" style="border-color:#333; background:#141820;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span style="font-size:12px; font-weight:700; color:#3b82f6;"><i class="fas fa-terminal"></i> CANLI SENSÖR DEBUG HUD</span>
+                        <button id="btn-send-telemetry" class="mini-btn" title="Sunucuya kaydet">📤 Kaydet</button>
+                    </div>
+                    <div id="hud-angles" class="status-text">Açı: Yaw=0.0° Pitch=0.0°</div>
+                    <div id="hud-target" class="status-text">Hedef Piksel: Bekleniyor</div>
+                    <div id="hud-range" class="status-text" style="color:#fbbf24;">Gezinme Aralığı: [0° ➔ 0°]</div>
+                    <div id="hud-rate" class="status-text" style="color:#10b981;">Örnek Hızı: 0 FPS | Paket: 0</div>
+                </div>
+
                 <div class="calib-card">
                     <div class="card-title"><i class="fas fa-crosshairs"></i> LAZER KALİBRASYONU (Sol - Sağ Sınır)</div>
                     <p style="font-size:11px; color:#888; line-height:1.4;">
-                        Telefonu sol ekranın en soluna doğrultup 1. butona, ardından sağ ekranın en sağına doğrultup 2. butona dokunun:
+                        Telefonu sol ekranın en soluna doğrultup 1'e, ardından sağ ekranın en sağına doğrultup 2'ye dokunun (veya gezinip otomatik uygulayın):
                     </p>
 
-                    <div style="display:flex; flex-direction:column; gap:8px; margin-top:4px;">
+                    <div style="display:flex; flex-direction:column; gap:6px; margin-top:2px;">
                         <button id="calib-set-left" class="action-btn">
                             <span>📍 1. Sol Sınırı Kaydet</span>
                             <small id="calib-left-indicator" style="color:#3b82f6;">Kaydedilmedi</small>
@@ -54,10 +66,13 @@
                             <span>📍 2. Sağ Sınırı Kaydet</span>
                             <small id="calib-right-indicator" style="color:#3b82f6;">Kaydedilmedi</small>
                         </button>
+                        <button id="btn-apply-autorange" class="action-btn" style="background:#1e293b; border-color:#334155; color:#38bdf8;">
+                            <span>⚡ Gezinilen Aralığı Otomatik Uygula</span>
+                        </button>
                     </div>
 
                     <div id="calib-status-box" class="calib-status">
-                        Kalibre edilmedi. Lütfen 1 ve 2. adımları tamamlayın.
+                        Kalibre edilmedi. 1 ve 2. adımları yapın veya otomatik aralığı kullanın.
                     </div>
                 </div>
 
@@ -69,7 +84,6 @@
                             <option value="relative">Göreli Yumuşak Mod</option>
                         </select>
                     </div>
-                    <div id="laser-debug-text" class="status-text" style="margin-top:6px;">Açı verisi bekleniyor...</div>
                 </div>
 
                 <button id="calib-reset-btn" class="action-btn" style="background:#1e1e1e; border-color:#333;">

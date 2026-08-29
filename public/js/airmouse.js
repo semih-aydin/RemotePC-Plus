@@ -1,8 +1,8 @@
-// Universal Wireless Control Hub - Lazer Kumanda ve Uzamsal Kalibrasyon Motoru (Laser Pointer Engine)
-// 1 Euro (1€) Titreme Engelleyici Filtre ve Coklu Monitor Uzamsal Isinlama (Raycasting)
+// Universal Wireless Control Hub - Gelismis Lazer, Telemetri ve 1 Euro Filtre Motoru
+// Canli Sensor Analizi, Otomatik Aralık Algılama (Auto-Range) ve Dusuk Gecikmeli Isinlama
 
 class OneEuroFilter {
-    constructor(freq = 60, minCutoff = 0.8, beta = 0.05, dCutoff = 1.0) {
+    constructor(freq = 60, minCutoff = 0.5, beta = 0.04, dCutoff = 1.0) {
         this.freq = freq;
         this.minCutoff = minCutoff;
         this.beta = beta;
@@ -17,7 +17,7 @@ class OneEuroFilter {
         return 1.0 / (1.0 + tau / dt);
     }
 
-    filter(x, timestamp = Date.now() / 1000) {
+    filter(x, timestamp = performance.now() / 1000) {
         if (this.tPrev === null) {
             this.tPrev = timestamp;
             this.xPrev = x;
@@ -28,13 +28,11 @@ class OneEuroFilter {
         const dt = Math.max(0.001, timestamp - this.tPrev);
         this.tPrev = timestamp;
 
-        // Hiz degisimi
         const dx = (x - this.xPrev) / dt;
         const alphaD = this.alpha(this.dCutoff, dt);
         const dxHat = alphaD * dx + (1 - alphaD) * this.dxPrev;
         this.dxPrev = dxHat;
 
-        // Dinamik Cutoff (Yavas harekette yuksek filtreleme / sifir titreme; hizlida sifir gecikme)
         const cutoff = this.minCutoff + this.beta * Math.abs(dxHat);
         const alpha = this.alpha(cutoff, dt);
         const xHat = alpha * x + (1 - alpha) * this.xPrev;
@@ -53,19 +51,32 @@ class OneEuroFilter {
 class AirMouseController {
     constructor() {
         this.active = false;
-        this.mode = 'laser'; // 'laser' (mutlak lazer isareti) veya 'relative' (goreli yumusak)
+        this.mode = 'laser'; // 'laser' (mutlak lazer) veya 'relative' (goreli yumusak)
 
-        // Kalibrasyon Noktalari (Sol ve Sag Sinir Acilari)
-        this.calibLeft = null;   // { yaw, pitch }
-        this.calibRight = null;  // { yaw, pitch }
+        // Manuel Kalibrasyon
+        this.calibLeft = null;
+        this.calibRight = null;
         this.isCalibrated = false;
 
-        // 1 Euro Filtreleri (X ve Y icin titreme onleyici)
-        this.filterX = new OneEuroFilter(60, 0.6, 0.08, 1.0);
-        this.filterY = new OneEuroFilter(60, 0.6, 0.08, 1.0);
+        // Otomatik Aralık Algılama (Auto-Range Tracking)
+        this.sweepMinYaw = Infinity;
+        this.sweepMaxYaw = -Infinity;
+        this.sweepMinPitch = Infinity;
+        this.sweepMaxPitch = -Infinity;
 
-        // Sanal Masaustu Sinirlari
+        // 1 Euro Titreme Önleme Filtresi
+        this.filterX = new OneEuroFilter(60, 0.4, 0.05, 1.0);
+        this.filterY = new OneEuroFilter(60, 0.4, 0.05, 1.0);
+
+        // Sanal Masaüstü Sınırları
         this.screenBounds = { minX: 0, maxX: 1920, minY: 0, maxY: 1080, width: 1920, height: 1080 };
+
+        // Telemetri ve İstatistikler
+        this.sampleBuffer = [];
+        this.packetCounter = 0;
+        this.fpsCounter = 0;
+        this.lastFpsTime = performance.now();
+        this.currentFps = 0;
 
         this.lastBeta = null;
         this.lastGamma = null;
@@ -76,10 +87,12 @@ class AirMouseController {
     }
 
     init() {
-        // Kalibrasyon Butonlari
+        // Kalibrasyon Butonları
         const btnSetLeft = document.getElementById('calib-set-left');
         const btnSetRight = document.getElementById('calib-set-right');
         const btnResetCalib = document.getElementById('calib-reset-btn');
+        const btnAutoRange = document.getElementById('btn-apply-autorange');
+        const btnSendTelemetry = document.getElementById('btn-send-telemetry');
         const modeToggle = document.getElementById('laser-mode-select');
 
         if (btnSetLeft) {
@@ -91,6 +104,12 @@ class AirMouseController {
         if (btnResetCalib) {
             btnResetCalib.addEventListener('click', () => this.resetCalibration());
         }
+        if (btnAutoRange) {
+            btnAutoRange.addEventListener('click', () => this.applyAutoRange());
+        }
+        if (btnSendTelemetry) {
+            btnSendTelemetry.addEventListener('click', () => this.sendTelemetryToServer());
+        }
         if (modeToggle) {
             modeToggle.addEventListener('change', (e) => {
                 this.mode = e.target.value;
@@ -99,12 +118,12 @@ class AirMouseController {
             });
         }
 
-        // Sensor Olaylari
+        // Sensör Olaylarını Dinle
         window.addEventListener('deviceorientation', (e) => this.handleOrientation(e), true);
         window.addEventListener('deviceorientationabsolute', (e) => this.handleOrientation(e), true);
     }
 
-    // Coklu monitor toplam cozunurlugunu hesapla
+    // Ekran Sınırlarını Güncelle
     updateScreenBounds(monitors) {
         if (!monitors || monitors.length === 0) return;
 
@@ -121,39 +140,60 @@ class AirMouseController {
             width: maxX - minX || 1920,
             height: maxY - minY || 1080
         };
-        console.log('[LaserPointer] Ekran sinirlari guncellendi:', this.screenBounds);
     }
 
-    // Kalibrasyon Noktasi Kaydet
+    // Kalibrasyon Noktası Kaydet
     recordCalibrationPoint(side) {
         if (this.lastGamma === null || this.lastBeta === null) {
-            alert('Henüz sensör verisi alınamadı. Telefonu hafifçe hareket ettirin.');
+            alert('Sensör verisi bekleniyor. Lütfen telefonu hafifçe hareket ettirin.');
             return;
         }
 
-        // Yaw icin gamma veya alpha kullanalim
         const currentYaw = this.lastGamma;
         const currentPitch = this.lastBeta;
 
         if (side === 'left') {
             this.calibLeft = { yaw: currentYaw, pitch: currentPitch };
             const ind = document.getElementById('calib-left-indicator');
-            if (ind) ind.textContent = `✓ Kaydedildi (${currentYaw.toFixed(1)}°)`;
+            if (ind) ind.textContent = `✓ ${currentYaw.toFixed(1)}°`;
         } else if (side === 'right') {
             this.calibRight = { yaw: currentYaw, pitch: currentPitch };
             const ind = document.getElementById('calib-right-indicator');
-            if (ind) ind.textContent = `✓ Kaydedildi (${currentYaw.toFixed(1)}°)`;
+            if (ind) ind.textContent = `✓ ${currentYaw.toFixed(1)}°`;
         }
 
         if (this.calibLeft && this.calibRight) {
             this.isCalibrated = true;
             this.saveCalibration();
             const statusBox = document.getElementById('calib-status-box');
-            if (statusBox) statusBox.textContent = '🎉 Lazer Kalibrasyonu Başarılı! Telefon artık bir lazer gibi çalışıyor.';
+            if (statusBox) statusBox.textContent = '🎉 Lazer Kalibrasyonu Başarılı!';
             window.haptics.success();
         } else {
             window.haptics.click();
         }
+    }
+
+    // Gezinilen doğal açı aralığından otomatik kalibrasyon yap
+    applyAutoRange() {
+        if (this.sweepMinYaw === Infinity || this.sweepMaxYaw === -Infinity) {
+            alert('Henüz yeterli gezinme verisi toplanmadı. Lütfen telefonu sol ve sağ ekranlar arasında gezdirin.');
+            return;
+        }
+
+        this.calibLeft = { yaw: this.sweepMinYaw, pitch: (this.sweepMinPitch + this.sweepMaxPitch) / 2 };
+        this.calibRight = { yaw: this.sweepMaxYaw, pitch: (this.sweepMinPitch + this.sweepMaxPitch) / 2 };
+        this.isCalibrated = true;
+        this.saveCalibration();
+
+        const indL = document.getElementById('calib-left-indicator');
+        const indR = document.getElementById('calib-right-indicator');
+        const statusBox = document.getElementById('calib-status-box');
+
+        if (indL) indL.textContent = `✓ Oto ${this.sweepMinYaw.toFixed(1)}°`;
+        if (indR) indR.textContent = `✓ Oto ${this.sweepMaxYaw.toFixed(1)}°`;
+        if (statusBox) statusBox.textContent = `🎉 Otomatik Aralık Uygulandı: ${this.sweepMinYaw.toFixed(1)}° ile ${this.sweepMaxYaw.toFixed(1)}° arası`;
+
+        window.haptics.success();
     }
 
     saveCalibration() {
@@ -179,6 +219,11 @@ class AirMouseController {
         this.calibLeft = null;
         this.calibRight = null;
         this.isCalibrated = false;
+        this.sweepMinYaw = Infinity;
+        this.sweepMaxYaw = -Infinity;
+        this.sweepMinPitch = Infinity;
+        this.sweepMaxPitch = -Infinity;
+
         try {
             localStorage.removeItem('laser_calib_left');
             localStorage.removeItem('laser_calib_right');
@@ -190,7 +235,7 @@ class AirMouseController {
 
         if (indL) indL.textContent = 'Kaydedilmedi';
         if (indR) indR.textContent = 'Kaydedilmedi';
-        if (statusBox) statusBox.textContent = 'Kalibre edilmedi. Lütfen 1 ve 2. adımları tamamlayın.';
+        if (statusBox) statusBox.textContent = 'Kalibre edilmedi. 1 ve 2. adımları yapın veya otomatik aralığı kullanın.';
         window.haptics.click();
     }
 
@@ -198,55 +243,76 @@ class AirMouseController {
         if (!this.active) return;
         if (e.beta === null || e.gamma === null) return;
 
+        this.packetCounter++;
+        this.fpsCounter++;
+
+        const now = performance.now();
+        if (now - this.lastFpsTime >= 1000) {
+            this.currentFps = this.fpsCounter;
+            this.fpsCounter = 0;
+            this.lastFpsTime = now;
+        }
+
         this.lastBeta = e.beta;
         this.lastGamma = e.gamma;
         this.lastAlpha = e.alpha;
 
-        const curYaw = e.gamma;  // Saga / Sola acisal donus
-        const curPitch = e.beta; // Yukari / Asagi acisal donus
+        const curYaw = e.gamma;
+        const curPitch = e.beta;
 
-        // === 1. MUTLAK LAZER MODU (Absolute Raycasting) ===
+        // Otomatik Gezinme Aralığını Güncelle
+        if (curYaw < this.sweepMinYaw) this.sweepMinYaw = curYaw;
+        if (curYaw > this.sweepMaxYaw) this.sweepMaxYaw = curYaw;
+        if (curPitch < this.sweepMinPitch) this.sweepMinPitch = curPitch;
+        if (curPitch > this.sweepMaxPitch) this.sweepMaxPitch = curPitch;
+
+        // Telemetri Örneği Kaydet (Son 100 örnek)
+        if (this.sampleBuffer.length > 100) this.sampleBuffer.shift();
+        this.sampleBuffer.push({
+            t: Math.round(now),
+            yaw: parseFloat(curYaw.toFixed(2)),
+            pitch: parseFloat(curPitch.toFixed(2))
+        });
+
+        // === 1. MUTLAK LAZER MODU ===
         if (this.mode === 'laser' && this.isCalibrated && this.calibLeft && this.calibRight) {
             const leftYaw = this.calibLeft.yaw;
             const rightYaw = this.calibRight.yaw;
             const yawSpan = rightYaw - leftYaw;
 
             if (Math.abs(yawSpan) > 2) {
-                // X ekseni oransal konumu (0.0: Sol Ekran Sınırı, 1.0: Sağ Ekran Sınırı)
                 let tX = (curYaw - leftYaw) / yawSpan;
-                tX = Math.max(-0.05, Math.min(1.05, tX)); // Hafif tasmaya izin ver
+                tX = Math.max(-0.02, Math.min(1.02, tX));
 
-                // Y ekseni (Yukari - Asagi egim: ornek 35 derece dikey aci araligi)
                 const centerPitch = (this.calibLeft.pitch + this.calibRight.pitch) / 2;
-                const pitchSpan = 30.0; // Dikeyde 30 derecelik acisal alan
+                const pitchSpan = 28.0;
                 let tY = (curPitch - (centerPitch - pitchSpan / 2)) / pitchSpan;
-                tY = Math.max(-0.05, Math.min(1.05, tY));
+                tY = Math.max(-0.02, Math.min(1.02, tY));
 
-                // Ham hedef koordinat
                 const rawTargetX = this.screenBounds.minX + tX * this.screenBounds.width;
                 const rawTargetY = this.screenBounds.minY + tY * this.screenBounds.height;
 
-                // 1 Euro Filtresi ile titremeyi SIFIRA indir
-                const nowSec = Date.now() / 1000;
+                const nowSec = now / 1000;
                 const filteredX = this.filterX.filter(rawTargetX, nowSec);
                 const filteredY = this.filterY.filter(rawTargetY, nowSec);
 
-                // Sunucuya mutlak koordinat (move_abs) gonder
                 if (window.app && window.app.ws && window.app.ws.readyState === WebSocket.OPEN) {
                     window.app.send({
                         type: 'move_abs',
                         x: filteredX,
                         y: filteredY,
+                        yaw: curYaw,
+                        pitch: curPitch,
                         t: Date.now()
                     });
                 }
 
-                this.updateDebugUi(curYaw, curPitch, filteredX, filteredY);
+                this.renderLiveHud(curYaw, curPitch, filteredX, filteredY);
                 return;
             }
         }
 
-        // === 2. GORELI MOD (Relative Smooth Fallback) ===
+        // === 2. GÖRELİ MOD ===
         if (this.lastYawRel === undefined) {
             this.lastYawRel = curYaw;
             this.lastPitchRel = curPitch;
@@ -261,11 +327,11 @@ class AirMouseController {
         if (Math.abs(dYaw) > 80) dYaw = 0;
         if (Math.abs(dPitch) > 80) dPitch = 0;
 
-        if (Math.hypot(dYaw, dPitch) < 0.04) return;
+        if (Math.hypot(dYaw, dPitch) < 0.03) return;
 
-        const nowSec = Date.now() / 1000;
-        const smoothDx = this.filterX.filter(dYaw * 28.0, nowSec);
-        const smoothDy = this.filterY.filter(dPitch * 28.0, nowSec);
+        const nowSec = now / 1000;
+        const smoothDx = this.filterX.filter(dYaw * 32.0, nowSec);
+        const smoothDy = this.filterY.filter(dPitch * 32.0, nowSec);
 
         if (window.app && window.app.ws && window.app.ws.readyState === WebSocket.OPEN) {
             window.app.send({
@@ -276,17 +342,58 @@ class AirMouseController {
             });
         }
 
-        this.updateDebugUi(curYaw, curPitch);
+        this.renderLiveHud(curYaw, curPitch);
     }
 
-    updateDebugUi(yaw, pitch, targetX = null, targetY = null) {
-        const debugText = document.getElementById('laser-debug-text');
-        if (debugText) {
+    // Canlı Telemetri HUD Paneli
+    renderLiveHud(yaw, pitch, targetX = null, targetY = null) {
+        const hudAngles = document.getElementById('hud-angles');
+        const hudTarget = document.getElementById('hud-target');
+        const hudRange = document.getElementById('hud-range');
+        const hudRate = document.getElementById('hud-rate');
+
+        if (hudAngles) {
+            hudAngles.textContent = `Açı (Yaw / Pitch): ${yaw.toFixed(1)}° / ${pitch.toFixed(1)}°`;
+        }
+        if (hudTarget) {
             if (targetX !== null && targetY !== null) {
-                debugText.textContent = `Açı: ${yaw.toFixed(1)}° | Hedef: (${Math.round(targetX)}, ${Math.round(targetY)})`;
+                hudTarget.textContent = `Hedef Piksel: (${Math.round(targetX)}, ${Math.round(targetY)})`;
             } else {
-                debugText.textContent = `Açı: Yaw=${yaw.toFixed(1)}° Pitch=${pitch.toFixed(1)}°`;
+                hudTarget.textContent = `Mod: Göreli Yumuşak`;
             }
+        }
+        if (hudRange) {
+            const minStr = this.sweepMinYaw !== Infinity ? this.sweepMinYaw.toFixed(1) : '0';
+            const maxStr = this.sweepMaxYaw !== -Infinity ? this.sweepMaxYaw.toFixed(1) : '0';
+            const spanStr = (this.sweepMaxYaw !== -Infinity && this.sweepMinYaw !== Infinity) ? (this.sweepMaxYaw - this.sweepMinYaw).toFixed(1) : '0';
+            hudRange.textContent = `Gezinme Aralığı: [${minStr}° ➔ ${maxStr}°] (${spanStr}° genişlik)`;
+        }
+        if (hudRate) {
+            hudRate.textContent = `Örnek Hızı: ${this.currentFps} FPS | Paket: ${this.packetCounter}`;
+        }
+    }
+
+    // Toplu Telemetriyi Sunucuya Gönder
+    async sendTelemetryToServer() {
+        try {
+            const res = await fetch('/api/telemetry', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    samples: this.sampleBuffer,
+                    screenBounds: this.screenBounds,
+                    calibLeft: this.calibLeft,
+                    calibRight: this.calibRight,
+                    sweepRange: { minYaw: this.sweepMinYaw, maxYaw: this.sweepMaxYaw }
+                })
+            });
+            const data = await res.json();
+            if (data.success) {
+                alert(`Telemetri sunucuya kaydedildi! (${this.sampleBuffer.length} örnek)`);
+                window.haptics.success();
+            }
+        } catch (e) {
+            alert('Telemetri gönderilemedi: ' + e.message);
         }
     }
 

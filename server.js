@@ -78,26 +78,43 @@ function log(level, subsystem, message, meta = null) {
     console.log(`[${timestamp}] [${level.padEnd(5)}] [${subsystem.padEnd(12)}] ${message}${metaStr}`);
 }
 
+// Canli Telemetri & Debug Kaydedici (Son 200 Hareket Ornegi)
+const telemetryBuffer = [];
+function recordTelemetry(sample) {
+    if (telemetryBuffer.length > 200) telemetryBuffer.shift();
+    telemetryBuffer.push({
+        t: Date.now(),
+        ...sample
+    });
+}
+
 // HTTP ve HTTPS Sunuculari olusturalim
 const httpServer = http.createServer(app);
 const httpsServer = https.createServer(sslOptions, app);
 
-// WebSocket sunuculari
-const wssHttp = new WebSocketServer({ server: httpServer });
-const wssHttps = new WebSocketServer({ server: httpsServer });
+// WebSocket sunuculari (perMessageDeflate devre disi: Gecikmeyi minimuma indirmek icin sikistirma kapatildi)
+const wssOptions = { perMessageDeflate: false, maxPayload: 1024 * 64 };
+const wssHttp = new WebSocketServer({ server: httpServer, ...wssOptions });
+const wssHttps = new WebSocketServer({ server: httpsServer, ...wssOptions });
 
 const allClients = new Set();
 
 // Baglanan tum istemcilere WebSocket yonetimi
 function handleWebSocketConnection(ws, req) {
     allClients.add(ws);
+    
+    // Nagle Algoritmasini Devre Disi Birak (TCP_NODELAY: Gecikmeyi 1-2ms seviyesine indirir)
+    if (ws._socket && ws._socket.setNoDelay) {
+        ws._socket.setNoDelay(true);
+    }
+
     const clientIp = req.socket.remoteAddress;
     const proto = req.socket.encrypted ? 'WSS (Secure)' : 'WS (Plain)';
     const userAgent = req.headers['user-agent'] || 'unknown';
 
-    log('INFO', 'WS:CONN', `Client connected: ${clientIp} via ${proto}`, {
+    log('INFO', 'WS:CONN', `Client connected: ${clientIp} via ${proto} [TCP_NODELAY=ON]`, {
         activeClients: allClients.size,
-        userAgent: userAgent.substring(0, 45) + '...'
+        userAgent: userAgent.substring(0, 40)
     });
 
     // Ilk baglantida monitorler ve mevcut context bilgisini yolla
@@ -131,6 +148,13 @@ function handleWebSocketConnection(ws, req) {
                             monId: moveResult.currentMonitorId
                         }));
                     }
+                    recordTelemetry({
+                        type: 'move',
+                        dx: data.dx,
+                        dy: data.dy,
+                        monId: moveResult.currentMonitorId,
+                        client_t: data.t
+                    });
                     if (Date.now() - lastLogTime > 150) {
                         log('DEBUG', 'INPUT:MOVE', `dx=${(data.dx || 0).toFixed(2)} dy=${(data.dy || 0).toFixed(2)}`, {
                             monId: moveResult.currentMonitorId,
@@ -141,10 +165,20 @@ function handleWebSocketConnection(ws, req) {
                     break;
 
                 case 'move_abs':
-                    // Mutlak Lazer Konumlandirma (Laser Pointer Raycasting)
                     win32.setCursorPos(data.x, data.y);
+                    recordTelemetry({
+                        type: 'laser_abs',
+                        x: data.x,
+                        y: data.y,
+                        rawYaw: data.yaw,
+                        rawPitch: data.pitch,
+                        client_t: data.t
+                    });
                     if (Date.now() - lastLogTime > 150) {
-                        log('DEBUG', 'INPUT:LASER', `abs_x=${Math.round(data.x)} abs_y=${Math.round(data.y)}`);
+                        log('DEBUG', 'INPUT:LASER', `abs_x=${Math.round(data.x)} abs_y=${Math.round(data.y)}`, {
+                            yaw: data.yaw,
+                            pitch: data.pitch
+                        });
                         lastLogTime = Date.now();
                     }
                     break;
@@ -302,6 +336,25 @@ app.post('/api/settings', (req, res) => {
     } catch (err) {
         res.status(500).json({ success: false, error: err.message });
     }
+});
+
+// Canli Telemetri Verisini Getir
+app.get('/api/telemetry', (req, res) => {
+    res.json({
+        count: telemetryBuffer.length,
+        data: telemetryBuffer
+    });
+});
+
+// Istemciden toplu sensor logu kaydet
+app.post('/api/telemetry', (req, res) => {
+    const logs = req.body;
+    if (Array.isArray(logs)) {
+        logs.forEach(recordTelemetry);
+    } else if (logs) {
+        recordTelemetry(logs);
+    }
+    res.json({ success: true, count: telemetryBuffer.length });
 });
 
 // QR Code gorseli uret
