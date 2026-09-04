@@ -1,6 +1,18 @@
-# Universal Wireless Control Hub (Remote-PC-Plus) 🎮📱
+<div align="center">
 
-> Akıllı telefonunuzu sıfır gecikmeli, çok modlu, bağlam duyarlı (context-aware) kablosuz fare ve masaüstü kontrol merkezine dönüştürün.
+# 🎮 Universal Wireless Control Hub (Remote-PC-Plus) 📱
+
+**Turn any smartphone into a zero-latency, context-aware air mouse & multi-monitor desktop trackpad via Win32 FFI and WebSockets.**
+
+[![Status](https://img.shields.io/badge/Status-Active_Development-orange?style=for-the-badge)](https://github.com/semjhaydin/Remote-PC-Plus)
+[![GitHub Stars](https://img.shields.io/github/stars/semjhaydin/Remote-PC-Plus?style=for-the-badge&logo=github&logoColor=white&color=0891b2)](https://github.com/semjhaydin/Remote-PC-Plus)
+[![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)](https://github.com/semjhaydin/Remote-PC-Plus)
+[![NodeJS](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)](https://github.com/semjhaydin/Remote-PC-Plus)
+[![Win32 FFI](https://img.shields.io/badge/Win32_API-koffi_FFI-0078D6?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/semjhaydin/Remote-PC-Plus)
+
+</div>
+
+> **Özet:** Akıllı telefonunuzu (iOS / Android) sıfır gecikmeli, çok modlu, bağlam duyarlı (context-aware) kablosuz hava faresi (Air Mouse) ve çoklu monitör masaüstü kontrol merkezine dönüştürün.
 
 Bu proje, fiziksel kablosuz fareleri ve medya kumandalarını ortadan kaldırarak herhangi bir akıllı telefonu (iOS / Android) gelişmiş çoklu monitör desteğine ve sezgisel hareket kontrollerine sahip güçlü bir giriş ekosistemine dönüştürmek için geliştirilmiştir.
 
