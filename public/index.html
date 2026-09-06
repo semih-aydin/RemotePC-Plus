@@ -268,6 +268,23 @@
             </div>
         </div>
 
+        <!-- === GÜVENLİK PIN DOĞRULAMA MODAL === -->
+        <div id="modal-pin-auth" class="modal-backdrop">
+            <div class="modal-card" style="max-width:320px; text-align:center;">
+                <div class="modal-header">
+                    <div class="modal-title"><i class="fas fa-shield-alt"></i> Güvenlik PIN Doğrulaması</div>
+                </div>
+                <div class="modal-body" style="align-items:center;">
+                    <p style="color:#aaa; font-size:12px;">Bu bilgisayara bağlanmak için 4 haneli PIN kodunu girin:</p>
+                    <input id="pin-input" type="password" maxlength="6" pattern="[0-9]*" inputmode="numeric" placeholder="****" style="width:140px; text-align:center; font-size:24px; letter-spacing:8px; padding:8px; border-radius:8px; border:1px solid #3b82f6; background:#101216; color:#fff; outline:none; margin:12px 0;">
+                    <div id="pin-error-msg" style="color:#ef4444; font-size:11px; min-height:16px; margin-bottom:8px;"></div>
+                    <button id="btn-submit-pin" class="pres-nav-btn primary" style="width:100%; height:44px;">
+                        <i class="fas fa-unlock"></i> Bağlantıyı Doğrula
+                    </button>
+                </div>
+            </div>
+        </div>
+
         <!-- Toast Bildirimleri -->
         <div id="toast-container" class="toast-container"></div>
     </div>

@@ -112,7 +112,10 @@ function handleWebSocketConnection(ws, req) {
     const proto = req.socket.encrypted ? 'WSS (Secure)' : 'WS (Plain)';
     const userAgent = req.headers['user-agent'] || 'unknown';
 
-    log('INFO', 'WS:CONN', `Client connected: ${clientIp} via ${proto} [TCP_NODELAY=ON]`, {
+    const isPinEnabled = !!(monitorManager.settings.security && monitorManager.settings.security.pinAuthEnabled);
+    ws.isAuthenticated = !isPinEnabled;
+
+    log('INFO', 'WS:CONN', `Client connected: ${clientIp} via ${proto} [TCP_NODELAY=ON, AuthRequired=${!ws.isAuthenticated}]`, {
         activeClients: allClients.size,
         userAgent: userAgent.substring(0, 40)
     });
@@ -125,6 +128,7 @@ function handleWebSocketConnection(ws, req) {
         processName: appDetector.currentProcess,
         windowTitle: appDetector.currentTitle,
         settings: monitorManager.settings,
+        requiresAuth: !ws.isAuthenticated,
         serverTime: Date.now()
     };
     ws.send(JSON.stringify(initData));
@@ -136,6 +140,26 @@ function handleWebSocketConnection(ws, req) {
         try {
             const data = JSON.parse(msgBuffer.toString());
             packetCount++;
+
+            // Kimlik Dogrulama Mesaji
+            if (data.type === 'auth') {
+                const targetPin = (monitorManager.settings.security && monitorManager.settings.security.pin) ? monitorManager.settings.security.pin : '1234';
+                if (data.pin === targetPin) {
+                    ws.isAuthenticated = true;
+                    ws.send(JSON.stringify({ type: 'auth_result', success: true }));
+                    log('INFO', 'AUTH', `Client authenticated successfully from ${clientIp}`);
+                } else {
+                    ws.send(JSON.stringify({ type: 'auth_result', success: false, error: 'Hatalı PIN kodu!' }));
+                    log('WARN', 'AUTH', `Client authentication failed from ${clientIp}`);
+                }
+                return;
+            }
+
+            // PIN Dogrulamasi Gerekliyse ve Dogrulanmamissa diger mesajlari reddet
+            if (!ws.isAuthenticated) {
+                ws.send(JSON.stringify({ type: 'auth_required' }));
+                return;
+            }
 
             switch (data.type) {
                 case 'move':

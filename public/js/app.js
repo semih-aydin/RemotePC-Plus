@@ -26,6 +26,7 @@ class RemoteApp {
         this.initSpeechToText();
         this.initFullscreenLandscape();
         this.initModals();
+        this.initPinAuth();
         this.initWakeLock();
         this.initHardwareKeys();
     }
@@ -93,6 +94,35 @@ class RemoteApp {
                 if (window.contextCards) {
                     window.contextCards.setContext(msg.context, msg.windowTitle, msg.processName);
                 }
+                if (msg.requiresAuth) {
+                    const savedPin = localStorage.getItem('rpc_pin');
+                    if (savedPin) {
+                        this.send({ type: 'auth', pin: savedPin });
+                    } else {
+                        const pinModal = document.getElementById('modal-pin-auth');
+                        if (pinModal) pinModal.classList.add('active');
+                    }
+                }
+                break;
+
+            case 'auth_result':
+                const pinModal = document.getElementById('modal-pin-auth');
+                const errEl = document.getElementById('pin-error-msg');
+                if (msg.success) {
+                    if (pinModal) pinModal.classList.remove('active');
+                    if (errEl) errEl.textContent = '';
+                    this.showToast('PIN Doğrulandı!', 'success');
+                    window.haptics.success();
+                } else {
+                    if (pinModal) pinModal.classList.add('active');
+                    if (errEl) errEl.textContent = msg.error || 'Hatalı PIN kodu!';
+                    window.haptics.boundaryHit();
+                }
+                break;
+
+            case 'auth_required':
+                const modal = document.getElementById('modal-pin-auth');
+                if (modal) modal.classList.add('active');
                 break;
 
             case 'context_update':
@@ -379,6 +409,33 @@ class RemoteApp {
             chkHaptics.checked = window.haptics.enabled;
             chkHaptics.addEventListener('change', (e) => {
                 window.haptics.enabled = e.target.checked;
+            });
+        }
+    }
+
+    // PIN Kimlik Doğrulama Modal Mantığı
+    initPinAuth() {
+        const pinInput = document.getElementById('pin-input');
+        const submitBtn = document.getElementById('btn-submit-pin');
+        const errEl = document.getElementById('pin-error-msg');
+
+        const doAuth = () => {
+            const val = (pinInput ? pinInput.value : '').trim();
+            if (!val) {
+                if (errEl) errEl.textContent = 'Lütfen PIN girin.';
+                return;
+            }
+            if (errEl) errEl.textContent = '';
+            localStorage.setItem('rpc_pin', val);
+            this.send({ type: 'auth', pin: val });
+        };
+
+        if (submitBtn) {
+            submitBtn.addEventListener('click', doAuth);
+        }
+        if (pinInput) {
+            pinInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') doAuth();
             });
         }
     }

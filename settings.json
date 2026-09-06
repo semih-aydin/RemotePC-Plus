@@ -44,5 +44,9 @@
     "firefox": "browser",
     "code": "code",
     "devenv": "code"
+  },
+  "security": {
+    "pinAuthEnabled": false,
+    "pin": "1234"
   }
 }

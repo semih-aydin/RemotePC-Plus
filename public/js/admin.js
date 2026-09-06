@@ -73,6 +73,15 @@ class AdminDashboard {
             });
         }
 
+        // Guvenlik PIN anahtari
+        const pinToggle = document.getElementById('security-pin-enabled');
+        if (pinToggle) {
+            pinToggle.addEventListener('change', (e) => {
+                const pinGroup = document.getElementById('security-pin-options');
+                if (pinGroup) pinGroup.style.display = e.target.checked ? 'block' : 'none';
+            });
+        }
+
         // Monitor secimi degistiginde
         const monSelect = document.getElementById('monitor-select');
         if (monSelect) {
@@ -181,6 +190,16 @@ class AdminDashboard {
 
         if (dpiInput) dpiInput.value = prof.dpi || 1.5;
         if (accelInput) accelInput.value = prof.acceleration || 1.2;
+
+        // Guvenlik PIN Durumu
+        const pinEnabled = !!(this.info.settings.security && this.info.settings.security.pinAuthEnabled);
+        const pinVal = (this.info.settings.security && this.info.settings.security.pin) ? this.info.settings.security.pin : '1234';
+        const pinChk = document.getElementById('security-pin-enabled');
+        const pinInp = document.getElementById('security-pin-input');
+        const pinGrp = document.getElementById('security-pin-options');
+        if (pinChk) pinChk.checked = pinEnabled;
+        if (pinInp) pinInp.value = pinVal;
+        if (pinGrp) pinGrp.style.display = pinEnabled ? 'block' : 'none';
     }
 
     async saveSettings() {
@@ -189,12 +208,19 @@ class AdminDashboard {
         const magEnabled = document.getElementById('magnetism-enabled').checked;
         const magResistance = parseInt(document.getElementById('magnetism-resistance').value) || 15;
 
+        const pinEnabled = document.getElementById('security-pin-enabled').checked;
+        const pinVal = (document.getElementById('security-pin-input').value || '1234').trim();
+
         const newSettings = {
             ...this.info.settings,
             boundaryMagnetism: {
                 enabled: magEnabled,
                 resistance: magResistance,
                 breakthroughVelocity: 25
+            },
+            security: {
+                pinAuthEnabled: pinEnabled,
+                pin: pinVal
             },
             perMonitorProfiles: {
                 ...this.info.settings.perMonitorProfiles,

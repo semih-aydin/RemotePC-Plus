@@ -96,8 +96,24 @@
                 <input id="magnetism-resistance" type="range" min="5" max="40" value="15" class="form-control">
             </div>
 
+            <!-- Guvenlik ve PIN Dogrulamasi -->
+            <div class="card-title" style="margin-top:12px;">
+                <i class="fas fa-shield-alt"></i>
+                <span>Güvenlik & PIN Eşleştirme</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
+                <input id="security-pin-enabled" type="checkbox" style="accent-color:var(--primary); width:18px; height:18px;">
+                <label for="security-pin-enabled" style="font-size:13px; cursor:pointer;">
+                    Yeni telefon bağlantılarında PIN doğrulaması zorunlu olsun
+                </label>
+            </div>
+            <div id="security-pin-options" class="form-group" style="display:none;">
+                <label>4 Haneli PIN Kodu:</label>
+                <input id="security-pin-input" type="text" maxlength="6" class="form-control" value="1234" style="max-width:140px; text-align:center; font-weight:700; letter-spacing:4px;">
+            </div>
+
             <!-- Canli Girdi Testi -->
-            <div class="card-title" style="margin-top:10px;">
+            <div class="card-title" style="margin-top:12px;">
                 <i class="fas fa-gamepad"></i>
                 <span>Canlı Giriş Test Alanı (Diagnostics)</span>
             </div>
