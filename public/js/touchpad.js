@@ -26,12 +26,41 @@ class TouchpadController {
         this.inertiaRafId = null;
         this.scrollAcc = 0;
 
+        // Kullanıcı Ayarları (LocalStorage Destekli)
+        this.sensitivity = 1.35;
+        this.naturalScroll = true; // true: parmak yukarı = sayfa aşağı (doğal)
+        this.enableDoubleTapDrag = true;
+
         // rAF Paket Toplayıcı
         this.pendingDx = 0;
         this.pendingDy = 0;
         this.rafScheduled = false;
 
+        this.loadSettings();
         this.initEvents();
+    }
+
+    loadSettings() {
+        try {
+            const sens = localStorage.getItem('tp_sens');
+            const nat = localStorage.getItem('tp_natural');
+            const dtd = localStorage.getItem('tp_dtd');
+            if (sens !== null) this.sensitivity = parseFloat(sens);
+            if (nat !== null) this.naturalScroll = nat === 'true';
+            if (dtd !== null) this.enableDoubleTapDrag = dtd === 'true';
+        } catch (e) {}
+    }
+
+    updateSettings(opts = {}) {
+        if (opts.sensitivity !== undefined) this.sensitivity = opts.sensitivity;
+        if (opts.naturalScroll !== undefined) this.naturalScroll = opts.naturalScroll;
+        if (opts.enableDoubleTapDrag !== undefined) this.enableDoubleTapDrag = opts.enableDoubleTapDrag;
+
+        try {
+            localStorage.setItem('tp_sens', this.sensitivity);
+            localStorage.setItem('tp_natural', this.naturalScroll);
+            localStorage.setItem('tp_dtd', this.enableDoubleTapDrag);
+        } catch (e) {}
     }
 
     initEvents() {
@@ -87,7 +116,7 @@ class TouchpadController {
         this.lastPositions = [...this.touchStartPositions];
 
         // === Akıllı Çift Dokunma Sürükleme Kontrolü ===
-        if (this.fingerCount === 1) {
+        if (this.fingerCount === 1 && this.enableDoubleTapDrag) {
             const timeSinceLastTap = this.touchStartTime - this.lastTapEndTime;
             const distFromLastTap = Math.hypot(
                 this.touchStartPositions[0].x - this.lastTapPos.x,
@@ -139,11 +168,11 @@ class TouchpadController {
             const rawDx = curPositions[0].x - this.lastPositions[0].x;
             const rawDy = curPositions[0].y - this.lastPositions[0].y;
 
-            // Hassas İvmelenme Eğrisi
+            // Hassas İvmelenme Eğrisi (Kullanıcı Hassasiyeti ile Ölçekli)
             const speed = Math.hypot(rawDx, rawDy);
-            let multiplier = 1.35;
+            let multiplier = this.sensitivity;
             if (speed > 3.0) {
-                multiplier = 1.35 + Math.min(2.5, Math.pow((speed - 3.0) * 0.12, 1.15));
+                multiplier = this.sensitivity + Math.min(2.5, Math.pow((speed - 3.0) * 0.12, 1.15));
             }
 
             this.pendingDx += rawDx * multiplier;
@@ -175,11 +204,12 @@ class TouchpadController {
                 const dx1 = curPositions[1].x - this.lastPositions[1].x;
                 const avgDx = (dx0 + dx1) * 0.5;
 
-                this.scrollVelY = avgDy;
-                this.scrollVelX = avgDx;
+                const scrollDir = this.naturalScroll ? 1 : -1;
+                this.scrollVelY = avgDy * scrollDir;
+                this.scrollVelX = avgDx * scrollDir;
 
                 if (Math.abs(avgDy) > 0.3 || Math.abs(avgDx) > 0.3) {
-                    window.app.send({ type: 'scroll', dy: avgDy * 0.45, dx: -avgDx * 0.45 });
+                    window.app.send({ type: 'scroll', dy: avgDy * 0.45 * scrollDir, dx: -avgDx * 0.45 * scrollDir });
                 }
             }
         }

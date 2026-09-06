@@ -18,8 +18,10 @@
                 <button class="tab-btn" data-mode="context"><i class="fas fa-sliders-h"></i> Medya & Sunum</button>
             </div>
 
-            <div style="display:flex; align-items:center; gap:8px;">
-                <button id="btn-fullscreen-toggle" class="tool-btn" style="background:#2563eb; color:#fff; border:none; padding:4px 9px;" title="Tam Ekran Yatay Mod">
+            <div style="display:flex; align-items:center; gap:6px;">
+                <button id="btn-help-modal" class="icon-tool-btn" title="Kullanım Rehberi & Jestler"><i class="fas fa-question-circle"></i></button>
+                <button id="btn-settings-modal" class="icon-tool-btn" title="Ayarlar"><i class="fas fa-cog"></i></button>
+                <button id="btn-fullscreen-toggle" class="tool-btn" style="background:#2563eb; color:#fff; border:none; padding:4px 8px;" title="Tam Ekran Yatay Mod">
                     <i class="fas fa-expand"></i> Yatay
                 </button>
                 <div id="latency-val" class="ping-badge">0ms</div>
@@ -168,6 +170,106 @@
             <button id="btn-drag-lock" class="click-btn"><i class="fas fa-lock"></i> Sürükle</button>
             <button id="btn-click-right" class="click-btn">Sağ Tık</button>
         </footer>
+
+        <!-- === AYARLAR MODAL === -->
+        <div id="modal-settings" class="modal-backdrop">
+            <div class="modal-card">
+                <div class="modal-header">
+                    <div class="modal-title"><i class="fas fa-cog"></i> Touchpad & Sistem Ayarları</div>
+                    <button id="btn-close-settings" class="modal-close-btn">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="setting-item">
+                        <div class="setting-label-row">
+                            <span>İmleç Hassasiyeti:</span>
+                            <span id="setting-sens-val" style="font-weight:700; color:#3b82f6;">1.35x</span>
+                        </div>
+                        <input id="setting-sens-slider" type="range" min="0.8" max="4.0" step="0.15" value="1.35" style="width:100%; accent-color:#2563eb; margin-top:6px;">
+                    </div>
+
+                    <div class="setting-item">
+                        <label class="setting-check-row">
+                            <input type="checkbox" id="setting-natural-scroll" checked style="accent-color:#2563eb;">
+                            <div>
+                                <strong>Doğal Kaydırma (Natural Scroll)</strong><br>
+                                <small style="color:#777;">Parmak yukarı çekildiğinde içerik yukarı kayar.</small>
+                            </div>
+                        </label>
+                    </div>
+
+                    <div class="setting-item">
+                        <label class="setting-check-row">
+                            <input type="checkbox" id="setting-doubletap-drag" checked style="accent-color:#2563eb;">
+                            <div>
+                                <strong>Çift Dokunarak Sürükleme (Tap-Drag)</strong><br>
+                                <small style="color:#777;">Hızlı çift dokunup parmağı kaydırarak pencereleri taşır.</small>
+                            </div>
+                        </label>
+                    </div>
+
+                    <div class="setting-item">
+                        <label class="setting-check-row">
+                            <input type="checkbox" id="setting-haptics" checked style="accent-color:#2563eb;">
+                            <div>
+                                <strong>Titreşim Geri Bildirimi (HD Haptics)</strong><br>
+                                <small style="color:#777;">Tıklamalarda ve sınır geçişlerinde dokunsal titreşim.</small>
+                            </div>
+                        </label>
+                    </div>
+
+                    <div style="margin-top:12px; text-align:center;">
+                        <a href="/admin" target="_blank" class="admin-link-btn">
+                            <i class="fas fa-external-link-alt"></i> Masaüstü Kontrol Merkezini Aç (/admin)
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- === YARDIM & JEST REHBERİ MODAL === -->
+        <div id="modal-help" class="modal-backdrop">
+            <div class="modal-card">
+                <div class="modal-header">
+                    <div class="modal-title"><i class="fas fa-question-circle"></i> Dokunmatik Jest Rehberi</div>
+                    <button id="btn-close-help" class="modal-close-btn">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="gesture-grid">
+                        <div class="gesture-item">
+                            <i class="fas fa-hand-point-up gesture-icon"></i>
+                            <div><strong>1 Parmak:</strong> İmleç hareketi ve dokunarak Sol Tık.</div>
+                        </div>
+                        <div class="gesture-item">
+                            <i class="fas fa-hand-peace gesture-icon"></i>
+                            <div><strong>2 Parmak Tık:</strong> Sağ Tık (Bağlam Menüsü).</div>
+                        </div>
+                        <div class="gesture-item">
+                            <i class="fas fa-arrows-alt-v gesture-icon"></i>
+                            <div><strong>2 Parmak Kaydırma:</strong> Ataletli dikey ve yatay sayfa kaydırma.</div>
+                        </div>
+                        <div class="gesture-item">
+                            <i class="fas fa-search-plus gesture-icon"></i>
+                            <div><strong>2 Parmak Kıstırma (Pinch):</strong> Yakınlaştır / Uzaklaştır (Zoom).</div>
+                        </div>
+                        <div class="gesture-item">
+                            <i class="fas fa-hand-spock gesture-icon"></i>
+                            <div><strong>3 Parmak Tık:</strong> Orta Tık (Sekme kapatma / Yeni sekmede açma).</div>
+                        </div>
+                        <div class="gesture-item">
+                            <i class="fas fa-exchange-alt gesture-icon"></i>
+                            <div><strong>3 Parmak Sağa/Sola:</strong> Ekranlar arası hızlı ışınlanma (Monitor Jump).</div>
+                        </div>
+                        <div class="gesture-item">
+                            <i class="fas fa-arrows-alt-v gesture-icon"></i>
+                            <div><strong>Sağ Kenar Şeridi:</strong> Tek parmakla mikro hassas kaydırma rayı.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toast Bildirimleri -->
+        <div id="toast-container" class="toast-container"></div>
     </div>
 
     <script src="/js/haptics.js"></script>

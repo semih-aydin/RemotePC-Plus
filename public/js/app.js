@@ -1,5 +1,5 @@
 // RemotePC+ Mobil İstemci - Ana Uygulama Yöneticisi
-// Touchpad, Çoklu Monitör, Medya, Klavye, Sesle Yazma ve Canlı Büyüteç
+// Touchpad, Çoklu Monitör, Medya, Klavye, Sesle Yazma, Büyüteç ve Ayar Yönetimi
 
 class RemoteApp {
     constructor() {
@@ -25,6 +25,7 @@ class RemoteApp {
         this.initVirtualKeyboard();
         this.initSpeechToText();
         this.initFullscreenLandscape();
+        this.initModals();
         this.initWakeLock();
         this.initHardwareKeys();
     }
@@ -44,6 +45,7 @@ class RemoteApp {
                 this.updateStatus('connected');
                 console.log('[WS] Sunucuya bağlandı!');
                 window.haptics.success();
+                this.showToast('Bilgisayara bağlandı', 'success');
                 this.startPing();
             };
 
@@ -110,8 +112,18 @@ class RemoteApp {
                 break;
 
             case 'pong':
+                const rtt = Date.now() - msg.t;
                 const pingEl = document.getElementById('latency-val');
-                if (pingEl) pingEl.textContent = `${Date.now() - msg.t}ms`;
+                if (pingEl) {
+                    pingEl.textContent = `${rtt}ms`;
+                    if (rtt < 25) {
+                        pingEl.style.color = '#10b981'; // Yeşil
+                    } else if (rtt < 70) {
+                        pingEl.style.color = '#fbbf24'; // Sarı
+                    } else {
+                        pingEl.style.color = '#ef4444'; // Kırmızı
+                    }
+                }
                 break;
 
             case 'loupe_frame':
@@ -170,6 +182,7 @@ class RemoteApp {
                     const keys = macro.split('+');
                     this.send({ type: 'macro', keys: keys });
                     window.haptics.click();
+                    this.showToast(`Kısayol: ${macro.toUpperCase()}`);
                 }
             });
         });
@@ -221,6 +234,7 @@ class RemoteApp {
                     }
                     fsBtn.innerHTML = '<i class="fas fa-compress"></i> Dikey';
                     window.haptics.modeSwitch();
+                    this.showToast('Yatay Tam Ekran Aktif');
                 } else {
                     if (document.exitFullscreen) {
                         await document.exitFullscreen();
@@ -263,6 +277,7 @@ class RemoteApp {
                     isListening = true;
                     voiceBtn.classList.add('recording');
                     window.haptics.modeSwitch();
+                    this.showToast('Dinleniyor... Konuşun');
                 } catch (err) {}
             } else {
                 recognition.stop();
@@ -277,6 +292,7 @@ class RemoteApp {
                 console.log('[Voice] Yazılıyor:', transcript);
                 this.send({ type: 'type', text: transcript + ' ' });
                 window.haptics.success();
+                this.showToast(`Yazıldı: "${transcript}"`, 'success');
             }
         };
 
@@ -291,6 +307,104 @@ class RemoteApp {
         };
     }
 
+    // Ayarlar ve Yardım Modalları
+    initModals() {
+        const btnSettings = document.getElementById('btn-settings-modal');
+        const btnCloseSettings = document.getElementById('btn-close-settings');
+        const modalSettings = document.getElementById('modal-settings');
+
+        const btnHelp = document.getElementById('btn-help-modal');
+        const btnCloseHelp = document.getElementById('btn-close-help');
+        const modalHelp = document.getElementById('modal-help');
+
+        if (btnSettings && modalSettings) {
+            btnSettings.addEventListener('click', () => {
+                modalSettings.classList.add('active');
+                window.haptics.click();
+            });
+        }
+        if (btnCloseSettings && modalSettings) {
+            btnCloseSettings.addEventListener('click', () => {
+                modalSettings.classList.remove('active');
+                window.haptics.click();
+            });
+        }
+
+        if (btnHelp && modalHelp) {
+            btnHelp.addEventListener('click', () => {
+                modalHelp.classList.add('active');
+                window.haptics.click();
+            });
+        }
+        if (btnCloseHelp && modalHelp) {
+            btnCloseHelp.addEventListener('click', () => {
+                modalHelp.classList.remove('active');
+                window.haptics.click();
+            });
+        }
+
+        // Ayar Kontrolleri Senkronizasyonu
+        const sensSlider = document.getElementById('setting-sens-slider');
+        const sensVal = document.getElementById('setting-sens-val');
+        const chkNatural = document.getElementById('setting-natural-scroll');
+        const chkDrag = document.getElementById('setting-doubletap-drag');
+        const chkHaptics = document.getElementById('setting-haptics');
+
+        if (sensSlider && window.touchpad) {
+            sensSlider.value = window.touchpad.sensitivity;
+            if (sensVal) sensVal.textContent = `${window.touchpad.sensitivity.toFixed(2)}x`;
+
+            sensSlider.addEventListener('input', (e) => {
+                const val = parseFloat(e.target.value);
+                if (sensVal) sensVal.textContent = `${val.toFixed(2)}x`;
+                window.touchpad.updateSettings({ sensitivity: val });
+            });
+        }
+
+        if (chkNatural && window.touchpad) {
+            chkNatural.checked = window.touchpad.naturalScroll;
+            chkNatural.addEventListener('change', (e) => {
+                window.touchpad.updateSettings({ naturalScroll: e.target.checked });
+            });
+        }
+
+        if (chkDrag && window.touchpad) {
+            chkDrag.checked = window.touchpad.enableDoubleTapDrag;
+            chkDrag.addEventListener('change', (e) => {
+                window.touchpad.updateSettings({ enableDoubleTapDrag: e.target.checked });
+            });
+        }
+
+        if (chkHaptics && window.haptics) {
+            chkHaptics.checked = window.haptics.enabled;
+            chkHaptics.addEventListener('change', (e) => {
+                window.haptics.enabled = e.target.checked;
+            });
+        }
+    }
+
+    // Toast Bildirim Sistemi
+    showToast(message, type = 'info', duration = 2200) {
+        const container = document.getElementById('toast-container');
+        if (!container) return;
+
+        const toast = document.createElement('div');
+        toast.className = `toast-item toast-${type}`;
+        toast.innerHTML = message;
+        container.appendChild(toast);
+
+        setTimeout(() => {
+            toast.classList.add('visible');
+        }, 10);
+
+        setTimeout(() => {
+            toast.classList.remove('visible');
+            setTimeout(() => {
+                if (toast.parentNode) toast.parentNode.removeChild(toast);
+            }, 300);
+        }, duration);
+    }
+
     // Alt Butonlar (Sol Tık / Orta Tık / Sürükle Kilidi / Sağ Tık)
     initBottomButtons() {
         const btnLeft = document.getElementById('btn-click-left');
@@ -298,7 +412,6 @@ class RemoteApp {
         const btnRight = document.getElementById('btn-click-right');
         const btnDrag = document.getElementById('btn-drag-lock');
 
-        // Sol Tık - Dokunulduğunda 'down', bırakıldığında 'up'
         if (btnLeft) {
             const onDown = (e) => {
                 e.preventDefault();
@@ -322,7 +435,6 @@ class RemoteApp {
             btnLeft.addEventListener('mouseup', onUp);
         }
 
-        // Orta Tık (Middle Click)
         if (btnMiddle) {
             btnMiddle.addEventListener('click', (e) => {
                 e.preventDefault();
@@ -331,7 +443,6 @@ class RemoteApp {
             });
         }
 
-        // Sağ Tık
         if (btnRight) {
             btnRight.addEventListener('click', (e) => {
                 e.preventDefault();
@@ -340,7 +451,6 @@ class RemoteApp {
             });
         }
 
-        // Sürükle ve Bırak Kilidi (Drag Lock Toggle)
         if (btnDrag) {
             btnDrag.addEventListener('click', (e) => {
                 e.preventDefault();
@@ -353,11 +463,13 @@ class RemoteApp {
                     this.send({ type: 'click', button: 'left', state: 'down' });
                     if (dragInd) dragInd.style.display = 'block';
                     window.haptics.modeSwitch();
+                    this.showToast('Sürükleme Kilidi Açıldı (Sol Tık Basılı)');
                 } else {
                     btnDrag.classList.remove('locked');
                     this.send({ type: 'click', button: 'left', state: 'up' });
                     if (dragInd) dragInd.style.display = 'none';
                     window.haptics.click();
+                    this.showToast('Sürükleme Bırakıldı');
                 }
             });
         }
@@ -393,6 +505,7 @@ class RemoteApp {
         const pingEl = document.getElementById('latency-val');
         if (pingEl && status === 'disconnected') {
             pingEl.textContent = 'Bağlantı koptu';
+            pingEl.style.color = '#ef4444';
         }
     }
 }
