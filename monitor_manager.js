@@ -5,6 +5,8 @@ class MonitorManager {
     constructor() {
         this.monitors = [];
         this.settings = null;
+        this.fracX = 0;
+        this.fracY = 0;
         this.loadSettings();
         this.refreshMonitors();
     }
@@ -126,8 +128,17 @@ class MonitorManager {
             }
         }
 
-        // Fareyi hareket ettir
-        win32.moveMouseRelative(finalDx, finalDy);
+        // Alt-piksel kesirli biriktirici (Sub-pixel residual accumulator — yavas hareketlerde 1px hassasiyet)
+        const totalDx = finalDx + this.fracX;
+        const totalDy = finalDy + this.fracY;
+        const moveX = Math.trunc(totalDx);
+        const moveY = Math.trunc(totalDy);
+        this.fracX = totalDx - moveX;
+        this.fracY = totalDy - moveY;
+
+        if (moveX !== 0 || moveY !== 0) {
+            win32.moveMouseRelative(moveX, moveY);
+        }
 
         return {
             dx: finalDx,

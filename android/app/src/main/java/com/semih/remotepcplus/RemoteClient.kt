@@ -38,6 +38,7 @@ class RemoteClient(private val listener: Listener) {
         fun onAutoRediscoverSuggested()
         fun onClipboardReceived(text: String)
         fun onClipboardAck(success: Boolean, pasted: Boolean)
+        fun onSystemStatsUpdated(cpu: Int, ram: Int, battery: Int?, charging: Boolean)
     }
 
     private val client = OkHttpClient.Builder()
@@ -203,6 +204,14 @@ class RemoteClient(private val listener: Listener) {
                     val ok = json.optBoolean("success", false)
                     val pasted = json.optBoolean("pasted", false)
                     mainHandler.post { listener.onClipboardAck(ok, pasted) }
+                }
+
+                "system_stats" -> {
+                    val cpu = json.optInt("cpu", 0)
+                    val ram = json.optInt("ram", 0)
+                    val battery = if (json.isNull("battery")) null else json.optInt("battery", -1).takeIf { it >= 0 }
+                    val charging = json.optBoolean("charging", false)
+                    mainHandler.post { listener.onSystemStatsUpdated(cpu, ram, battery, charging) }
                 }
             }
         } catch (_: Exception) {

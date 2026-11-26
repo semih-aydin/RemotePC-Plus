@@ -65,6 +65,15 @@ const INPUT = koffi.struct('INPUT', {
     u: INPUT_UNION
 });
 
+const SYSTEM_POWER_STATUS = koffi.struct('SYSTEM_POWER_STATUS', {
+    ACLineStatus: 'uint8',
+    BatteryFlag: 'uint8',
+    BatteryLifePercent: 'uint8',
+    SystemStatusFlag: 'uint8',
+    BatteryLifeTime: 'uint32',
+    BatteryFullLifeTime: 'uint32'
+});
+
 // User32 fonksiyonlari
 const GetCursorPos = user32.func('bool GetCursorPos(_Out_ POINT* lpPoint)');
 const SetCursorPos = user32.func('bool SetCursorPos(int X, int Y)');
@@ -96,6 +105,7 @@ const GetDIBits = gdi32.func('int GetDIBits(intptr_t hdc, intptr_t hbm, uint32 s
 const OpenProcess = kernel32.func('intptr_t OpenProcess(uint32 dwDesiredAccess, bool bInheritHandle, uint32 dwProcessId)');
 const QueryFullProcessImageNameW = kernel32.func('bool QueryFullProcessImageNameW(intptr_t hProcess, uint32 dwFlags, _Out_ uint16* lpExeName, _Inout_ uint32* lpdwSize)');
 const CloseHandle = kernel32.func('bool CloseHandle(intptr_t hObject)');
+const GetSystemPowerStatus = kernel32.func('bool GetSystemPowerStatus(_Out_ SYSTEM_POWER_STATUS* lpSystemPowerStatus)');
 
 // Mouse bayraklari (Windows API constants)
 const MOUSEEVENTF_MOVE = 0x0001;
@@ -150,6 +160,22 @@ VK_MAP['`'] = 0xC0;
 VK_MAP['backtick'] = 0xC0;
 
 class Win32Api {
+    // Pil ve sarj durumunu 0ms maliyetle Win32'den oku
+    getBatteryStatus() {
+        try {
+            const st = {};
+            if (GetSystemPowerStatus(st)) {
+                const hasBattery = (st.BatteryFlag & 128) === 0 && st.BatteryLifePercent <= 100;
+                return {
+                    hasBattery,
+                    percent: hasBattery ? st.BatteryLifePercent : null,
+                    charging: st.ACLineStatus === 1
+                };
+            }
+        } catch (_) {}
+        return { hasBattery: false, percent: null, charging: true };
+    }
+
     // Farenin anlik ekran koordinatini alir
     getCursorPos() {
         const pt = {};

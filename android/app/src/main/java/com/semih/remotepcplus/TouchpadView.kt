@@ -26,6 +26,7 @@ class TouchpadView @JvmOverloads constructor(
         fun onScroll(dy: Float, dx: Float)
         fun onZoom(delta: Int)
         fun onMonitorSwipe(direction: String)
+        fun onThreeFingerVerticalSwipe(direction: String)
         fun onDragStateChanged(isDragging: Boolean)
     }
 
@@ -46,8 +47,14 @@ class TouchpadView @JvmOverloads constructor(
     private var lastY1 = 0f
     private var lastPinchDist = 0f
     private var threeFingerStartX = 0f
-    private var monitorSwipeTriggered = false
+    private var threeFingerStartY = 0f
+    private var threeFingerTriggered = false
     private var hasMoved = false
+
+    // Kinetic inertial scroll state
+    private var scrollVelY = 0f
+    private var scrollVelX = 0f
+    private var inertiaRunning = false
 
     private var lastTapEndTime = 0L
     private var lastTapX = 0f
@@ -110,6 +117,29 @@ class TouchpadView @JvmOverloads constructor(
         }
     }
 
+    private val inertiaRunnable = object : Runnable {
+        override fun run() {
+            if (!inertiaRunning) return
+            scrollVelY *= 0.90f
+            scrollVelX *= 0.90f
+            if (abs(scrollVelY) < 0.12f && abs(scrollVelX) < 0.12f) {
+                inertiaRunning = false
+                scrollVelY = 0f
+                scrollVelX = 0f
+                return
+            }
+            callback?.onScroll(scrollVelY * 0.45f, -scrollVelX * 0.45f)
+            postOnAnimation(this)
+        }
+    }
+
+    private fun stopInertia() {
+        inertiaRunning = false
+        removeCallbacks(inertiaRunnable)
+        scrollVelY = 0f
+        scrollVelX = 0f
+    }
+
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         val pad = 2f * density
@@ -148,10 +178,11 @@ class TouchpadView @JvmOverloads constructor(
         val count = event.pointerCount
         when (event.actionMasked) {
             MotionEvent.ACTION_DOWN -> {
+                stopInertia()
                 touchStartTime = SystemClock.uptimeMillis()
                 maxFingersInGesture = 1
                 hasMoved = false
-                monitorSwipeTriggered = false
+                threeFingerTriggered = false
 
                 startX0 = event.getX(0)
                 startY0 = event.getY(0)
@@ -184,6 +215,7 @@ class TouchpadView @JvmOverloads constructor(
                 }
                 if (count >= 3) {
                     threeFingerStartX = (event.getX(0) + event.getX(1) + event.getX(2)) / 3f
+                    threeFingerStartY = (event.getY(0) + event.getY(1) + event.getY(2)) / 3f
                 }
                 return true
             }
@@ -239,6 +271,8 @@ class TouchpadView @JvmOverloads constructor(
                             val avgDy = (((curY0 - lastY0) + (curY1 - lastY1)) * 0.5f) / density
                             val avgDx = (((curX0 - lastX0) + (curX1 - lastX1)) * 0.5f) / density
                             val dir = if (naturalScroll) 1f else -1f
+                            scrollVelY = avgDy * dir
+                            scrollVelX = avgDx * dir
                             if (abs(avgDy) > 0.35f || abs(avgDx) > 0.35f) {
                                 callback?.onScroll(avgDy * 0.45f * dir, -avgDx * 0.45f * dir)
                             }
@@ -251,11 +285,18 @@ class TouchpadView @JvmOverloads constructor(
                     }
 
                     3 -> {
-                        val avgX = (event.getX(0) + event.getX(1) + event.getX(2)) / 3f
-                        val deltaDp = (avgX - threeFingerStartX) / density
-                        if (abs(deltaDp) > 55f && !monitorSwipeTriggered) {
-                            monitorSwipeTriggered = true
-                            callback?.onMonitorSwipe(if (deltaDp > 0) "next" else "prev")
+                        if (!threeFingerTriggered) {
+                            val avgX = (event.getX(0) + event.getX(1) + event.getX(2)) / 3f
+                            val avgY = (event.getY(0) + event.getY(1) + event.getY(2)) / 3f
+                            val deltaXDp = (avgX - threeFingerStartX) / density
+                            val deltaYDp = (avgY - threeFingerStartY) / density
+                            if (abs(deltaXDp) > 52f && abs(deltaXDp) > abs(deltaYDp)) {
+                                threeFingerTriggered = true
+                                callback?.onMonitorSwipe(if (deltaXDp > 0) "next" else "prev")
+                            } else if (abs(deltaYDp) > 52f && abs(deltaYDp) > abs(deltaXDp)) {
+                                threeFingerTriggered = true
+                                callback?.onThreeFingerVerticalSwipe(if (deltaYDp < 0) "up" else "down")
+                            }
                         }
                     }
                 }
@@ -308,6 +349,10 @@ class TouchpadView @JvmOverloads constructor(
                     }
                 } else {
                     isPotentialDrag = false
+                    if (maxFingersInGesture == 2 && (abs(scrollVelY) > 1.2f || abs(scrollVelX) > 1.2f)) {
+                        inertiaRunning = true
+                        postOnAnimation(inertiaRunnable)
+                    }
                 }
                 return true
             }

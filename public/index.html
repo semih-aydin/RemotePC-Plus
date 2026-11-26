@@ -95,12 +95,13 @@
 
             <!-- === 2. MEDYA & SUNUM EKRANI === -->
             <div id="view-context" class="context-view">
-                <!-- Aktif Uygulama Bilgi Kartı -->
+                <!-- Aktif Uygulama Bilgi Kartı + Canlı Telemetri -->
                 <div class="card active-win-card">
                     <div class="active-win-row">
-                        <span class="active-win-label">AKTİF PENCERE</span>
+                        <span class="active-win-label">Aktif Pencere</span>
                         <span id="context-app-title" class="active-win-title">Masaüstü</span>
                     </div>
+                    <div id="web-system-stats" style="font-family:var(--font-mono); font-size:11px; color:var(--ink-muted);">CPU — &nbsp;•&nbsp; RAM —</div>
                 </div>
 
                 <!-- Medya Kontrolleri Kartı -->
@@ -156,6 +157,19 @@
                         <button class="action-btn" data-macro-key="ctrl+t"><i class="fas fa-plus"></i> Yeni Sekme</button>
                         <button class="action-btn" data-macro-key="ctrl+w"><i class="fas fa-times"></i> Sekmeyi Kapat</button>
                         <button class="action-btn" data-macro-key="alt+f4"><i class="fas fa-power-off"></i> Pencereyi Kapat</button>
+                    </div>
+                </div>
+
+                <!-- Pencere & Sanal Masaüstü Yönetimi -->
+                <div class="card">
+                    <div class="card-title"><i class="fas fa-columns"></i> Pencere & Masaüstü</div>
+                    <div class="macro-grid">
+                        <button class="action-btn" data-macro-key="win+left"><i class="fas fa-align-left"></i> Sola Yasla</button>
+                        <button class="action-btn" data-macro-key="win+right"><i class="fas fa-align-right"></i> Sağa Yasla</button>
+                        <button class="action-btn" data-macro-key="win+up"><i class="fas fa-expand-arrows-alt"></i> Tam Ekran</button>
+                        <button class="action-btn" data-macro-key="win+down"><i class="fas fa-compress-arrows-alt"></i> Küçült</button>
+                        <button class="action-btn" data-macro-key="ctrl+win+left"><i class="fas fa-chevron-left"></i> Önceki Masaüstü</button>
+                        <button class="action-btn" data-macro-key="ctrl+win+right">Sonraki Masaüstü <i class="fas fa-chevron-right"></i></button>
                     </div>
                 </div>
 

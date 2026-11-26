@@ -430,11 +430,53 @@ appDetector.on('contextChange', (info) => {
     }
 });
 
+// Canli Sistem Telemetrisi (CPU, RAM, Pil) — yalnizca bagli istemci varken 4 saniyede bir
+let prevCpuInfo = os.cpus();
+function getCpuPercent() {
+    const cur = os.cpus();
+    let idleDiff = 0;
+    let totalDiff = 0;
+    for (let i = 0; i < cur.length; i++) {
+        const p = prevCpuInfo[i] ? prevCpuInfo[i].times : cur[i].times;
+        const c = cur[i].times;
+        const pTotal = p.user + p.nice + p.sys + p.idle + p.irq;
+        const cTotal = c.user + c.nice + c.sys + c.idle + c.irq;
+        idleDiff += (c.idle - p.idle);
+        totalDiff += (cTotal - pTotal);
+    }
+    prevCpuInfo = cur;
+    if (totalDiff <= 0) return 0;
+    return Math.max(0, Math.min(100, Math.round((1 - idleDiff / totalDiff) * 100)));
+}
+
+setInterval(() => {
+    if (allClients.size === 0) return;
+    const totalMem = os.totalmem();
+    const freeMem = os.freemem();
+    const ramPercent = Math.round(((totalMem - freeMem) / totalMem) * 100);
+    const cpuPercent = getCpuPercent();
+    const battery = win32.getBatteryStatus();
+
+    const payload = JSON.stringify({
+        type: 'system_stats',
+        cpu: cpuPercent,
+        ram: ramPercent,
+        battery: battery.percent,
+        charging: battery.charging
+    });
+
+    for (const client of allClients) {
+        if (client.readyState === 1 && client.isAuthenticated) {
+            client.send(payload);
+        }
+    }
+}, 4000);
+
 // Hizli kesif (Discovery) ping ucu — Android/Web istemcilerin LAN taramasinda <5ms'de dogrulamasi icin
 app.get('/api/ping', (req, res) => {
     res.json({
         app: 'RemotePC+',
-        version: '2.1.0',
+        version: '2.2.0',
         name: os.hostname(),
         ip: localIp,
         ips: lanInterfaces.map(i => i.address),

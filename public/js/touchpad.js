@@ -214,17 +214,26 @@ class TouchpadController {
             }
         }
 
-        // === 3 PARMAK: Ekranlar Arası Işınlanma ===
+        // === 3 PARMAK: Yatay (Ekran Değiştir) & Dikey (Görev Görünümü / Masaüstü) ===
         else if (e.touches.length === 3 && this.touchStartPositions.length >= 3) {
             const startX = (this.touchStartPositions[0].x + this.touchStartPositions[1].x + this.touchStartPositions[2].x) / 3;
             const currentX = (curPositions[0].x + curPositions[1].x + curPositions[2].x) / 3;
+            const startY = (this.touchStartPositions[0].y + this.touchStartPositions[1].y + this.touchStartPositions[2].y) / 3;
+            const currentY = (curPositions[0].y + curPositions[1].y + curPositions[2].y) / 3;
             const deltaX = currentX - startX;
+            const deltaY = currentY - startY;
 
-            if (Math.abs(deltaX) > 60 && !this.jumpTriggered) {
-                this.jumpTriggered = true;
-                window.haptics.monitorJump();
-                if (window.multiMonitor) {
-                    window.multiMonitor.jumpRelative(deltaX > 0 ? 'next' : 'prev');
+            if (!this.jumpTriggered) {
+                if (Math.abs(deltaX) > 60 && Math.abs(deltaX) > Math.abs(deltaY)) {
+                    this.jumpTriggered = true;
+                    window.haptics.monitorJump();
+                    if (window.multiMonitor) {
+                        window.multiMonitor.jumpRelative(deltaX > 0 ? 'next' : 'prev');
+                    }
+                } else if (Math.abs(deltaY) > 60 && Math.abs(deltaY) > Math.abs(deltaX)) {
+                    this.jumpTriggered = true;
+                    window.haptics.monitorJump();
+                    window.app.send({ type: 'macro', keys: deltaY < 0 ? ['win', 'tab'] : ['win', 'd'] });
                 }
             }
         }

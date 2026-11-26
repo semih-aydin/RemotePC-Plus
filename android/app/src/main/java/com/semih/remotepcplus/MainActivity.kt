@@ -5,8 +5,11 @@ import android.app.AlertDialog
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
+import android.speech.RecognizerIntent
 import android.text.InputType
+import androidx.activity.result.contract.ActivityResultContracts
 import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -54,6 +57,21 @@ class MainActivity : AppCompatActivity(), RemoteClient.Listener {
     private lateinit var btnRightClick: Button
 
     private lateinit var tvActiveWindow: TextView
+    private lateinit var tvSystemStats: TextView
+
+    private val voiceLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == RESULT_OK) {
+            val matches = result.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
+            val spoken = matches?.firstOrNull()?.trim()
+            if (!spoken.isNullOrEmpty()) {
+                client.sendType("$spoken ")
+                haptics.click()
+                Toast.makeText(this, "Yazıldı: $spoken", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
 
     private var monitors: List<MonitorInfo> = emptyList()
     private var currentMonitorId: Int = 1
@@ -96,6 +114,13 @@ class MainActivity : AppCompatActivity(), RemoteClient.Listener {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        if (prefs.hasSavedPc() && client.state == ConnectionState.DISCONNECTED) {
+            connectToSavedPc()
+        }
+    }
+
     override fun onPause() {
         super.onPause()
         touchpadView.forceReleaseDrag()
@@ -130,6 +155,7 @@ class MainActivity : AppCompatActivity(), RemoteClient.Listener {
         btnRightClick = findViewById(R.id.btnRightClick)
 
         tvActiveWindow = findViewById(R.id.tvActiveWindow)
+        tvSystemStats = findViewById(R.id.tvSystemStats)
     }
 
     private fun setupTopBar() {
@@ -195,6 +221,15 @@ class MainActivity : AppCompatActivity(), RemoteClient.Listener {
 
             override fun onMonitorSwipe(direction: String) {
                 jumpMonitorRelative(direction)
+            }
+
+            override fun onThreeFingerVerticalSwipe(direction: String) {
+                if (direction == "up") {
+                    client.sendMacro(listOf("win", "tab"))
+                } else {
+                    client.sendMacro(listOf("win", "d"))
+                }
+                haptics.monitorJump()
             }
 
             override fun onDragStateChanged(isDragging: Boolean) {
@@ -316,6 +351,14 @@ class MainActivity : AppCompatActivity(), RemoteClient.Listener {
         findViewById<View>(R.id.btnLaunchExplorer).setOnClickListener { client.sendLaunchApp("explorer"); haptics.click() }
         findViewById<View>(R.id.btnLaunchTaskMgr).setOnClickListener { client.sendLaunchApp("taskmgr"); haptics.click() }
         findViewById<View>(R.id.btnLaunchSettings).setOnClickListener { client.sendLaunchApp("settings"); haptics.click() }
+
+        // Window Snapping & Virtual Desktops
+        findViewById<View>(R.id.btnSnapLeft).setOnClickListener { client.sendMacro(listOf("win", "left")); haptics.click() }
+        findViewById<View>(R.id.btnSnapMax).setOnClickListener { client.sendMacro(listOf("win", "up")); haptics.click() }
+        findViewById<View>(R.id.btnSnapRight).setOnClickListener { client.sendMacro(listOf("win", "right")); haptics.click() }
+        findViewById<View>(R.id.btnSnapMin).setOnClickListener { client.sendMacro(listOf("win", "down")); haptics.click() }
+        findViewById<View>(R.id.btnDeskPrev).setOnClickListener { client.sendMacro(listOf("ctrl", "win", "left")); haptics.monitorJump() }
+        findViewById<View>(R.id.btnDeskNext).setOnClickListener { client.sendMacro(listOf("ctrl", "win", "right")); haptics.monitorJump() }
 
         // Shortcuts
         findViewById<View>(R.id.btnMacroCopy).setOnClickListener { client.sendMacro(listOf("ctrl", "c")); haptics.click() }
@@ -500,6 +543,13 @@ class MainActivity : AppCompatActivity(), RemoteClient.Listener {
         }
     }
 
+    override fun onSystemStatsUpdated(cpu: Int, ram: Int, battery: Int?, charging: Boolean) {
+        val batText = if (battery != null) {
+            "  •  Pil $battery%${if (charging) " (Şarj)" else ""}"
+        } else ""
+        tvSystemStats.text = "CPU $cpu%  •  RAM $ram%$batText"
+    }
+
     override fun onAutoRediscoverSuggested() {
         if (autoRediscoverRunning) return
         autoRediscoverRunning = true
@@ -600,6 +650,18 @@ class MainActivity : AppCompatActivity(), RemoteClient.Listener {
             }
         }
 
+        dialogView.findViewById<View>(R.id.btnKbVoice).setOnClickListener {
+            try {
+                val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+                    putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+                    putExtra(RecognizerIntent.EXTRA_LANGUAGE, "tr-TR")
+                    putExtra(RecognizerIntent.EXTRA_PROMPT, "Bilgisayara yazmak için konuşun...")
+                }
+                voiceLauncher.launch(intent)
+            } catch (_: Exception) {
+                Toast.makeText(this, "Sesle yazma bu cihazda desteklenmiyor", Toast.LENGTH_SHORT).show()
+            }
+        }
         dialogView.findViewById<View>(R.id.btnKbSend).setOnClickListener { sendCurrentText() }
         dialogView.findViewById<View>(R.id.btnKbEnter).setOnClickListener { sendCurrentText(); client.sendKey("enter"); haptics.click() }
         dialogView.findViewById<View>(R.id.btnKbBackspace).setOnClickListener { client.sendKey("backspace"); haptics.click() }

@@ -180,6 +180,17 @@ class RemoteApp {
                     this.showToast(msg.pasted ? 'PC\'ye yapıştırıldı' : 'PC panosuna kopyalandı', 'success');
                 }
                 break;
+
+            case 'system_stats': {
+                const el = document.getElementById('web-system-stats');
+                if (el) {
+                    const bat = msg.battery !== null && msg.battery !== undefined
+                        ? `  •  Pil ${msg.battery}%${msg.charging ? ' (Şarj)' : ''}`
+                        : '';
+                    el.textContent = `CPU ${msg.cpu}%  •  RAM ${msg.ram}%${bat}`;
+                }
+                break;
+            }
         }
     }
 

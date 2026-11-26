@@ -1,6 +1,6 @@
 {
   "name": "remotepcplus",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "RemotePC+ — Native Android APK, Windows System Tray & Web Control Hub for zero-latency wireless touchpad, multi-monitor, and media/presentation control.",
   "main": "server.js",
   "scripts": {
