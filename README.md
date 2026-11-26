@@ -6,7 +6,7 @@
 
 **Zero-latency wireless Magic Trackpad, multi-monitor controller, and media/presentation remote for Windows.**
 
-[![Build Android APK](https://github.com/semjhaydin/Remote-PC-Plus/actions/workflows/build-apk.yml/badge.svg)](https://github.com/semjhaydin/Remote-PC-Plus/actions/workflows/build-apk.yml)
+[![Build Android APK](https://github.com/semih-aydin/RemotePC-Plus/actions/workflows/build-apk.yml/badge.svg)](https://github.com/semih-aydin/RemotePC-Plus/actions/workflows/build-apk.yml)
 [![Node.js](https://img.shields.io/badge/Node.js-18%2B-1C1C1E?style=flat-square&logo=nodedotjs&logoColor=30D158)](https://nodejs.org)
 [![Android](https://img.shields.io/badge/Android-Native_Kotlin-1C1C1E?style=flat-square&logo=android&logoColor=0A84FF)](android/)
 [![Windows](https://img.shields.io/badge/Windows-Win32_FFI_%26_Tray-1C1C1E?style=flat-square&logo=windows&logoColor=F5F5F7)](tray/)
@@ -43,26 +43,40 @@
 
 ---
 
-## Hızlı Başlangıç
+## İndir ve Çalıştır (Kurulum Gerektirmez)
 
-### 1. Bilgisayarda Kurulum (Windows 10 / 11)
-Gereksinim: **Node.js 18+**
+Hiçbir teknik kurulum veya Node.js indirmeden doğrudan kullanmak için **[GitHub Releases](https://github.com/semih-aydin/RemotePC-Plus/releases)** (veya **Actions → Build & Release**) sayfasından iki dosyayı indirmeniz yeterli:
 
-```bash
-git clone https://github.com/semjhaydin/Remote-PC-Plus.git
-cd Remote-PC-Plus
-npm install
-```
+### 1. Windows Bilgisayar (`RemotePC-Plus-Windows.zip`)
+1. **`RemotePC-Plus-Windows.zip`** dosyasını indirip bir klasöre çıkarın *(Node.js içinde hazır gelir, kurmanız gerekmez)*.
+2. **`RemotePCPlus.exe`** dosyasına çift tıklayın — uygulama saatin yanında sessizce başlar.
+3. İlk kullanımda saatin yanındaki simgeye sağ tıklayıp **Güvenlik Duvarını Ayarla (Firewall)** seçeneğine tıklayın.
+4. *(İsteğe bağlı)* Sağ tık → **Windows ile Başlat** diyerek PC her açıldığında otomatik çalışmasını sağlayabilirsiniz.
 
-- **Güvenlik Duvarı (İlk Seferde 1 Kez):** `scripts/firewall_setup.bat` dosyasına sağ tıklayıp **Yönetici olarak çalıştır** deyin (TCP `5000`, `5443` ve UDP `5055` portlarını açar).
-- **Başlatma (Önerilen):** **`RemotePCPlus.exe`** dosyasına çift tıklayın. Saatin yanında simge belirir; çift tıklayarak Kontrol Merkezi'ni açabilirsiniz.
-- **Alternatif (Terminal):** `npm start` veya `baslat.bat`.
-
-### 2. Telefonda Kurulum (Android APK)
-1. GitHub reposunda **Actions → Build Android APK** (veya **Releases**) sekmesinden **`RemotePC-Plus.apk`** dosyasını indirip kurun.
-2. Telefon ve PC aynı Wi-Fi ağındayken uygulamayı açın — PC otomatik olarak listelenir, dokunup eşleştirin.
+### 2. Android Telefon (`RemotePC-Plus-Android.apk`)
+1. **`RemotePC-Plus-Android.apk`** dosyasını telefonunuza indirip kurun.
+2. Telefon ve PC aynı Wi-Fi ağındayken uygulamayı açın — bilgisayarınız otomatik olarak listelenir, tek dokunuşla eşleştirin.
 
 *(İsterseniz APK kurmadan da telefon tarayıcısından `http://<PC-IP>:5000` adresini açarak Web/PWA sürümünü kullanabilirsiniz.)*
+
+---
+
+## Geliştiriciler İçin (Kaynak Koddan Çalıştırma)
+
+Gereksinim: **Windows 10 / 11** ve **Node.js 18+**
+
+```bash
+git clone https://github.com/semih-aydin/RemotePC-Plus.git
+cd Remote-PC-Plus
+npm install
+npm start
+```
+
+Yeni bir hazır sürüm (APK + Windows Portable ZIP) yayınlamak için yalnızca etiket atıp push etmeniz yeterli:
+```bash
+git tag v2.0.0
+git push origin main --tags
+```
 
 ---
 

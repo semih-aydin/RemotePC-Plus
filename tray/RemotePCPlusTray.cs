@@ -68,6 +68,7 @@ namespace RemotePCPlusTray
             openItem.Font = new Font(openItem.Font, FontStyle.Bold);
 
             var restartItem = new ToolStripMenuItem("Sunucuyu Yeniden Başlat", null, (s, e) => RestartServer());
+            var firewallItem = new ToolStripMenuItem("Güvenlik Duvarını Ayarla (Firewall)", null, (s, e) => RunFirewallSetup());
 
             _startupItem = new ToolStripMenuItem("Windows ile Başlat", null, (s, e) => ToggleStartup())
             {
@@ -81,6 +82,7 @@ namespace RemotePCPlusTray
             menu.Items.Add(new ToolStripSeparator());
             menu.Items.Add(openItem);
             menu.Items.Add(restartItem);
+            menu.Items.Add(firewallItem);
             menu.Items.Add(new ToolStripSeparator());
             menu.Items.Add(_startupItem);
             menu.Items.Add(new ToolStripSeparator());
@@ -145,6 +147,36 @@ namespace RemotePCPlusTray
             return "127.0.0.1";
         }
 
+        private string ResolveNodeExecutable()
+        {
+            // Once tasinabilir (portable) runtime\node.exe var mi kontrol et
+            string bundled = Path.Combine(_projectDir, "runtime", "node.exe");
+            if (File.Exists(bundled))
+                return bundled;
+
+            return "node";
+        }
+
+        private void RunFirewallSetup()
+        {
+            string scriptPath = Path.Combine(_projectDir, "scripts", "firewall_setup.bat");
+            if (!File.Exists(scriptPath))
+            {
+                MessageBox.Show("scripts\\firewall_setup.bat bulunamadı.", "RemotePC+", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+            try
+            {
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = scriptPath,
+                    Verb = "runas",
+                    UseShellExecute = true
+                });
+            }
+            catch { }
+        }
+
         private void StartServer()
         {
             StopServer();
@@ -158,9 +190,10 @@ namespace RemotePCPlusTray
 
             try
             {
+                string nodeExe = ResolveNodeExecutable();
                 var psi = new ProcessStartInfo
                 {
-                    FileName = "node",
+                    FileName = nodeExe,
                     Arguments = "server.js",
                     WorkingDirectory = _projectDir,
                     UseShellExecute = false,
@@ -181,8 +214,17 @@ namespace RemotePCPlusTray
             }
             catch (Exception ex)
             {
-                _statusItem.Text = "RemotePC+ • Node.js başlatılamadı";
-                _trayIcon.ShowBalloonTip(4000, "RemotePC+ Hatası", "Node.js çalıştırılamadı: " + ex.Message, ToolTipIcon.Error);
+                _statusItem.Text = "RemotePC+ • Node.js bulunamadı";
+                var res = MessageBox.Show(
+                    "Node.js bulunamadı veya başlatılamadı.\n\nGitHub Releases'teki hazır Windows ZIP paketini kullanabilir veya Node.js indirip kurabilirsiniz.\n\nNode.js indirme sayfasını açmak ister misiniz?\n\nDetay: " + ex.Message,
+                    "RemotePC+",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Warning
+                );
+                if (res == DialogResult.Yes)
+                {
+                    try { Process.Start(new ProcessStartInfo { FileName = "https://nodejs.org", UseShellExecute = true }); } catch { }
+                }
             }
         }
 

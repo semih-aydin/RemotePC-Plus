@@ -1,19 +1,17 @@
-name: Build Android APK
+name: Build & Release (Android APK + Windows Portable)
 
 on:
   push:
     branches: [ main ]
     tags: [ 'v*' ]
-    paths:
-      - 'android/**'
-      - '.github/workflows/build-apk.yml'
   workflow_dispatch:
 
 permissions:
   contents: write
 
 jobs:
-  build-apk:
+  build-android:
+    name: Build Android APK
     runs-on: ubuntu-latest
 
     steps:
@@ -35,18 +33,95 @@ jobs:
         working-directory: android
         run: gradle assembleRelease --no-daemon
 
-      - name: Prepare APK artifact
-        run: cp android/app/build/outputs/apk/release/app-release.apk RemotePC-Plus.apk
+      - name: Prepare APK
+        run: cp android/app/build/outputs/apk/release/app-release.apk RemotePC-Plus-Android.apk
 
-      - name: Upload RemotePC-Plus.apk
+      - name: Upload Android APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: RemotePC-Plus-APK
-          path: RemotePC-Plus.apk
+          name: RemotePC-Plus-Android-APK
+          path: RemotePC-Plus-Android.apk
           retention-days: 30
 
-      - name: Attach APK to GitHub Release (on tag)
-        if: startsWith(github.ref, 'refs/tags/v')
+  build-windows:
+    name: Build Windows Portable ZIP
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install production dependencies
+        run: npm install --omit=dev
+
+      - name: Compile RemotePCPlus.exe (System Tray)
+        shell: cmd
+        run: |
+          "C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe" /nologo /target:winexe /optimize+ /utf8output /win32icon:"tray\app.ico" /out:"RemotePCPlus.exe" /r:System.Windows.Forms.dll /r:System.Drawing.dll "tray\RemotePCPlusTray.cs"
+
+      - name: Assemble Portable Windows Package (Zero-Install)
+        shell: pwsh
+        run: |
+          $dist = "dist_win\RemotePC-Plus"
+          New-Item -ItemType Directory -Force -Path "$dist\runtime", "$dist\scripts" | Out-Null
+
+          # Copy portable node.exe so users never need to install Node.js
+          $nodePath = (Get-Command node).Source
+          Copy-Item $nodePath "$dist\runtime\node.exe"
+
+          # Copy app files
+          Copy-Item "RemotePCPlus.exe", "server.js", "win32_api.js", "monitor_manager.js", "app_detector.js", "settings.json", "package.json" "$dist\"
+          Copy-Item "scripts\firewall_setup.bat" "$dist\scripts\"
+          Copy-Item -Recurse "public" "$dist\public"
+          Copy-Item -Recurse "node_modules" "$dist\node_modules"
+
+          # Create ZIP
+          Compress-Archive -Path "$dist\*" -DestinationPath "RemotePC-Plus-Windows.zip" -Force
+
+      - name: Upload Windows Portable artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: RemotePC-Plus-Windows-Portable
+          path: RemotePC-Plus-Windows.zip
+          retention-days: 30
+
+  publish-release:
+    name: Publish GitHub Release
+    needs: [ build-android, build-windows ]
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download Android APK
+        uses: actions/download-artifact@v4
+        with:
+          name: RemotePC-Plus-Android-APK
+
+      - name: Download Windows Portable ZIP
+        uses: actions/download-artifact@v4
+        with:
+          name: RemotePC-Plus-Windows-Portable
+
+      - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: RemotePC-Plus.apk
+          name: "RemotePC+ ${{ github.ref_name }}"
+          body: |
+            ## İndir ve Çalıştır (Kurulum Gerektirmez)
+
+            ### 1. Windows Masaüstü (`RemotePC-Plus-Windows.zip`)
+            1. `RemotePC-Plus-Windows.zip` dosyasını indirip bir klasöre çıkarın (**Node.js kurmanız gerekmez**).
+            2. **`RemotePCPlus.exe`** dosyasına çift tıklayın (saatin yanında sessizce başlar).
+            3. İlk kullanımda tepsi simgesine sağ tıklayıp **Güvenlik Duvarını Ayarla (Firewall)** seçeneğine tıklayın.
+
+            ### 2. Android Uygulaması (`RemotePC-Plus-Android.apk`)
+            1. `RemotePC-Plus-Android.apk` dosyasını telefonunuza indirip kurun.
+            2. Aynı Wi-Fi ağında uygulamayı açın — bilgisayarınız otomatik olarak listelenir, dokunup bağlanın.
+          files: |
+            RemotePC-Plus-Android.apk
+            RemotePC-Plus-Windows.zip
