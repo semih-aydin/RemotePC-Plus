@@ -1,34 +1,58 @@
-/* RemotePC+ Desktop Control Center — macOS System Settings (Sequoia Dark) */
+/* RemotePC+ Desktop Control Center — Apple.com Light Mode (Default) + Dark Mode */
 :root {
-    --bg: oklch(11% 0.004 260);
-    --surface-1: oklch(18.5% 0.005 260);       /* #1C1C1E */
-    --surface-2: oklch(24.5% 0.006 260);       /* #2C2C2E */
-    --surface-3: oklch(30.5% 0.006 260);       /* #3A3A3C */
-    --glass: oklch(16% 0.005 260 / 0.78);
-    --hairline: oklch(100% 0 0 / 0.09);
-    --hairline-strong: oklch(100% 0 0 / 0.16);
+    --bg: #f5f5f7;
+    --surface-1: #ffffff;
+    --surface-2: #f5f5f7;
+    --surface-3: #e8e8ed;
+    --glass: rgba(255, 255, 255, 0.82);
+    --hairline: rgba(0, 0, 0, 0.08);
+    --hairline-strong: rgba(0, 0, 0, 0.14);
+    --card-shadow: 0 2px 16px rgba(0, 0, 0, 0.04), 0 0 0 0.5px rgba(0, 0, 0, 0.05);
 
-    --ink: oklch(97% 0.003 260);               /* #F5F5F7 */
-    --ink-muted: oklch(68% 0.006 260);         /* #98989D */
-    --ink-subtle: oklch(48% 0.006 260);        /* #636366 */
+    --ink: #1d1d1f;
+    --ink-muted: #6e6e73;
+    --ink-subtle: #86868b;
 
-    --accent: oklch(64% 0.21 255);             /* #0A84FF Apple System Blue */
-    --accent-hover: oklch(69% 0.20 255);
-    --accent-ink: oklch(99% 0 0);
-    --accent-soft: oklch(64% 0.21 255 / 0.18);
+    --accent: #0071e3;
+    --accent-hover: #0077ed;
+    --accent-ink: #ffffff;
+    --accent-soft: rgba(0, 113, 227, 0.12);
 
-    --ok: oklch(73% 0.18 148);                 /* #30D158 */
-    --warn: oklch(78% 0.16 78);                /* #FF9F0A */
-    --err: oklch(64% 0.22 25);                 /* #FF453A */
+    --ok: #34c759;
+    --warn: #ff9500;
+    --err: #ff3b30;
 
     --radius-sm: 10px;
     --radius-md: 14px;
-    --radius-lg: 20px;
+    --radius-lg: 22px;
     --radius-pill: 999px;
     --ease-apple: cubic-bezier(0.25, 0.1, 0.25, 1);
 
-    --font-ui: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-    --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+    --font-ui: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', monospace;
+}
+
+[data-theme="dark"] {
+    --bg: #000000;
+    --surface-1: #1c1c1e;
+    --surface-2: #2c2c2e;
+    --surface-3: #3a3a3c;
+    --glass: rgba(28, 28, 30, 0.82);
+    --hairline: rgba(255, 255, 255, 0.09);
+    --hairline-strong: rgba(255, 255, 255, 0.16);
+    --card-shadow: 0 12px 32px rgba(0, 0, 0, 0.35), inset 0 0.5px 0 rgba(255, 255, 255, 0.06);
+
+    --ink: #f5f5f7;
+    --ink-muted: #98989d;
+    --ink-subtle: #636366;
+
+    --accent: #0a84ff;
+    --accent-hover: #409cff;
+    --accent-soft: rgba(10, 132, 255, 0.18);
+
+    --ok: #30d158;
+    --warn: #ff9f0a;
+    --err: #ff453a;
 }
 
 * {
@@ -42,18 +66,19 @@ body {
     color: var(--ink);
     font-family: var(--font-ui);
     -webkit-font-smoothing: antialiased;
-    letter-spacing: -0.012em;
+    letter-spacing: -0.015em;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    transition: background-color 200ms var(--ease-apple), color 200ms var(--ease-apple);
 }
 
-/* macOS Translucent Window Toolbar */
+/* Apple.com Frosted Glass Header */
 .admin-header {
     height: 60px;
     background: var(--glass);
-    backdrop-filter: saturate(180%) blur(24px);
-    -webkit-backdrop-filter: saturate(180%) blur(24px);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
     border-bottom: 0.5px solid var(--hairline);
     display: flex;
     align-items: center;
@@ -68,27 +93,20 @@ body {
     display: flex;
     align-items: center;
     gap: 10px;
-    font-size: 15px;
-    font-weight: 600;
-    letter-spacing: -0.025em;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: -0.028em;
     color: var(--ink);
-}
-
-.logo-dot {
-    width: 9px;
-    height: 9px;
-    border-radius: 50%;
-    background: var(--ok);
-    box-shadow: 0 0 10px oklch(73% 0.18 148 / 0.5);
 }
 
 .server-stats {
     display: flex;
+    align-items: center;
     gap: 10px;
 }
 
 .stat-chip {
-    background: var(--surface-1);
+    background: var(--surface-2);
     border: 0.5px solid var(--hairline);
     padding: 6px 14px;
     border-radius: var(--radius-pill);
@@ -104,14 +122,33 @@ body {
     font-weight: 600;
 }
 
-/* macOS Settings Grid */
+.theme-toggle-btn {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: var(--surface-2);
+    border: 0.5px solid var(--hairline);
+    color: var(--ink);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    transition: transform 140ms var(--ease-apple), background 140ms var(--ease-apple);
+}
+
+.theme-toggle-btn:active {
+    transform: scale(0.92);
+}
+
+/* Bento Grid (Apple.com clean spacious layout) */
 .dashboard-grid {
     flex: 1;
     display: grid;
-    grid-template-columns: 1.05fr 0.95fr;
+    grid-template-columns: 1.06fr 0.94fr;
     gap: 20px;
     padding: 28px;
-    max-width: 1240px;
+    max-width: 1200px;
     margin: 0 auto;
     width: 100%;
 }
@@ -124,19 +161,18 @@ body {
 
 .card {
     background: var(--surface-1);
-    border: 0.5px solid var(--hairline);
     border-radius: var(--radius-lg);
-    padding: 22px;
+    padding: 24px;
     display: flex;
     flex-direction: column;
     gap: 16px;
-    box-shadow: inset 0 0.5px 0 oklch(100% 0 0 / 0.06), 0 12px 32px oklch(0% 0 0 / 0.25);
+    box-shadow: var(--card-shadow);
 }
 
 .card-title {
-    font-size: 13px;
-    font-weight: 600;
-    letter-spacing: -0.015em;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
     color: var(--ink);
     display: flex;
     align-items: center;
@@ -162,7 +198,7 @@ body {
 .qr-img {
     width: 124px;
     height: 124px;
-    border-radius: 12px;
+    border-radius: 14px;
     border: 0.5px solid var(--hairline-strong);
     background: var(--surface-1);
 }
@@ -180,7 +216,7 @@ body {
     text-decoration: none;
     font-family: var(--font-mono);
     font-size: 12px;
-    font-weight: 500;
+    font-weight: 600;
 }
 
 .qr-links a:hover {
@@ -189,7 +225,7 @@ body {
 
 /* macOS Displays Arrangement Canvas */
 .monitor-canvas-container {
-    background: var(--bg);
+    background: var(--surface-2);
     border: 0.5px solid var(--hairline);
     border-radius: var(--radius-md);
     overflow: hidden;
@@ -215,7 +251,7 @@ body {
 .form-group label {
     font-size: 12px;
     color: var(--ink-muted);
-    font-weight: 500;
+    font-weight: 600;
 }
 
 .form-control {
@@ -235,12 +271,12 @@ body {
     box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
-/* macOS Switch style for checkboxes */
+/* Authentic Apple Switch */
 input[type="checkbox"] {
     appearance: none;
     -webkit-appearance: none;
-    width: 42px;
-    height: 24px;
+    width: 44px;
+    height: 26px;
     border-radius: 999px;
     background: var(--surface-3);
     position: relative;
@@ -254,11 +290,11 @@ input[type="checkbox"]::after {
     position: absolute;
     top: 2px;
     left: 2px;
-    width: 20px;
-    height: 20px;
+    width: 22px;
+    height: 22px;
     border-radius: 50%;
-    background: #fff;
-    box-shadow: 0 1px 4px oklch(0% 0 0 / 0.35);
+    background: #ffffff;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.22);
     transition: transform 200ms var(--ease-apple);
 }
 
@@ -278,7 +314,7 @@ input[type="range"] {
     background: var(--accent);
     color: var(--accent-ink);
     border: none;
-    padding: 12px 20px;
+    padding: 12px 22px;
     border-radius: var(--radius-pill);
     font-family: var(--font-ui);
     font-size: 13.5px;
@@ -297,31 +333,30 @@ input[type="range"] {
 
 /* Apple Pill Badge */
 .badge {
-    padding: 3px 9px;
+    padding: 3px 10px;
     border-radius: var(--radius-pill);
     font-size: 10.5px;
     font-weight: 600;
     letter-spacing: 0.02em;
     text-transform: uppercase;
-    background: var(--surface-2);
+    background: var(--surface-3);
     color: var(--ink-muted);
 }
 
-.badge-media { background: oklch(73% 0.18 148 / 0.16); color: var(--ok); }
-.badge-presentation { background: oklch(78% 0.16 78 / 0.16); color: var(--warn); }
+.badge-media { background: rgba(52, 199, 89, 0.14); color: var(--ok); }
+.badge-presentation { background: rgba(255, 149, 0, 0.14); color: var(--warn); }
 .badge-browser { background: var(--accent-soft); color: var(--accent); }
-.badge-code { background: oklch(68% 0.18 300 / 0.18); color: oklch(78% 0.16 300); }
-.badge-desktop { background: var(--surface-2); color: var(--ink-muted); }
+.badge-code { background: rgba(175, 82, 222, 0.14); color: #af52de; }
+.badge-desktop { background: var(--surface-3); color: var(--ink-muted); }
 
 /* Live Diagnostics Pad */
 .diagnostics-box {
-    background: linear-gradient(180deg, oklch(16% 0.005 260) 0%, oklch(13% 0.004 260) 100%);
+    background: var(--surface-2);
     border: 0.5px solid var(--hairline-strong);
     height: 132px;
     border-radius: var(--radius-md);
     position: relative;
     overflow: hidden;
-    box-shadow: inset 0 1px 0 oklch(100% 0 0 / 0.06);
 }
 
 .diagnostics-cursor {

@@ -36,11 +36,14 @@ class RemoteClient(private val listener: Listener) {
         fun onAuthRequired()
         fun onAuthResult(success: Boolean, error: String?)
         fun onAutoRediscoverSuggested()
+        fun onClipboardReceived(text: String)
+        fun onClipboardAck(success: Boolean, pasted: Boolean)
     }
 
     private val client = OkHttpClient.Builder()
         .connectTimeout(3, TimeUnit.SECONDS)
         .readTimeout(0, TimeUnit.MILLISECONDS)
+        .pingInterval(10, TimeUnit.SECONDS)
         .build()
 
     private val mainHandler = Handler(Looper.getMainLooper())
@@ -190,6 +193,17 @@ class RemoteClient(private val listener: Listener) {
                         mainHandler.post { listener.onPingUpdated(rtt) }
                     }
                 }
+
+                "clipboard_data" -> {
+                    val clip = json.optString("text", "")
+                    mainHandler.post { listener.onClipboardReceived(clip) }
+                }
+
+                "clipboard_ack" -> {
+                    val ok = json.optBoolean("success", false)
+                    val pasted = json.optBoolean("pasted", false)
+                    mainHandler.post { listener.onClipboardAck(ok, pasted) }
+                }
             }
         } catch (_: Exception) {
         }
@@ -263,4 +277,19 @@ class RemoteClient(private val listener: Listener) {
 
     fun sendMonitorJump(monitorId: Int) =
         sendJson(JSONObject().put("type", "monitor_jump").put("monitorId", monitorId))
+
+    fun sendClipboardSet(text: String, paste: Boolean = false) =
+        sendJson(JSONObject().put("type", "clipboard_set").put("text", text).put("paste", paste))
+
+    fun sendClipboardGet() =
+        sendJson(JSONObject().put("type", "clipboard_get"))
+
+    fun sendOpenUrl(url: String) =
+        sendJson(JSONObject().put("type", "open_url").put("url", url))
+
+    fun sendLaunchApp(app: String) =
+        sendJson(JSONObject().put("type", "launch_app").put("app", app))
+
+    fun sendSystemPower(action: String) =
+        sendJson(JSONObject().put("type", "system_power").put("action", action))
 }

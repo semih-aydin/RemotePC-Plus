@@ -1,31 +1,31 @@
-/* RemotePC+ — Apple Human Interface Guidelines (iOS 18 / Magic Trackpad Dark) */
+/* RemotePC+ — Apple.com Light Mode (Default) + Apple Dark Mode */
 
 :root {
-    /* Apple System Dark Elevation Layers (OKLCH) */
-    --bg: oklch(9% 0.003 260);
-    --surface-1: oklch(18.5% 0.005 260);       /* #1C1C1E secondarySystemBackground */
-    --surface-2: oklch(24.5% 0.006 260);       /* #2C2C2E tertiarySystemBackground */
-    --surface-3: oklch(30.5% 0.006 260);       /* #3A3A3C elevated thumb / active */
-    --glass: oklch(16% 0.005 260 / 0.76);
-    --hairline: oklch(100% 0 0 / 0.09);
-    --hairline-strong: oklch(100% 0 0 / 0.16);
+    /* Apple.com Signature Light Mode */
+    --bg: #f5f5f7;
+    --surface-1: #ffffff;
+    --surface-2: #f5f5f7;
+    --surface-3: #e8e8ed;
+    --glass: rgba(255, 255, 255, 0.82);
+    --hairline: rgba(0, 0, 0, 0.08);
+    --hairline-strong: rgba(0, 0, 0, 0.14);
+    --card-shadow: 0 2px 12px rgba(0, 0, 0, 0.04), 0 0 0 0.5px rgba(0, 0, 0, 0.05);
+    --pad-bg: linear-gradient(180deg, #ffffff 0%, #f8f8fa 100%);
+    --pad-shadow: 0 4px 24px rgba(0, 0, 0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.9);
 
-    /* Apple Labels */
-    --ink: oklch(97% 0.003 260);               /* #F5F5F7 */
-    --ink-muted: oklch(68% 0.006 260);         /* #98989D */
-    --ink-subtle: oklch(48% 0.006 260);        /* #636366 */
+    --ink: #1d1d1f;
+    --ink-muted: #6e6e73;
+    --ink-subtle: #86868b;
 
-    /* Apple System Semantic Colors */
-    --accent: oklch(64% 0.21 255);             /* #0A84FF System Blue */
-    --accent-hover: oklch(69% 0.20 255);
-    --accent-ink: oklch(99% 0 0);
-    --accent-soft: oklch(64% 0.21 255 / 0.16);
+    --accent: #0071e3;
+    --accent-hover: #0077ed;
+    --accent-ink: #ffffff;
+    --accent-soft: rgba(0, 113, 227, 0.10);
 
-    --ok: oklch(73% 0.18 148);                 /* #30D158 System Green */
-    --warn: oklch(78% 0.16 78);                /* #FF9F0A System Orange */
-    --err: oklch(64% 0.22 25);                 /* #FF453A System Red */
+    --ok: #34c759;
+    --warn: #ff9500;
+    --err: #ff3b30;
 
-    /* Apple Squircle-inspired Radii & Fluid Physics */
     --radius-sm: 10px;
     --radius-md: 14px;
     --radius-lg: 20px;
@@ -34,8 +34,33 @@
     --dur-fast: 140ms;
     --dur-mid: 240ms;
 
-    --font-ui: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-    --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+    --font-ui: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', monospace;
+}
+
+[data-theme="dark"] {
+    --bg: #000000;
+    --surface-1: #1c1c1e;
+    --surface-2: #2c2c2e;
+    --surface-3: #3a3a3c;
+    --glass: rgba(28, 28, 30, 0.80);
+    --hairline: rgba(255, 255, 255, 0.09);
+    --hairline-strong: rgba(255, 255, 255, 0.16);
+    --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.35), inset 0 0.5px 0 rgba(255, 255, 255, 0.06);
+    --pad-bg: linear-gradient(180deg, #222225 0%, #18181a 100%);
+    --pad-shadow: 0 8px 28px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.07);
+
+    --ink: #f5f5f7;
+    --ink-muted: #98989d;
+    --ink-subtle: #636366;
+
+    --accent: #0a84ff;
+    --accent-hover: #409cff;
+    --accent-soft: rgba(10, 132, 255, 0.16);
+
+    --ok: #30d158;
+    --warn: #ff9f0a;
+    --err: #ff453a;
 }
 
 * {
@@ -57,7 +82,8 @@ body {
     color: var(--ink);
     font-family: var(--font-ui);
     -webkit-font-smoothing: antialiased;
-    letter-spacing: -0.012em;
+    letter-spacing: -0.015em;
+    transition: background 200ms var(--ease-apple), color 200ms var(--ease-apple);
 }
 
 #app-root {
@@ -67,25 +93,25 @@ body {
     height: 100%;
 }
 
-/* === TRANSLUCENT NAVIGATION BAR === */
+/* === APPLE FROSTED NAVIGATION BAR === */
 .top-bar {
     height: 54px;
     padding: 0 14px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 10px;
+    gap: 8px;
     background: var(--glass);
-    backdrop-filter: saturate(180%) blur(24px);
-    -webkit-backdrop-filter: saturate(180%) blur(24px);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
     border-bottom: 0.5px solid var(--hairline);
     z-index: 20;
 }
 
 .logo {
     font-size: 14px;
-    font-weight: 600;
-    letter-spacing: -0.024em;
+    font-weight: 700;
+    letter-spacing: -0.025em;
     color: var(--ink);
     display: flex;
     align-items: center;
@@ -93,19 +119,11 @@ body {
     white-space: nowrap;
 }
 
-.logo-mark {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--ok);
-    box-shadow: 0 0 8px oklch(73% 0.18 148 / 0.55);
-}
-
-/* iOS Segmented Control */
+/* Apple Segmented Control */
 .tabs {
     display: flex;
     gap: 2px;
-    background: var(--surface-1);
+    background: var(--surface-2);
     padding: 3px;
     border-radius: var(--radius-pill);
     border: 0.5px solid var(--hairline);
@@ -115,7 +133,7 @@ body {
     border: none;
     background: transparent;
     color: var(--ink-muted);
-    padding: 6px 14px;
+    padding: 6px 12px;
     border-radius: var(--radius-pill);
     font-family: var(--font-ui);
     font-size: 12px;
@@ -123,14 +141,14 @@ body {
     cursor: pointer;
     display: flex;
     align-items: center;
-    gap: 6px;
-    transition: background var(--dur-fast) var(--ease-apple), color var(--dur-fast) var(--ease-apple);
+    gap: 5px;
+    transition: all var(--dur-fast) var(--ease-apple);
 }
 
 .tab-btn.active {
-    background: var(--surface-3);
+    background: var(--surface-1);
     color: var(--ink);
-    box-shadow: 0 1px 4px oklch(0% 0 0 / 0.35), inset 0 0.5px 0 oklch(100% 0 0 / 0.12);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.10), 0 0 0 0.5px var(--hairline);
 }
 
 .top-actions {
@@ -143,12 +161,12 @@ body {
     font-size: 11px;
     color: var(--ok);
     font-family: var(--font-mono);
-    font-weight: 500;
+    font-weight: 600;
     padding: 4px 8px;
     background: var(--surface-1);
     border: 0.5px solid var(--hairline);
     border-radius: var(--radius-pill);
-    min-width: 46px;
+    min-width: 44px;
     text-align: center;
 }
 
@@ -168,8 +186,8 @@ body {
 }
 
 .icon-tool-btn:active {
-    transform: scale(0.93);
-    background: var(--surface-2);
+    transform: scale(0.92);
+    background: var(--surface-3);
     color: var(--ink);
 }
 
@@ -195,7 +213,7 @@ body {
     border-radius: var(--radius-pill);
     display: none;
     z-index: 15;
-    box-shadow: 0 4px 16px oklch(64% 0.21 255 / 0.4);
+    box-shadow: 0 4px 16px rgba(0, 113, 227, 0.35);
 }
 
 /* === 1. TOUCHPAD VIEW === */
@@ -208,12 +226,11 @@ body {
 }
 
 .monitor-bar {
-    height: 42px;
+    height: 40px;
     padding: 0 14px;
     display: flex;
     align-items: center;
     gap: 8px;
-    background: var(--bg);
     overflow-x: auto;
     scrollbar-width: none;
 }
@@ -262,17 +279,15 @@ body {
 .mon-chip-btn .mon-res {
     font-family: var(--font-mono);
     font-size: 10px;
-    opacity: 0.65;
+    opacity: 0.7;
 }
 
-/* Quick Pill Toolbar */
 .quick-toolbar {
     height: 42px;
     padding: 0 14px;
     display: flex;
     align-items: center;
     gap: 7px;
-    background: var(--bg);
     overflow-x: auto;
     scrollbar-width: none;
 }
@@ -285,17 +300,18 @@ body {
     border-radius: var(--radius-pill);
     font-family: var(--font-ui);
     font-size: 11.5px;
-    font-weight: 500;
+    font-weight: 600;
     cursor: pointer;
     white-space: nowrap;
     display: flex;
     align-items: center;
     gap: 6px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
     transition: transform var(--dur-fast) var(--ease-apple), background var(--dur-fast) var(--ease-apple);
 }
 
 .tool-btn i {
-    color: var(--ink-muted);
+    color: var(--accent);
     font-size: 11px;
 }
 
@@ -324,7 +340,7 @@ body {
     50% { opacity: 0.65; }
 }
 
-/* Apple Magic Trackpad Surface */
+/* Apple Magic Trackpad Glass Surface */
 .touchpad-wrapper {
     flex: 1;
     display: flex;
@@ -337,15 +353,14 @@ body {
 .touchpad-surface {
     flex: 1;
     position: relative;
-    background: linear-gradient(180deg, oklch(19% 0.005 260) 0%, oklch(15.5% 0.005 260) 100%);
+    background: var(--pad-bg);
     border: 0.5px solid var(--hairline-strong);
-    border-radius: 24px;
+    border-radius: 26px;
     display: flex;
     align-items: center;
     justify-content: center;
-    cursor: default;
     overflow: hidden;
-    box-shadow: inset 0 1px 0 oklch(100% 0 0 / 0.08), 0 8px 28px oklch(0% 0 0 / 0.35);
+    box-shadow: var(--pad-shadow);
 }
 
 .touch-hint {
@@ -359,7 +374,7 @@ body {
 
 .touch-hint span {
     display: block;
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 600;
     letter-spacing: -0.02em;
     color: var(--ink-muted);
@@ -381,10 +396,10 @@ body {
     justify-content: center;
     color: var(--ink-subtle);
     font-size: 11px;
-    box-shadow: inset 0 1px 0 oklch(100% 0 0 / 0.05);
+    box-shadow: var(--card-shadow);
 }
 
-/* Magnifier Loupe (iOS Loupe Pill) */
+/* Magnifier Loupe */
 .magnifier-overlay {
     position: absolute;
     top: 18px;
@@ -396,7 +411,7 @@ body {
     border-radius: 18px;
     overflow: hidden;
     display: none;
-    box-shadow: 0 20px 48px oklch(0% 0 0 / 0.65);
+    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.25);
     z-index: 25;
 }
 
@@ -407,7 +422,6 @@ body {
 .mag-header {
     height: 30px;
     padding: 0 10px;
-    background: transparent;
     border-bottom: 0.5px solid var(--hairline);
     color: var(--ink);
     font-size: 11px;
@@ -429,15 +443,15 @@ body {
     display: block;
     width: 152px;
     height: 152px;
-    background: var(--bg);
+    background: #000;
 }
 
-/* === 2. MEDIA & PRESENTATION VIEW (iOS Inset Grouped Style) === */
+/* === 2. KUMANDA & ARAÇLAR VIEW === */
 .context-view {
     flex: 1;
     display: none;
     flex-direction: column;
-    padding: 12px 14px;
+    padding: 14px;
     gap: 12px;
     overflow-y: auto;
     background: var(--bg);
@@ -445,18 +459,17 @@ body {
 
 .card {
     background: var(--surface-1);
-    border: 0.5px solid var(--hairline);
     border-radius: var(--radius-lg);
     padding: 16px;
     display: flex;
     flex-direction: column;
     gap: 12px;
-    box-shadow: inset 0 0.5px 0 oklch(100% 0 0 / 0.06);
+    box-shadow: var(--card-shadow);
 }
 
 .card-title {
     font-size: 12px;
-    font-weight: 600;
+    font-weight: 700;
     letter-spacing: -0.01em;
     color: var(--ink-muted);
     display: flex;
@@ -470,7 +483,6 @@ body {
 }
 
 .active-win-card {
-    background: var(--surface-1);
     padding: 13px 16px;
 }
 
@@ -509,7 +521,7 @@ body {
     height: 58px;
     border-radius: 50%;
     background: var(--ink);
-    color: var(--bg);
+    color: var(--surface-1);
     border: none;
     font-size: 18px;
     display: flex;
@@ -573,7 +585,7 @@ input[type="range"] {
 }
 
 .pres-nav-btn {
-    height: 58px;
+    height: 56px;
     background: var(--surface-2);
     border: 0.5px solid var(--hairline);
     color: var(--ink);
@@ -605,6 +617,12 @@ input[type="range"] {
     gap: 8px;
 }
 
+.macro-grid-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+}
+
 .action-btn {
     height: 44px;
     background: var(--surface-2);
@@ -613,7 +631,7 @@ input[type="range"] {
     border-radius: var(--radius-sm);
     font-family: var(--font-ui);
     font-size: 12.5px;
-    font-weight: 500;
+    font-weight: 600;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -627,6 +645,10 @@ input[type="range"] {
     background: var(--surface-3);
 }
 
+.action-btn.danger {
+    color: var(--err);
+}
+
 .mini-btn {
     background: var(--surface-2);
     border: 0.5px solid var(--hairline);
@@ -638,6 +660,23 @@ input[type="range"] {
     cursor: pointer;
 }
 
+.apple-input {
+    width: 100%;
+    background: var(--surface-2);
+    border: 0.5px solid var(--hairline);
+    color: var(--ink);
+    padding: 10px 13px;
+    border-radius: var(--radius-sm);
+    font-family: var(--font-ui);
+    font-size: 13px;
+    outline: none;
+}
+
+.apple-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
 /* === BOTTOM CLICK DOCK === */
 .bottom-bar {
     height: 66px;
@@ -645,8 +684,8 @@ input[type="range"] {
     display: flex;
     gap: 8px;
     background: var(--glass);
-    backdrop-filter: saturate(180%) blur(24px);
-    -webkit-backdrop-filter: saturate(180%) blur(24px);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
     border-top: 0.5px solid var(--hairline);
     z-index: 20;
 }
@@ -665,12 +704,13 @@ input[type="range"] {
     justify-content: center;
     cursor: pointer;
     gap: 6px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
     transition: transform var(--dur-fast) var(--ease-apple), background var(--dur-fast) var(--ease-apple);
 }
 
 .click-btn.primary {
     flex: 1.35;
-    background: var(--surface-2);
+    background: var(--surface-1);
     border-color: var(--hairline-strong);
 }
 
@@ -692,7 +732,7 @@ input[type="range"] {
 .modal-backdrop {
     position: fixed;
     inset: 0;
-    background: oklch(0% 0 0 / 0.55);
+    background: rgba(0, 0, 0, 0.36);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     display: none;
@@ -712,11 +752,11 @@ input[type="range"] {
     max-height: 85vh;
     background: var(--surface-1);
     border: 0.5px solid var(--hairline-strong);
-    border-radius: 22px;
+    border-radius: 24px;
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    box-shadow: 0 24px 64px oklch(0% 0 0 / 0.72);
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.25);
     animation: sheetIn var(--dur-mid) var(--ease-apple);
 }
 
@@ -726,9 +766,8 @@ input[type="range"] {
 }
 
 .modal-header {
-    height: 52px;
+    height: 54px;
     padding: 0 18px;
-    background: transparent;
     border-bottom: 0.5px solid var(--hairline);
     display: flex;
     align-items: center;
@@ -737,7 +776,7 @@ input[type="range"] {
 
 .modal-title {
     font-size: 15px;
-    font-weight: 600;
+    font-weight: 700;
     letter-spacing: -0.02em;
     color: var(--ink);
     display: flex;
@@ -783,7 +822,7 @@ input[type="range"] {
     justify-content: space-between;
     font-size: 13px;
     color: var(--ink);
-    font-weight: 500;
+    font-weight: 600;
 }
 
 .setting-check-row {
@@ -825,7 +864,7 @@ input[type="range"] {
     height: 24px;
     border-radius: 50%;
     background: #fff;
-    box-shadow: 0 2px 5px oklch(0% 0 0 / 0.35);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.22);
     transition: transform var(--dur-mid) var(--ease-apple);
 }
 
@@ -844,7 +883,7 @@ input[type="range"] {
     color: var(--accent);
     text-decoration: none;
     font-size: 13px;
-    font-weight: 500;
+    font-weight: 600;
 }
 
 .gesture-grid {
@@ -891,16 +930,13 @@ input[type="range"] {
 }
 
 .toast-item {
-    background: var(--glass);
-    backdrop-filter: saturate(180%) blur(20px);
-    -webkit-backdrop-filter: saturate(180%) blur(20px);
-    border: 0.5px solid var(--hairline-strong);
-    color: var(--ink);
+    background: #1d1d1f;
+    color: #f5f5f7;
     padding: 8px 16px;
     border-radius: var(--radius-pill);
     font-size: 12px;
     font-weight: 500;
-    box-shadow: 0 10px 30px oklch(0% 0 0 / 0.55);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
     opacity: 0;
     transform: translateY(8px);
     transition: opacity var(--dur-mid) var(--ease-apple), transform var(--dur-mid) var(--ease-apple);
@@ -912,5 +948,5 @@ input[type="range"] {
 }
 
 .toast-item.toast-success {
-    color: var(--ok);
+    color: #30d158;
 }

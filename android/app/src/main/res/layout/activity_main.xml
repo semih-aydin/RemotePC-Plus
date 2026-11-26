@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#000000"
+    android:background="@color/bg_canvas"
     android:orientation="vertical"
     android:padding="14dp">
 
@@ -18,13 +18,13 @@
             android:layout_width="0dp"
             android:layout_height="40dp"
             android:layout_weight="1"
-            android:background="@drawable/bg_pill"
+            android:background="@drawable/bg_card"
             android:clickable="true"
             android:focusable="true"
             android:gravity="center_vertical"
             android:orientation="horizontal"
-            android:paddingStart="12dp"
-            android:paddingEnd="12dp">
+            android:paddingStart="13dp"
+            android:paddingEnd="13dp">
 
             <View
                 android:id="@+id/statusDot"
@@ -41,8 +41,8 @@
                 android:ellipsize="end"
                 android:maxLines="1"
                 android:text="PC Seç"
-                android:textColor="#ECEEF2"
-                android:textSize="13sp"
+                android:textColor="@color/ink_primary"
+                android:textSize="13.5sp"
                 android:textStyle="bold" />
 
             <TextView
@@ -52,32 +52,34 @@
                 android:layout_marginStart="8dp"
                 android:fontFamily="monospace"
                 android:text="Bağlı değil"
-                android:textColor="#EF4444"
+                android:textColor="@color/signal_red"
                 android:textSize="11sp" />
         </LinearLayout>
 
         <ImageButton
             android:id="@+id/btnKeyboard"
-            android:layout_width="44dp"
+            android:layout_width="42dp"
             android:layout_height="40dp"
             android:layout_marginStart="8dp"
-            android:background="@drawable/bg_btn_dark"
+            android:background="@drawable/bg_card"
             android:contentDescription="Klavye"
             android:scaleType="center"
-            android:src="@drawable/ic_keyboard" />
+            android:src="@drawable/ic_keyboard"
+            android:tint="@color/ink_primary" />
 
         <ImageButton
             android:id="@+id/btnSettings"
-            android:layout_width="44dp"
+            android:layout_width="42dp"
             android:layout_height="40dp"
             android:layout_marginStart="6dp"
-            android:background="@drawable/bg_btn_dark"
+            android:background="@drawable/bg_card"
             android:contentDescription="Ayarlar"
             android:scaleType="center"
-            android:src="@drawable/ic_settings" />
+            android:src="@drawable/ic_settings"
+            android:tint="@color/ink_primary" />
     </LinearLayout>
 
-    <!-- SEGMENTED MOD SEKMELERİ -->
+    <!-- APPLE SEGMENTED CONTROL -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="40dp"
@@ -95,8 +97,8 @@
             android:minHeight="0dp"
             android:text="Touchpad"
             android:textAllCaps="false"
-            android:textColor="#ECEEF2"
-            android:textSize="12sp"
+            android:textColor="@color/ink_primary"
+            android:textSize="12.5sp"
             android:textStyle="bold" />
 
         <Button
@@ -106,14 +108,14 @@
             android:layout_weight="1"
             android:background="@drawable/bg_tab_idle"
             android:minHeight="0dp"
-            android:text="Kumanda"
+            android:text="Kumanda &amp; Araçlar"
             android:textAllCaps="false"
-            android:textColor="#8E95A5"
-            android:textSize="12sp"
+            android:textColor="@color/ink_secondary"
+            android:textSize="12.5sp"
             android:textStyle="bold" />
     </LinearLayout>
 
-    <!-- ÇOKLU MONİTÖR ÇUBUĞU (2+ ekran varsa görünür) -->
+    <!-- ÇOKLU MONİTÖR ÇUBUĞU -->
     <LinearLayout
         android:id="@+id/monitorBar"
         android:layout_width="match_parent"
@@ -170,7 +172,7 @@
                 <View
                     android:layout_width="3dp"
                     android:layout_height="44dp"
-                    android:background="#2E3440" />
+                    android:background="@color/border_hairline" />
             </LinearLayout>
         </LinearLayout>
 
@@ -187,11 +189,11 @@
                 android:layout_height="match_parent"
                 android:layout_marginEnd="5dp"
                 android:layout_weight="1.35"
-                android:background="@drawable/bg_btn_dark"
+                android:background="@drawable/bg_card"
                 android:text="Sol Tık"
                 android:textAllCaps="false"
-                android:textColor="#ECEEF2"
-                android:textSize="13sp"
+                android:textColor="@color/ink_primary"
+                android:textSize="13.5sp"
                 android:textStyle="bold" />
 
             <Button
@@ -201,11 +203,11 @@
                 android:layout_marginStart="2dp"
                 android:layout_marginEnd="2dp"
                 android:layout_weight="0.95"
-                android:background="@drawable/bg_btn_dark"
+                android:background="@drawable/bg_card"
                 android:text="Sürükle"
                 android:textAllCaps="false"
-                android:textColor="#9AA1B1"
-                android:textSize="12sp"
+                android:textColor="@color/ink_secondary"
+                android:textSize="12.5sp"
                 android:textStyle="bold" />
 
             <Button
@@ -214,16 +216,16 @@
                 android:layout_height="match_parent"
                 android:layout_marginStart="5dp"
                 android:layout_weight="1.1"
-                android:background="@drawable/bg_btn_dark"
+                android:background="@drawable/bg_card"
                 android:text="Sağ Tık"
                 android:textAllCaps="false"
-                android:textColor="#ECEEF2"
-                android:textSize="13sp"
+                android:textColor="@color/ink_primary"
+                android:textSize="13.5sp"
                 android:textStyle="bold" />
         </LinearLayout>
     </LinearLayout>
 
-    <!-- 2. MEDYA & SUNUM GÖRÜNÜMÜ -->
+    <!-- 2. KUMANDA & ARAÇLAR GÖRÜNÜMÜ -->
     <ScrollView
         android:id="@+id/viewMedia"
         android:layout_width="match_parent"
@@ -236,7 +238,8 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:paddingBottom="10dp">
 
             <!-- Aktif Pencere -->
             <LinearLayout
@@ -244,13 +247,13 @@
                 android:layout_height="wrap_content"
                 android:background="@drawable/bg_card"
                 android:orientation="vertical"
-                android:padding="14dp">
+                android:padding="15dp">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Aktif Pencere"
-                    android:textColor="#0A84FF"
+                    android:textColor="@color/accent_blue"
                     android:textSize="12sp"
                     android:textStyle="bold" />
 
@@ -258,12 +261,12 @@
                     android:id="@+id/tvActiveWindow"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
+                    android:layout_marginTop="3dp"
                     android:ellipsize="end"
                     android:fontFamily="monospace"
                     android:maxLines="1"
                     android:text="Masaüstü"
-                    android:textColor="#F5F5F7"
+                    android:textColor="@color/ink_primary"
                     android:textSize="12.5sp" />
             </LinearLayout>
 
@@ -274,22 +277,20 @@
                 android:layout_marginTop="10dp"
                 android:background="@drawable/bg_card"
                 android:orientation="vertical"
-                android:padding="14dp">
+                android:padding="15dp">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:fontFamily="monospace"
-                    android:letterSpacing="0.1"
-                    android:text="MEDYA OYNATICI"
-                    android:textColor="#6B7280"
-                    android:textSize="10sp"
+                    android:text="Medya"
+                    android:textColor="@color/ink_secondary"
+                    android:textSize="12sp"
                     android:textStyle="bold" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="52dp"
-                    android:layout_marginTop="12dp"
+                    android:layout_marginTop="10dp"
                     android:orientation="horizontal">
 
                     <ImageButton
@@ -301,7 +302,8 @@
                         android:background="@drawable/bg_btn_dark"
                         android:contentDescription="Önceki"
                         android:scaleType="center"
-                        android:src="@drawable/ic_prev" />
+                        android:src="@drawable/ic_prev"
+                        android:tint="@color/ink_primary" />
 
                     <ImageButton
                         android:id="@+id/btnMediaPlayPause"
@@ -311,7 +313,8 @@
                         android:background="@drawable/bg_btn_accent"
                         android:contentDescription="Oynat Duraklat"
                         android:scaleType="center"
-                        android:src="@drawable/ic_play_pause" />
+                        android:src="@drawable/ic_play_pause"
+                        android:tint="#FFFFFF" />
 
                     <ImageButton
                         android:id="@+id/btnMediaNext"
@@ -322,7 +325,8 @@
                         android:background="@drawable/bg_btn_dark"
                         android:contentDescription="Sonraki"
                         android:scaleType="center"
-                        android:src="@drawable/ic_next" />
+                        android:src="@drawable/ic_next"
+                        android:tint="@color/ink_primary" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -340,7 +344,8 @@
                         android:background="@drawable/bg_btn_dark"
                         android:contentDescription="Ses Azalt"
                         android:scaleType="center"
-                        android:src="@drawable/ic_vol_down" />
+                        android:src="@drawable/ic_vol_down"
+                        android:tint="@color/ink_primary" />
 
                     <ImageButton
                         android:id="@+id/btnVolMute"
@@ -350,7 +355,8 @@
                         android:background="@drawable/bg_btn_dark"
                         android:contentDescription="Sessiz"
                         android:scaleType="center"
-                        android:src="@drawable/ic_vol_mute" />
+                        android:src="@drawable/ic_vol_mute"
+                        android:tint="@color/ink_primary" />
 
                     <ImageButton
                         android:id="@+id/btnVolUp"
@@ -361,7 +367,58 @@
                         android:background="@drawable/bg_btn_dark"
                         android:contentDescription="Ses Artır"
                         android:scaleType="center"
-                        android:src="@drawable/ic_vol_up" />
+                        android:src="@drawable/ic_vol_up"
+                        android:tint="@color/ink_primary" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Pano Paylaşımı (Clipboard Sync) -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/bg_card"
+                android:orientation="vertical"
+                android:padding="15dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Pano Paylaşımı"
+                    android:textColor="@color/ink_secondary"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="44dp"
+                    android:layout_marginTop="10dp"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/btnClipSend"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_marginEnd="6dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/bg_btn_accent"
+                        android:text="PC'ye Yapıştır"
+                        android:textAllCaps="false"
+                        android:textColor="#FFFFFF"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
+
+                    <Button
+                        android:id="@+id/btnClipGet"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:background="@drawable/bg_btn_dark"
+                        android:text="PC'den Kopyala"
+                        android:textAllCaps="false"
+                        android:textColor="@color/ink_primary"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
                 </LinearLayout>
             </LinearLayout>
 
@@ -372,22 +429,20 @@
                 android:layout_marginTop="10dp"
                 android:background="@drawable/bg_card"
                 android:orientation="vertical"
-                android:padding="14dp">
+                android:padding="15dp">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:fontFamily="monospace"
-                    android:letterSpacing="0.1"
-                    android:text="SUNUM KONTROLÜ"
-                    android:textColor="#6B7280"
-                    android:textSize="10sp"
+                    android:text="Sunum"
+                    android:textColor="@color/ink_secondary"
+                    android:textSize="12sp"
                     android:textStyle="bold" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="56dp"
-                    android:layout_marginTop="12dp"
+                    android:layout_height="54dp"
+                    android:layout_marginTop="10dp"
                     android:orientation="horizontal">
 
                     <Button
@@ -399,7 +454,7 @@
                         android:background="@drawable/bg_btn_dark"
                         android:text="Önceki"
                         android:textAllCaps="false"
-                        android:textColor="#ECEEF2"
+                        android:textColor="@color/ink_primary"
                         android:textSize="13sp"
                         android:textStyle="bold" />
 
@@ -411,14 +466,14 @@
                         android:background="@drawable/bg_btn_accent"
                         android:text="Sonraki Slayt"
                         android:textAllCaps="false"
-                        android:textColor="#FAF7F5"
+                        android:textColor="#FFFFFF"
                         android:textSize="14sp"
                         android:textStyle="bold" />
                 </LinearLayout>
 
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="44dp"
+                    android:layout_height="42dp"
                     android:layout_marginTop="8dp"
                     android:orientation="horizontal">
 
@@ -431,7 +486,7 @@
                         android:background="@drawable/bg_btn_dark"
                         android:text="F5 Başlat"
                         android:textAllCaps="false"
-                        android:textColor="#C9CDD6"
+                        android:textColor="@color/ink_primary"
                         android:textSize="12sp" />
 
                     <Button
@@ -442,7 +497,7 @@
                         android:background="@drawable/bg_btn_dark"
                         android:text="Esc Bitir"
                         android:textAllCaps="false"
-                        android:textColor="#C9CDD6"
+                        android:textColor="@color/ink_primary"
                         android:textSize="12sp" />
 
                     <Button
@@ -454,33 +509,133 @@
                         android:background="@drawable/bg_btn_dark"
                         android:text="Siyah Ekran"
                         android:textAllCaps="false"
-                        android:textColor="#C9CDD6"
+                        android:textColor="@color/ink_primary"
                         android:textSize="12sp" />
                 </LinearLayout>
             </LinearLayout>
 
-            <!-- Hızlı Kısayollar -->
+            <!-- Hızlı Başlatıcı -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
                 android:background="@drawable/bg_card"
                 android:orientation="vertical"
-                android:padding="14dp">
+                android:padding="15dp">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:fontFamily="monospace"
-                    android:letterSpacing="0.1"
-                    android:text="HIZLI KISAYOLLAR"
-                    android:textColor="#6B7280"
-                    android:textSize="10sp"
+                    android:text="Hızlı Başlatıcı"
+                    android:textColor="@color/ink_secondary"
+                    android:textSize="12sp"
                     android:textStyle="bold" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="44dp"
+                    android:layout_height="42dp"
+                    android:layout_marginTop="10dp"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/btnLaunchBrowser"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_marginEnd="6dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/bg_btn_dark"
+                        android:text="Tarayıcı"
+                        android:textAllCaps="false"
+                        android:textColor="@color/ink_primary"
+                        android:textSize="12sp" />
+
+                    <Button
+                        android:id="@+id/btnLaunchYoutube"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:background="@drawable/bg_btn_dark"
+                        android:text="YouTube"
+                        android:textAllCaps="false"
+                        android:textColor="@color/ink_primary"
+                        android:textSize="12sp" />
+
+                    <Button
+                        android:id="@+id/btnLaunchSpotify"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_marginStart="6dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/bg_btn_dark"
+                        android:text="Spotify"
+                        android:textAllCaps="false"
+                        android:textColor="@color/ink_primary"
+                        android:textSize="12sp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="42dp"
+                    android:layout_marginTop="8dp"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/btnLaunchExplorer"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_marginEnd="6dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/bg_btn_dark"
+                        android:text="Dosyalar"
+                        android:textAllCaps="false"
+                        android:textColor="@color/ink_primary"
+                        android:textSize="12sp" />
+
+                    <Button
+                        android:id="@+id/btnLaunchTaskMgr"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:background="@drawable/bg_btn_dark"
+                        android:text="Görevler"
+                        android:textAllCaps="false"
+                        android:textColor="@color/ink_primary"
+                        android:textSize="12sp" />
+
+                    <Button
+                        android:id="@+id/btnLaunchSettings"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_marginStart="6dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/bg_btn_dark"
+                        android:text="Ayarlar"
+                        android:textAllCaps="false"
+                        android:textColor="@color/ink_primary"
+                        android:textSize="12sp" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Hızlı Kısayollar & Güç -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/bg_card"
+                android:orientation="vertical"
+                android:padding="15dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Kısayollar &amp; Sistem"
+                    android:textColor="@color/ink_secondary"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="42dp"
                     android:layout_marginTop="10dp"
                     android:orientation="horizontal">
 
@@ -493,7 +648,7 @@
                         android:background="@drawable/bg_btn_dark"
                         android:text="Kopyala"
                         android:textAllCaps="false"
-                        android:textColor="#C9CDD6"
+                        android:textColor="@color/ink_primary"
                         android:textSize="12sp" />
 
                     <Button
@@ -504,7 +659,7 @@
                         android:background="@drawable/bg_btn_dark"
                         android:text="Yapıştır"
                         android:textAllCaps="false"
-                        android:textColor="#C9CDD6"
+                        android:textColor="@color/ink_primary"
                         android:textSize="12sp" />
 
                     <Button
@@ -516,13 +671,13 @@
                         android:background="@drawable/bg_btn_dark"
                         android:text="Geri Al"
                         android:textAllCaps="false"
-                        android:textColor="#C9CDD6"
+                        android:textColor="@color/ink_primary"
                         android:textSize="12sp" />
                 </LinearLayout>
 
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="44dp"
+                    android:layout_height="42dp"
                     android:layout_marginTop="8dp"
                     android:orientation="horizontal">
 
@@ -535,7 +690,7 @@
                         android:background="@drawable/bg_btn_dark"
                         android:text="Masaüstü"
                         android:textAllCaps="false"
-                        android:textColor="#C9CDD6"
+                        android:textColor="@color/ink_primary"
                         android:textSize="12sp" />
 
                     <Button
@@ -544,9 +699,9 @@
                         android:layout_height="match_parent"
                         android:layout_weight="1"
                         android:background="@drawable/bg_btn_dark"
-                        android:text="Görevler"
+                        android:text="Pencereler"
                         android:textAllCaps="false"
-                        android:textColor="#C9CDD6"
+                        android:textColor="@color/ink_primary"
                         android:textSize="12sp" />
 
                     <Button
@@ -558,7 +713,49 @@
                         android:background="@drawable/bg_btn_dark"
                         android:text="Kapat"
                         android:textAllCaps="false"
-                        android:textColor="#FF453A"
+                        android:textColor="@color/signal_red"
+                        android:textSize="12sp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="42dp"
+                    android:layout_marginTop="8dp"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/btnPowerLock"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_marginEnd="6dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/bg_btn_dark"
+                        android:text="Kilitle"
+                        android:textAllCaps="false"
+                        android:textColor="@color/ink_primary"
+                        android:textSize="12sp" />
+
+                    <Button
+                        android:id="@+id/btnPowerDisplayOff"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:background="@drawable/bg_btn_dark"
+                        android:text="Ekranı Kapat"
+                        android:textAllCaps="false"
+                        android:textColor="@color/ink_primary"
+                        android:textSize="12sp" />
+
+                    <Button
+                        android:id="@+id/btnPowerSleep"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_marginStart="6dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/bg_btn_dark"
+                        android:text="Uyku"
+                        android:textAllCaps="false"
+                        android:textColor="@color/signal_red"
                         android:textSize="12sp" />
                 </LinearLayout>
             </LinearLayout>

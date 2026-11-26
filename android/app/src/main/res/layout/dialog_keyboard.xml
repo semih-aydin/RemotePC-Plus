@@ -2,31 +2,31 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="#1C1C1E"
+    android:background="@color/surface_card"
     android:orientation="vertical"
     android:padding="20dp">
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Bilgisayara Metin Gönder"
-        android:textColor="#FFFFFF"
-        android:textSize="16sp"
+        android:text="Klavye"
+        android:textColor="@color/ink_primary"
+        android:textSize="17sp"
         android:textStyle="bold" />
 
     <EditText
         android:id="@+id/etKeyboardInput"
         android:layout_width="match_parent"
         android:layout_height="46dp"
-        android:layout_marginTop="10dp"
-        android:background="@drawable/bg_pill"
-        android:hint="Yazmak istediğiniz metin..."
+        android:layout_marginTop="12dp"
+        android:background="@drawable/bg_btn_dark"
+        android:hint="Metin yazın..."
         android:imeOptions="actionSend"
         android:inputType="text"
         android:paddingStart="12dp"
         android:paddingEnd="12dp"
-        android:textColor="#FFFFFF"
-        android:textColorHint="#64748B"
+        android:textColor="@color/ink_primary"
+        android:textColorHint="@color/ink_tertiary"
         android:textSize="14sp" />
 
     <LinearLayout
@@ -45,7 +45,8 @@
             android:text="Gönder"
             android:textAllCaps="false"
             android:textColor="#FFFFFF"
-            android:textSize="13sp" />
+            android:textSize="13sp"
+            android:textStyle="bold" />
 
         <Button
             android:id="@+id/btnKbEnter"
@@ -55,7 +56,7 @@
             android:background="@drawable/bg_btn_dark"
             android:text="Enter"
             android:textAllCaps="false"
-            android:textColor="#ECEEF2"
+            android:textColor="@color/ink_primary"
             android:textSize="13sp" />
 
         <Button
@@ -67,7 +68,104 @@
             android:background="@drawable/bg_btn_dark"
             android:text="Sil"
             android:textAllCaps="false"
-            android:textColor="#ECEEF2"
+            android:textColor="@color/ink_primary"
             android:textSize="13sp" />
+    </LinearLayout>
+
+    <!-- Özel Tuşlar & Ok Tuşları -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_marginTop="10dp"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btnKbEsc"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginEnd="6dp"
+            android:layout_weight="1"
+            android:background="@drawable/bg_btn_dark"
+            android:text="Esc"
+            android:textAllCaps="false"
+            android:textColor="@color/ink_primary"
+            android:textSize="12sp" />
+
+        <Button
+            android:id="@+id/btnKbTab"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginEnd="6dp"
+            android:layout_weight="1"
+            android:background="@drawable/bg_btn_dark"
+            android:text="Tab"
+            android:textAllCaps="false"
+            android:textColor="@color/ink_primary"
+            android:textSize="12sp" />
+
+        <Button
+            android:id="@+id/btnKbSpace"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1.5"
+            android:background="@drawable/bg_btn_dark"
+            android:text="Boşluk"
+            android:textAllCaps="false"
+            android:textColor="@color/ink_primary"
+            android:textSize="12sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_marginTop="8dp"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btnKbLeft"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginEnd="6dp"
+            android:layout_weight="1"
+            android:background="@drawable/bg_btn_dark"
+            android:text="Sol"
+            android:textAllCaps="false"
+            android:textColor="@color/ink_primary"
+            android:textSize="12sp" />
+
+        <Button
+            android:id="@+id/btnKbUp"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginEnd="6dp"
+            android:layout_weight="1"
+            android:background="@drawable/bg_btn_dark"
+            android:text="Yukarı"
+            android:textAllCaps="false"
+            android:textColor="@color/ink_primary"
+            android:textSize="12sp" />
+
+        <Button
+            android:id="@+id/btnKbDown"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginEnd="6dp"
+            android:layout_weight="1"
+            android:background="@drawable/bg_btn_dark"
+            android:text="Aşağı"
+            android:textAllCaps="false"
+            android:textColor="@color/ink_primary"
+            android:textSize="12sp" />
+
+        <Button
+            android:id="@+id/btnKbRight"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@drawable/bg_btn_dark"
+            android:text="Sağ"
+            android:textAllCaps="false"
+            android:textColor="@color/ink_primary"
+            android:textSize="12sp" />
     </LinearLayout>
 </LinearLayout>

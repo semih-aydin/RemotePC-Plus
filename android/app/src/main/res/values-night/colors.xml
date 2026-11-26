@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Apple Space Black Dark Mode Palette -->
+    <color name="bg_canvas">#000000</color>
+    <color name="surface_card">#1C1C1E</color>
+    <color name="surface_btn">#2C2C2E</color>
+    <color name="surface_btn_pressed">#3A3A3C</color>
+    <color name="surface_pill">#1C1C1E</color>
+    <color name="surface_tab_active">#3A3A3C</color>
+    <color name="border_hairline">#22FFFFFF</color>
+    <color name="ink_primary">#F5F5F7</color>
+    <color name="ink_secondary">#98989D</color>
+    <color name="ink_tertiary">#636366</color>
+    <color name="accent_blue">#0A84FF</color>
+    <color name="accent_blue_pressed">#0070E0</color>
+    <color name="accent_halo_fill">#240A84FF</color>
+    <color name="accent_halo_ring">#660A84FF</color>
+    <color name="signal_green">#30D158</color>
+    <color name="signal_orange">#FF9F0A</color>
+    <color name="signal_red">#FF453A</color>
+</resources>

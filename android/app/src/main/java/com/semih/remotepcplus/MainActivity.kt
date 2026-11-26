@@ -2,6 +2,9 @@ package com.semih.remotepcplus
 
 import android.annotation.SuppressLint
 import android.app.AlertDialog
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.os.Bundle
 import android.text.InputType
 import android.view.KeyEvent
@@ -18,6 +21,8 @@ import android.widget.SeekBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.content.ContextCompat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -57,11 +62,12 @@ class MainActivity : AppCompatActivity(), RemoteClient.Listener {
     private var autoRediscoverRunning = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        prefs = Prefs(this)
+        applyThemeMode(prefs.themeMode)
         super.onCreate(savedInstanceState)
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         setContentView(R.layout.activity_main)
 
-        prefs = Prefs(this)
         haptics = HapticsHelper(this, prefs)
         client = RemoteClient(this)
 
@@ -70,12 +76,23 @@ class MainActivity : AppCompatActivity(), RemoteClient.Listener {
         setupTabs()
         setupTouchpad()
         setupBottomButtons()
-        setupMediaAndPresentation()
+        setupMediaAndTools()
 
         if (prefs.hasSavedPc()) {
             connectToSavedPc()
         } else {
             showConnectDialog(autoScan = true)
+        }
+    }
+
+    private fun applyThemeMode(mode: String) {
+        val target = when (mode) {
+            "dark" -> AppCompatDelegate.MODE_NIGHT_YES
+            "system" -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+            else -> AppCompatDelegate.MODE_NIGHT_NO
+        }
+        if (AppCompatDelegate.getDefaultNightMode() != target) {
+            AppCompatDelegate.setDefaultNightMode(target)
         }
     }
 
@@ -131,12 +148,8 @@ class MainActivity : AppCompatActivity(), RemoteClient.Listener {
     }
 
     private fun setupTabs() {
-        tabTouchpad.setOnClickListener {
-            switchMode(media = false)
-        }
-        tabMedia.setOnClickListener {
-            switchMode(media = true)
-        }
+        tabTouchpad.setOnClickListener { switchMode(media = false) }
+        tabMedia.setOnClickListener { switchMode(media = true) }
         switchMode(media = false)
     }
 
@@ -146,10 +159,12 @@ class MainActivity : AppCompatActivity(), RemoteClient.Listener {
         viewTouchpad.visibility = if (media) View.GONE else View.VISIBLE
         viewMedia.visibility = if (media) View.VISIBLE else View.GONE
 
+        val primaryColor = ContextCompat.getColor(this, R.color.ink_primary)
+        val secondaryColor = ContextCompat.getColor(this, R.color.ink_secondary)
         tabTouchpad.setBackgroundResource(if (!media) R.drawable.bg_tab_active else R.drawable.bg_tab_idle)
         tabMedia.setBackgroundResource(if (media) R.drawable.bg_tab_active else R.drawable.bg_tab_idle)
-        tabTouchpad.setTextColor(if (!media) 0xFFFFFFFF.toInt() else 0xFF94A3B8.toInt())
-        tabMedia.setTextColor(if (media) 0xFFFFFFFF.toInt() else 0xFF94A3B8.toInt())
+        tabTouchpad.setTextColor(if (!media) primaryColor else secondaryColor)
+        tabMedia.setTextColor(if (media) primaryColor else secondaryColor)
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -187,7 +202,6 @@ class MainActivity : AppCompatActivity(), RemoteClient.Listener {
             }
         }
 
-        // Dedicated right-edge vertical scroll strip
         var lastStripY = 0f
         val density = resources.displayMetrics.density
         scrollStrip.setOnTouchListener { _, event ->
@@ -252,67 +266,78 @@ class MainActivity : AppCompatActivity(), RemoteClient.Listener {
 
     private fun updateDragLockUi() {
         btnDragLock.setBackgroundResource(
-            if (isDragLocked) R.drawable.bg_btn_accent else R.drawable.bg_btn_dark
+            if (isDragLocked) R.drawable.bg_btn_accent else R.drawable.bg_card
         )
-        btnDragLock.text = if (isDragLocked) "Sürükle: AÇIK" else "Sürükle"
+        btnDragLock.setTextColor(
+            if (isDragLocked) 0xFFFFFFFF.toInt() else ContextCompat.getColor(this, R.color.ink_secondary)
+        )
+        btnDragLock.text = if (isDragLocked) "Sürükle: Açık" else "Sürükle"
     }
 
-    private fun setupMediaAndPresentation() {
-        // Media buttons
-        findViewById<View>(R.id.btnMediaPrev).setOnClickListener {
-            client.sendMedia("prev"); haptics.click()
+    private fun setupMediaAndTools() {
+        // Media
+        findViewById<View>(R.id.btnMediaPrev).setOnClickListener { client.sendMedia("prev"); haptics.click() }
+        findViewById<View>(R.id.btnMediaPlayPause).setOnClickListener { client.sendMedia("play_pause"); haptics.click() }
+        findViewById<View>(R.id.btnMediaNext).setOnClickListener { client.sendMedia("next"); haptics.click() }
+        findViewById<View>(R.id.btnVolDown).setOnClickListener { client.sendMedia("vol_down"); haptics.click() }
+        findViewById<View>(R.id.btnVolMute).setOnClickListener { client.sendMedia("mute"); haptics.click() }
+        findViewById<View>(R.id.btnVolUp).setOnClickListener { client.sendMedia("vol_up"); haptics.click() }
+
+        // Clipboard Sync
+        findViewById<View>(R.id.btnClipSend).setOnClickListener {
+            val cm = getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
+            val text = cm?.primaryClip?.getItemAt(0)?.coerceToText(this)?.toString()?.trim()
+            if (text.isNullOrEmpty()) {
+                Toast.makeText(this, "Telefon panosu boş", Toast.LENGTH_SHORT).show()
+            } else if (text.startsWith("http://", true) || text.startsWith("https://", true)) {
+                client.sendOpenUrl(text)
+                Toast.makeText(this, "Link PC'de açıldı", Toast.LENGTH_SHORT).show()
+            } else {
+                client.sendClipboardSet(text, paste = true)
+            }
+            haptics.click()
         }
-        findViewById<View>(R.id.btnMediaPlayPause).setOnClickListener {
-            client.sendMedia("play_pause"); haptics.click()
-        }
-        findViewById<View>(R.id.btnMediaNext).setOnClickListener {
-            client.sendMedia("next"); haptics.click()
-        }
-        findViewById<View>(R.id.btnVolDown).setOnClickListener {
-            client.sendMedia("vol_down"); haptics.click()
-        }
-        findViewById<View>(R.id.btnVolMute).setOnClickListener {
-            client.sendMedia("mute"); haptics.click()
-        }
-        findViewById<View>(R.id.btnVolUp).setOnClickListener {
-            client.sendMedia("vol_up"); haptics.click()
+        findViewById<View>(R.id.btnClipGet).setOnClickListener {
+            client.sendClipboardGet()
+            haptics.click()
         }
 
-        // Presentation buttons
-        findViewById<View>(R.id.btnPresPrev).setOnClickListener {
-            client.sendPresentation("prev"); haptics.click()
-        }
-        findViewById<View>(R.id.btnPresNext).setOnClickListener {
-            client.sendPresentation("next"); haptics.click()
-        }
-        findViewById<View>(R.id.btnPresStart).setOnClickListener {
-            client.sendPresentation("start"); haptics.click()
-        }
-        findViewById<View>(R.id.btnPresStop).setOnClickListener {
-            client.sendPresentation("stop"); haptics.click()
-        }
-        findViewById<View>(R.id.btnPresBlack).setOnClickListener {
-            client.sendPresentation("blank_black"); haptics.click()
-        }
+        // Presentation
+        findViewById<View>(R.id.btnPresPrev).setOnClickListener { client.sendPresentation("prev"); haptics.click() }
+        findViewById<View>(R.id.btnPresNext).setOnClickListener { client.sendPresentation("next"); haptics.click() }
+        findViewById<View>(R.id.btnPresStart).setOnClickListener { client.sendPresentation("start"); haptics.click() }
+        findViewById<View>(R.id.btnPresStop).setOnClickListener { client.sendPresentation("stop"); haptics.click() }
+        findViewById<View>(R.id.btnPresBlack).setOnClickListener { client.sendPresentation("blank_black"); haptics.click() }
 
-        // Quick shortcuts
-        findViewById<View>(R.id.btnMacroCopy).setOnClickListener {
-            client.sendMacro(listOf("ctrl", "c")); haptics.click()
-        }
-        findViewById<View>(R.id.btnMacroPaste).setOnClickListener {
-            client.sendMacro(listOf("ctrl", "v")); haptics.click()
-        }
-        findViewById<View>(R.id.btnMacroUndo).setOnClickListener {
-            client.sendMacro(listOf("ctrl", "z")); haptics.click()
-        }
-        findViewById<View>(R.id.btnMacroDesktop).setOnClickListener {
-            client.sendMacro(listOf("win", "d")); haptics.click()
-        }
-        findViewById<View>(R.id.btnMacroTaskView).setOnClickListener {
-            client.sendMacro(listOf("win", "tab")); haptics.click()
-        }
-        findViewById<View>(R.id.btnMacroClose).setOnClickListener {
-            client.sendMacro(listOf("alt", "f4")); haptics.click()
+        // Quick App Launcher
+        findViewById<View>(R.id.btnLaunchBrowser).setOnClickListener { client.sendLaunchApp("browser"); haptics.click() }
+        findViewById<View>(R.id.btnLaunchYoutube).setOnClickListener { client.sendLaunchApp("youtube"); haptics.click() }
+        findViewById<View>(R.id.btnLaunchSpotify).setOnClickListener { client.sendLaunchApp("spotify"); haptics.click() }
+        findViewById<View>(R.id.btnLaunchExplorer).setOnClickListener { client.sendLaunchApp("explorer"); haptics.click() }
+        findViewById<View>(R.id.btnLaunchTaskMgr).setOnClickListener { client.sendLaunchApp("taskmgr"); haptics.click() }
+        findViewById<View>(R.id.btnLaunchSettings).setOnClickListener { client.sendLaunchApp("settings"); haptics.click() }
+
+        // Shortcuts
+        findViewById<View>(R.id.btnMacroCopy).setOnClickListener { client.sendMacro(listOf("ctrl", "c")); haptics.click() }
+        findViewById<View>(R.id.btnMacroPaste).setOnClickListener { client.sendMacro(listOf("ctrl", "v")); haptics.click() }
+        findViewById<View>(R.id.btnMacroUndo).setOnClickListener { client.sendMacro(listOf("ctrl", "z")); haptics.click() }
+        findViewById<View>(R.id.btnMacroDesktop).setOnClickListener { client.sendMacro(listOf("win", "d")); haptics.click() }
+        findViewById<View>(R.id.btnMacroTaskView).setOnClickListener { client.sendMacro(listOf("win", "tab")); haptics.click() }
+        findViewById<View>(R.id.btnMacroClose).setOnClickListener { client.sendMacro(listOf("alt", "f4")); haptics.click() }
+
+        // System Power
+        findViewById<View>(R.id.btnPowerLock).setOnClickListener { client.sendSystemPower("lock"); haptics.rightClick() }
+        findViewById<View>(R.id.btnPowerDisplayOff).setOnClickListener { client.sendSystemPower("display_off"); haptics.rightClick() }
+        findViewById<View>(R.id.btnPowerSleep).setOnClickListener {
+            AlertDialog.Builder(this, R.style.Theme_RemotePCPlus_Dialog)
+                .setTitle("Uyku Modu")
+                .setMessage("Bilgisayarı uyku moduna almak istiyor musunuz?")
+                .setPositiveButton("Uyku Moduna Al") { _, _ ->
+                    client.sendSystemPower("sleep")
+                    haptics.rightClick()
+                }
+                .setNegativeButton("İptal", null)
+                .show()
         }
     }
 
@@ -332,11 +357,7 @@ class MainActivity : AppCompatActivity(), RemoteClient.Listener {
         if (monitors.size <= 1) return
         var idx = monitors.indexOfFirst { it.id == currentMonitorId }
         if (idx == -1) idx = 0
-        idx = if (direction == "next") {
-            (idx + 1) % monitors.size
-        } else {
-            (idx - 1 + monitors.size) % monitors.size
-        }
+        idx = if (direction == "next") (idx + 1) % monitors.size else (idx - 1 + monitors.size) % monitors.size
         val target = monitors[idx]
         currentMonitorId = target.id
         client.sendMonitorJump(target.id)
@@ -352,18 +373,18 @@ class MainActivity : AppCompatActivity(), RemoteClient.Listener {
         }
         monitorBar.visibility = View.VISIBLE
         val density = resources.displayMetrics.density
+        val inkPrimary = ContextCompat.getColor(this, R.color.ink_primary)
         for (m in monitors) {
+            val active = m.id == currentMonitorId
             val btn = Button(this).apply {
                 text = "${m.name} (${m.width}x${m.height})"
                 textSize = 11f
                 isAllCaps = false
-                setPadding((10 * density).toInt(), (4 * density).toInt(), (10 * density).toInt(), (4 * density).toInt())
+                setPadding((12 * density).toInt(), (4 * density).toInt(), (12 * density).toInt(), (4 * density).toInt())
                 minHeight = 0
                 minimumHeight = (30 * density).toInt()
-                setBackgroundResource(
-                    if (m.id == currentMonitorId) R.drawable.bg_tab_active else R.drawable.bg_btn_dark
-                )
-                setTextColor(if (m.id == currentMonitorId) 0xFFFFFFFF.toInt() else 0xFFCBD5E1.toInt())
+                setBackgroundResource(if (active) R.drawable.bg_btn_accent else R.drawable.bg_card)
+                setTextColor(if (active) 0xFFFFFFFF.toInt() else inkPrimary)
                 setOnClickListener {
                     currentMonitorId = m.id
                     client.sendMonitorJump(m.id)
@@ -374,14 +395,11 @@ class MainActivity : AppCompatActivity(), RemoteClient.Listener {
             val lp = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.WRAP_CONTENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
-            ).apply {
-                marginEnd = (6 * density).toInt()
-            }
+            ).apply { marginEnd = (6 * density).toInt() }
             monitorChipsContainer.addView(btn, lp)
         }
     }
 
-    // === Hardware Volume Keys ===
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
         if (client.state == ConnectionState.CONNECTED) {
             if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
@@ -408,14 +426,14 @@ class MainActivity : AppCompatActivity(), RemoteClient.Listener {
 
             ConnectionState.CONNECTING -> {
                 statusDot.setBackgroundResource(R.drawable.dot_yellow)
-                tvPing.text = "..."
-                tvPing.setTextColor(0xFFFBBF24.toInt())
+                tvPing.text = "Bağlanıyor"
+                tvPing.setTextColor(ContextCompat.getColor(this, R.color.signal_orange))
             }
 
             ConnectionState.DISCONNECTED -> {
                 statusDot.setBackgroundResource(R.drawable.dot_red)
                 tvPing.text = "Bağlı değil"
-                tvPing.setTextColor(0xFFEF4444.toInt())
+                tvPing.setTextColor(ContextCompat.getColor(this, R.color.signal_red))
             }
         }
     }
@@ -435,8 +453,7 @@ class MainActivity : AppCompatActivity(), RemoteClient.Listener {
 
     override fun onContextUpdated(context: String, processName: String, windowTitle: String) {
         val label = when {
-            windowTitle.isNotBlank() && processName.isNotBlank() ->
-                "${processName.uppercase()}: $windowTitle"
+            windowTitle.isNotBlank() && processName.isNotBlank() -> "${processName.uppercase()}: $windowTitle"
             processName.isNotBlank() -> processName.uppercase()
             else -> "Masaüstü"
         }
@@ -445,22 +462,17 @@ class MainActivity : AppCompatActivity(), RemoteClient.Listener {
 
     override fun onPingUpdated(rttMs: Long) {
         tvPing.text = "${rttMs}ms"
-        tvPing.setTextColor(
-            when {
-                rttMs < 25 -> 0xFF10B981.toInt()
-                rttMs < 70 -> 0xFFFBBF24.toInt()
-                else -> 0xFFEF4444.toInt()
-            }
-        )
+        val colorRes = when {
+            rttMs < 25 -> R.color.signal_green
+            rttMs < 70 -> R.color.signal_orange
+            else -> R.color.signal_red
+        }
+        tvPing.setTextColor(ContextCompat.getColor(this, colorRes))
     }
 
     override fun onAuthRequired() {
         val savedPin = prefs.pin
-        if (savedPin.isNotBlank()) {
-            client.sendAuth(savedPin)
-        } else {
-            showPinDialog(null)
-        }
+        if (savedPin.isNotBlank()) client.sendAuth(savedPin) else showPinDialog(null)
     }
 
     override fun onAuthResult(success: Boolean, error: String?) {
@@ -468,7 +480,23 @@ class MainActivity : AppCompatActivity(), RemoteClient.Listener {
             Toast.makeText(this, "PIN doğrulandı", Toast.LENGTH_SHORT).show()
         } else {
             prefs.pin = ""
-            showPinDialog(error ?: "Hatalı PIN!")
+            showPinDialog(error ?: "Hatalı PIN")
+        }
+    }
+
+    override fun onClipboardReceived(text: String) {
+        if (text.isBlank()) {
+            Toast.makeText(this, "PC panosu boş", Toast.LENGTH_SHORT).show()
+            return
+        }
+        val cm = getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
+        cm?.setPrimaryClip(ClipData.newPlainText("RemotePC+", text))
+        Toast.makeText(this, "PC panosu kopyalandı", Toast.LENGTH_SHORT).show()
+    }
+
+    override fun onClipboardAck(success: Boolean, pasted: Boolean) {
+        if (success) {
+            Toast.makeText(this, if (pasted) "PC'ye yapıştırıldı" else "PC panosuna kopyalandı", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -476,7 +504,7 @@ class MainActivity : AppCompatActivity(), RemoteClient.Listener {
         if (autoRediscoverRunning) return
         autoRediscoverRunning = true
         uiScope.launch {
-            val found = DiscoveryManager.discoverPcs(this@MainActivity, timeoutMs = 2000)
+            val found = DiscoveryManager.discoverPcs(this@MainActivity, prefs.port)
             autoRediscoverRunning = false
             if (found.isNotEmpty() && client.state != ConnectionState.CONNECTED) {
                 val match = found.firstOrNull {
@@ -484,11 +512,7 @@ class MainActivity : AppCompatActivity(), RemoteClient.Listener {
                 } ?: found.first()
                 if (match.ip != prefs.host || match.httpPort != prefs.port) {
                     prefs.savePc(match.name, match.ip, match.httpPort)
-                    Toast.makeText(
-                        this@MainActivity,
-                        "PC yeni IP'de bulundu: ${match.ip}",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    Toast.makeText(this@MainActivity, "Bağlandı: ${match.name} (${match.ip})", Toast.LENGTH_SHORT).show()
                     connectToSavedPc()
                 }
             }
@@ -517,17 +541,16 @@ class MainActivity : AppCompatActivity(), RemoteClient.Listener {
             discoveredList.removeAllViews()
             btnRescan.isEnabled = false
             uiScope.launch {
-                val pcs = DiscoveryManager.discoverPcs(this@MainActivity)
+                val pcs = DiscoveryManager.discoverPcs(this@MainActivity, prefs.port)
                 btnRescan.isEnabled = true
                 if (pcs.isEmpty()) {
-                    tvScanStatus.text =
-                        "Otomatik PC bulunamadı. PC'de RemotePC+ açık mı? (Aşağıdan IP ile bağlanabilirsin)"
+                    tvScanStatus.text = "Bilgisayar bulunamadı. PC'de RemotePC+ açık olmalı veya IP girin."
                 } else {
-                    tvScanStatus.text = "${pcs.size} bilgisayar bulundu — bağlanmak için dokun:"
+                    tvScanStatus.text = "${pcs.size} bilgisayar bulundu:"
                     val density = resources.displayMetrics.density
                     for (pc in pcs) {
                         val itemBtn = Button(this@MainActivity).apply {
-                            text = "${pc.name}  (${pc.ip}:${pc.httpPort})"
+                            text = "${pc.name}  •  ${pc.ip}"
                             isAllCaps = false
                             setBackgroundResource(R.drawable.bg_btn_accent)
                             setTextColor(0xFFFFFFFF.toInt())
@@ -567,9 +590,6 @@ class MainActivity : AppCompatActivity(), RemoteClient.Listener {
     private fun showKeyboardDialog() {
         val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_keyboard, null)
         val etText = dialogView.findViewById<EditText>(R.id.etKeyboardInput)
-        val btnSend = dialogView.findViewById<Button>(R.id.btnKbSend)
-        val btnEnter = dialogView.findViewById<Button>(R.id.btnKbEnter)
-        val btnBackspace = dialogView.findViewById<Button>(R.id.btnKbBackspace)
 
         fun sendCurrentText() {
             val text = etText.text.toString()
@@ -580,16 +600,17 @@ class MainActivity : AppCompatActivity(), RemoteClient.Listener {
             }
         }
 
-        btnSend.setOnClickListener { sendCurrentText() }
-        btnEnter.setOnClickListener {
-            sendCurrentText()
-            client.sendKey("enter")
-            haptics.click()
-        }
-        btnBackspace.setOnClickListener {
-            client.sendKey("backspace")
-            haptics.click()
-        }
+        dialogView.findViewById<View>(R.id.btnKbSend).setOnClickListener { sendCurrentText() }
+        dialogView.findViewById<View>(R.id.btnKbEnter).setOnClickListener { sendCurrentText(); client.sendKey("enter"); haptics.click() }
+        dialogView.findViewById<View>(R.id.btnKbBackspace).setOnClickListener { client.sendKey("backspace"); haptics.click() }
+        dialogView.findViewById<View>(R.id.btnKbEsc).setOnClickListener { client.sendKey("esc"); haptics.click() }
+        dialogView.findViewById<View>(R.id.btnKbTab).setOnClickListener { client.sendKey("tab"); haptics.click() }
+        dialogView.findViewById<View>(R.id.btnKbSpace).setOnClickListener { client.sendKey("space"); haptics.click() }
+        dialogView.findViewById<View>(R.id.btnKbLeft).setOnClickListener { client.sendKey("left"); haptics.click() }
+        dialogView.findViewById<View>(R.id.btnKbUp).setOnClickListener { client.sendKey("up"); haptics.click() }
+        dialogView.findViewById<View>(R.id.btnKbDown).setOnClickListener { client.sendKey("down"); haptics.click() }
+        dialogView.findViewById<View>(R.id.btnKbRight).setOnClickListener { client.sendKey("right"); haptics.click() }
+
         etText.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_SEND || actionId == EditorInfo.IME_ACTION_DONE) {
                 sendCurrentText()
@@ -605,11 +626,42 @@ class MainActivity : AppCompatActivity(), RemoteClient.Listener {
 
     private fun showSettingsDialog() {
         val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_settings, null)
+        val btnLight = dialogView.findViewById<Button>(R.id.btnThemeLight)
+        val btnDark = dialogView.findViewById<Button>(R.id.btnThemeDark)
+        val btnSystem = dialogView.findViewById<Button>(R.id.btnThemeSystem)
         val tvSens = dialogView.findViewById<TextView>(R.id.tvSensValue)
         val seekSens = dialogView.findViewById<SeekBar>(R.id.seekSens)
         val chkNatural = dialogView.findViewById<CheckBox>(R.id.chkNaturalScroll)
         val chkDrag = dialogView.findViewById<CheckBox>(R.id.chkDoubleTapDrag)
         val chkHaptics = dialogView.findViewById<CheckBox>(R.id.chkHaptics)
+
+        val primaryColor = ContextCompat.getColor(this, R.color.ink_primary)
+        val secondaryColor = ContextCompat.getColor(this, R.color.ink_secondary)
+
+        fun styleThemeTabs(selected: String) {
+            val map = listOf("light" to btnLight, "dark" to btnDark, "system" to btnSystem)
+            for ((k, b) in map) {
+                b.setBackgroundResource(if (k == selected) R.drawable.bg_tab_active else R.drawable.bg_tab_idle)
+                b.setTextColor(if (k == selected) primaryColor else secondaryColor)
+            }
+        }
+        styleThemeTabs(prefs.themeMode)
+
+        val dialog = AlertDialog.Builder(this, R.style.Theme_RemotePCPlus_Dialog)
+            .setView(dialogView)
+            .setPositiveButton("Tamam", null)
+            .create()
+
+        fun selectTheme(mode: String) {
+            if (prefs.themeMode != mode) {
+                prefs.themeMode = mode
+                dialog.dismiss()
+                applyThemeMode(mode)
+            }
+        }
+        btnLight.setOnClickListener { selectTheme("light") }
+        btnDark.setOnClickListener { selectTheme("dark") }
+        btnSystem.setOnClickListener { selectTheme("system") }
 
         val progressInit = ((prefs.sensitivity - 0.6f) / 0.1f).toInt().coerceIn(0, 34)
         seekSens.max = 34
@@ -629,34 +681,23 @@ class MainActivity : AppCompatActivity(), RemoteClient.Listener {
         })
 
         chkNatural.isChecked = prefs.naturalScroll
-        chkNatural.setOnCheckedChangeListener { _, checked ->
-            prefs.naturalScroll = checked
-            applyTouchpadPrefs()
-        }
+        chkNatural.setOnCheckedChangeListener { _, checked -> prefs.naturalScroll = checked; applyTouchpadPrefs() }
 
         chkDrag.isChecked = prefs.doubleTapDrag
-        chkDrag.setOnCheckedChangeListener { _, checked ->
-            prefs.doubleTapDrag = checked
-            applyTouchpadPrefs()
-        }
+        chkDrag.setOnCheckedChangeListener { _, checked -> prefs.doubleTapDrag = checked; applyTouchpadPrefs() }
 
         chkHaptics.isChecked = prefs.hapticsEnabled
-        chkHaptics.setOnCheckedChangeListener { _, checked ->
-            prefs.hapticsEnabled = checked
-        }
+        chkHaptics.setOnCheckedChangeListener { _, checked -> prefs.hapticsEnabled = checked }
 
-        AlertDialog.Builder(this, R.style.Theme_RemotePCPlus_Dialog)
-            .setView(dialogView)
-            .setPositiveButton("Tamam", null)
-            .show()
+        dialog.show()
     }
 
     private fun showPinDialog(errorMessage: String?) {
         val input = EditText(this).apply {
             inputType = InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_VARIATION_PASSWORD
             hint = "4 haneli PIN"
-            setTextColor(0xFFFFFFFF.toInt())
-            setHintTextColor(0xFF64748B.toInt())
+            setTextColor(ContextCompat.getColor(this@MainActivity, R.color.ink_primary))
+            setHintTextColor(ContextCompat.getColor(this@MainActivity, R.color.ink_tertiary))
             setPadding(40, 30, 40, 30)
         }
 

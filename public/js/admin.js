@@ -12,6 +12,7 @@ class AdminDashboard {
     }
 
     async init() {
+        this.initThemeToggle();
         await this.loadInfo();
         this.loadSelectedMonitorProfile();
         await this.loadQrCode();
@@ -20,6 +21,28 @@ class AdminDashboard {
 
         // Her 2 saniyede bir durumu guncelle
         setInterval(() => this.loadInfo(), 2000);
+    }
+
+    initThemeToggle() {
+        const btn = document.getElementById('admin-theme-toggle');
+        const apply = (theme) => {
+            if (theme === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                if (btn) btn.innerHTML = '<i class="fas fa-sun"></i>';
+            } else {
+                document.documentElement.removeAttribute('data-theme');
+                if (btn) btn.innerHTML = '<i class="fas fa-moon"></i>';
+            }
+            try { localStorage.setItem('rpc_theme', theme); } catch (e) {}
+            this.drawMonitorCanvas();
+        };
+        apply(localStorage.getItem('rpc_theme') || 'light');
+        if (btn) {
+            btn.addEventListener('click', () => {
+                const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+                apply(isDark ? 'light' : 'dark');
+            });
+        }
     }
 
     async loadInfo() {
@@ -160,23 +183,28 @@ class AdminDashboard {
             const drawW = m.width * scale;
             const drawH = m.height * scale;
 
-            // Ekran kutusu (macOS Displays Style)
-            this.ctx.fillStyle = m.isPrimary ? 'rgba(10, 132, 255, 0.16)' : 'rgba(255, 255, 255, 0.05)';
-            this.ctx.strokeStyle = m.isPrimary ? '#0A84FF' : 'rgba(255, 255, 255, 0.18)';
+            // Ekran kutusu (Apple Light & Dark uyumlu)
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            this.ctx.fillStyle = m.isPrimary
+                ? (isDark ? 'rgba(10, 132, 255, 0.18)' : 'rgba(0, 113, 227, 0.10)')
+                : (isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.03)');
+            this.ctx.strokeStyle = m.isPrimary
+                ? (isDark ? '#0A84FF' : '#0071E3')
+                : (isDark ? 'rgba(255, 255, 255, 0.18)' : 'rgba(0, 0, 0, 0.15)');
             this.ctx.lineWidth = 1.5;
 
             this.ctx.beginPath();
-            this.ctx.roundRect(drawX, drawY, drawW, drawH, 8);
+            this.ctx.roundRect(drawX, drawY, drawW, drawH, 10);
             this.ctx.fill();
             this.ctx.stroke();
 
             // Ekran etiketi
-            this.ctx.fillStyle = '#fff';
-            this.ctx.font = '12px Segoe UI, sans-serif';
+            this.ctx.fillStyle = isDark ? '#F5F5F7' : '#1D1D1F';
+            this.ctx.font = '600 12px "Plus Jakarta Sans", -apple-system, sans-serif';
             this.ctx.textAlign = 'center';
-            this.ctx.fillText(`${m.name}`, drawX + drawW / 2, drawY + drawH / 2 - 8);
-            this.ctx.fillStyle = '#888';
-            this.ctx.font = '10px Segoe UI, sans-serif';
+            this.ctx.fillText(`${m.name}`, drawX + drawW / 2, drawY + drawH / 2 - 7);
+            this.ctx.fillStyle = isDark ? '#98989D' : '#6E6E73';
+            this.ctx.font = '500 10px "JetBrains Mono", monospace';
             this.ctx.fillText(`${m.width}x${m.height} (${m.dpi || 1.5}x DPI)`, drawX + drawW / 2, drawY + drawH / 2 + 10);
         });
     }

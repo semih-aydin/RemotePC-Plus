@@ -39,6 +39,11 @@ class Prefs(context: Context) {
         get() = sp.getBoolean("haptics_enabled", true)
         set(value) = sp.edit().putBoolean("haptics_enabled", value).apply()
 
+    // "light" (apple.com default), "dark", "system"
+    var themeMode: String
+        get() = sp.getString("theme_mode", "light") ?: "light"
+        set(value) = sp.edit().putString("theme_mode", value).apply()
+
     fun hasSavedPc(): Boolean = host.isNotBlank()
 
     fun savePc(name: String, ip: String, port: Int) {

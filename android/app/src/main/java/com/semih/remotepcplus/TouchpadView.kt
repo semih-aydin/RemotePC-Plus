@@ -8,6 +8,7 @@ import android.os.SystemClock
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
+import androidx.core.content.ContextCompat
 import kotlin.math.abs
 import kotlin.math.hypot
 import kotlin.math.min
@@ -63,37 +64,37 @@ class TouchpadView @JvmOverloads constructor(
     private var contactX = 0f
     private var contactY = 0f
 
-    // Apple Magic Trackpad matte-glass surface paints
+    // Apple Magic Trackpad matte-glass surface paints (Light + Dark aware)
     private val bgPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = 0xFF1C1C1E.toInt()
+        color = ContextCompat.getColor(context, R.color.surface_card)
         style = Paint.Style.FILL
     }
     private val borderPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = 0xFF2C2C2E.toInt()
+        color = ContextCompat.getColor(context, R.color.border_hairline)
         style = Paint.Style.STROKE
         strokeWidth = 1f * density
     }
     private val dragBorderPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = 0xFF0A84FF.toInt()
+        color = ContextCompat.getColor(context, R.color.accent_blue)
         style = Paint.Style.STROKE
         strokeWidth = 2f * density
     }
     private val haloFillPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = 0x220A84FF
+        color = ContextCompat.getColor(context, R.color.accent_halo_fill)
         style = Paint.Style.FILL
     }
     private val haloRingPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = 0x660A84FF
+        color = ContextCompat.getColor(context, R.color.accent_halo_ring)
         style = Paint.Style.STROKE
         strokeWidth = 1f * density
     }
     private val hintTitlePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = 0xFF8E8E93.toInt()
+        color = ContextCompat.getColor(context, R.color.ink_secondary)
         textSize = 14f * density
         textAlign = Paint.Align.CENTER
     }
     private val hintSubPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = 0xFF636366.toInt()
+        color = ContextCompat.getColor(context, R.color.ink_tertiary)
         textSize = 11.5f * density
         textAlign = Paint.Align.CENTER
     }

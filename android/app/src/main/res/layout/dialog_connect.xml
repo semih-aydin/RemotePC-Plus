@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="#1C1C1E"
+    android:background="@color/surface_card"
     android:orientation="vertical"
     android:padding="20dp">
 
@@ -23,7 +23,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
             android:text="Bilgisayara Bağlan"
-            android:textColor="#F5F5F7"
+            android:textColor="@color/ink_primary"
             android:textSize="17sp"
             android:textStyle="bold" />
     </LinearLayout>
@@ -32,10 +32,10 @@
         android:id="@+id/tvScanStatus"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="10dp"
         android:text="Ağdaki bilgisayarlar taranıyor..."
-        android:textColor="#94A3B8"
-        android:textSize="12sp" />
+        android:textColor="@color/ink_secondary"
+        android:textSize="12.5sp" />
 
     <LinearLayout
         android:id="@+id/discoveredList"
@@ -47,26 +47,27 @@
     <Button
         android:id="@+id/btnRescan"
         android:layout_width="match_parent"
-        android:layout_height="40dp"
+        android:layout_height="42dp"
         android:layout_marginTop="4dp"
         android:background="@drawable/bg_btn_dark"
-        android:text="Tekrar Tara (Wi-Fi)"
+        android:text="Tekrar Tara"
         android:textAllCaps="false"
-        android:textColor="#E2E8F0"
-        android:textSize="13sp" />
+        android:textColor="@color/ink_primary"
+        android:textSize="13sp"
+        android:textStyle="bold" />
 
     <View
         android:layout_width="match_parent"
-        android:layout_height="1dp"
+        android:layout_height="0.5dp"
         android:layout_marginTop="14dp"
         android:layout_marginBottom="12dp"
-        android:background="#232B3A" />
+        android:background="@color/border_hairline" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Manuel IP ile Bağlan"
-        android:textColor="#94A3B8"
+        android:text="Manuel IP"
+        android:textColor="@color/ink_secondary"
         android:textSize="12sp"
         android:textStyle="bold" />
 
@@ -82,13 +83,13 @@
             android:layout_height="44dp"
             android:layout_marginEnd="6dp"
             android:layout_weight="2"
-            android:background="@drawable/bg_pill"
+            android:background="@drawable/bg_btn_dark"
             android:hint="192.168.1.x"
             android:inputType="textUri"
             android:paddingStart="12dp"
             android:paddingEnd="12dp"
-            android:textColor="#FFFFFF"
-            android:textColorHint="#64748B"
+            android:textColor="@color/ink_primary"
+            android:textColorHint="@color/ink_tertiary"
             android:textSize="14sp" />
 
         <EditText
@@ -96,13 +97,13 @@
             android:layout_width="0dp"
             android:layout_height="44dp"
             android:layout_weight="1"
-            android:background="@drawable/bg_pill"
+            android:background="@drawable/bg_btn_dark"
             android:hint="5000"
             android:inputType="number"
             android:paddingStart="10dp"
             android:paddingEnd="10dp"
-            android:textColor="#FFFFFF"
-            android:textColorHint="#64748B"
+            android:textColor="@color/ink_primary"
+            android:textColorHint="@color/ink_tertiary"
             android:textSize="14sp" />
     </LinearLayout>
 
@@ -112,7 +113,7 @@
         android:layout_height="44dp"
         android:layout_marginTop="10dp"
         android:background="@drawable/bg_btn_accent"
-        android:text="Kaydet ve Bağlan"
+        android:text="Bağlan"
         android:textAllCaps="false"
         android:textColor="#FFFFFF"
         android:textSize="14sp"

@@ -2,22 +2,80 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="#1C1C1E"
+    android:background="@color/surface_card"
     android:orientation="vertical"
     android:padding="20dp">
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Touchpad Ayarları"
-        android:textColor="#FFFFFF"
+        android:text="Ayarlar"
+        android:textColor="@color/ink_primary"
         android:textSize="17sp"
+        android:textStyle="bold" />
+
+    <!-- Görünüm / Tema Seçici -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="14dp"
+        android:text="Görünüm"
+        android:textColor="@color/ink_secondary"
+        android:textSize="12sp"
         android:textStyle="bold" />
 
     <LinearLayout
         android:layout_width="match_parent"
+        android:layout_height="38dp"
+        android:layout_marginTop="6dp"
+        android:background="@drawable/bg_pill"
+        android:orientation="horizontal"
+        android:padding="3dp">
+
+        <Button
+            android:id="@+id/btnThemeLight"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@drawable/bg_tab_active"
+            android:minHeight="0dp"
+            android:text="Açık"
+            android:textAllCaps="false"
+            android:textColor="@color/ink_primary"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/btnThemeDark"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@drawable/bg_tab_idle"
+            android:minHeight="0dp"
+            android:text="Koyu"
+            android:textAllCaps="false"
+            android:textColor="@color/ink_secondary"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/btnThemeSystem"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@drawable/bg_tab_idle"
+            android:minHeight="0dp"
+            android:text="Sistem"
+            android:textAllCaps="false"
+            android:textColor="@color/ink_secondary"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="14dp"
+        android:layout_marginTop="16dp"
         android:orientation="horizontal">
 
         <TextView
@@ -25,7 +83,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="İmleç Hassasiyeti"
-            android:textColor="#E2E8F0"
+            android:textColor="@color/ink_primary"
             android:textSize="14sp" />
 
         <TextView
@@ -34,7 +92,7 @@
             android:layout_height="wrap_content"
             android:fontFamily="monospace"
             android:text="1.4x"
-            android:textColor="#0A84FF"
+            android:textColor="@color/accent_blue"
             android:textSize="14sp"
             android:textStyle="bold" />
     </LinearLayout>
@@ -51,7 +109,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
         android:text="Doğal Kaydırma (Natural Scroll)"
-        android:textColor="#E2E8F0"
+        android:textColor="@color/ink_primary"
         android:textSize="14sp" />
 
     <CheckBox
@@ -60,7 +118,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="6dp"
         android:text="Çift Dokunarak Sürükleme"
-        android:textColor="#E2E8F0"
+        android:textColor="@color/ink_primary"
         android:textSize="14sp" />
 
     <CheckBox
@@ -69,6 +127,6 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="6dp"
         android:text="Titreşim Geri Bildirimi"
-        android:textColor="#E2E8F0"
+        android:textColor="@color/ink_primary"
         android:textSize="14sp" />
 </LinearLayout>

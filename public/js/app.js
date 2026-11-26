@@ -29,6 +29,8 @@ class RemoteApp {
         this.initPinAuth();
         this.initWakeLock();
         this.initHardwareKeys();
+        this.initThemeToggle();
+        this.initPowerTools();
     }
 
     // WebSocket Bağlantısı Kur
@@ -158,6 +160,25 @@ class RemoteApp {
 
             case 'loupe_frame':
                 if (window.magnifier) window.magnifier.handleFrame(msg);
+                break;
+
+            case 'clipboard_data':
+                if (msg.text) {
+                    const inp = document.getElementById('clipboard-send-input');
+                    if (inp) inp.value = msg.text;
+                    if (navigator.clipboard && navigator.clipboard.writeText) {
+                        navigator.clipboard.writeText(msg.text).catch(() => {});
+                    }
+                    this.showToast('PC panosu alındı', 'success');
+                } else {
+                    this.showToast('PC panosu boş');
+                }
+                break;
+
+            case 'clipboard_ack':
+                if (msg.success) {
+                    this.showToast(msg.pasted ? 'PC\'ye yapıştırıldı' : 'PC panosuna kopyalandı', 'success');
+                }
                 break;
         }
     }
@@ -555,6 +576,82 @@ class RemoteApp {
                     e.preventDefault();
                 }
             }
+        });
+    }
+
+    initThemeToggle() {
+        const btn = document.getElementById('btn-theme-toggle');
+        const apply = (theme) => {
+            if (theme === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                if (btn) btn.innerHTML = '<i class="fas fa-sun"></i>';
+            } else {
+                document.documentElement.removeAttribute('data-theme');
+                if (btn) btn.innerHTML = '<i class="fas fa-moon"></i>';
+            }
+            try { localStorage.setItem('rpc_theme', theme); } catch (e) {}
+        };
+        const saved = localStorage.getItem('rpc_theme') || 'light';
+        apply(saved);
+        if (btn) {
+            btn.addEventListener('click', () => {
+                const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+                apply(isDark ? 'light' : 'dark');
+                window.haptics.click();
+            });
+        }
+    }
+
+    initPowerTools() {
+        const clipInp = document.getElementById('clipboard-send-input');
+        const btnSend = document.getElementById('btn-clip-send');
+        const btnPaste = document.getElementById('btn-clip-paste');
+        const btnGet = document.getElementById('btn-clip-get');
+
+        if (btnSend && clipInp) {
+            btnSend.addEventListener('click', () => {
+                const val = clipInp.value.trim();
+                if (!val) return;
+                if (/^https?:\/\//i.test(val)) {
+                    this.send({ type: 'open_url', url: val });
+                    this.showToast('Link PC\'de açıldı', 'success');
+                } else {
+                    this.send({ type: 'clipboard_set', text: val, paste: false });
+                }
+                window.haptics.click();
+            });
+        }
+        if (btnPaste && clipInp) {
+            btnPaste.addEventListener('click', () => {
+                const val = clipInp.value;
+                if (!val) return;
+                this.send({ type: 'clipboard_set', text: val, paste: true });
+                window.haptics.click();
+            });
+        }
+        if (btnGet) {
+            btnGet.addEventListener('click', () => {
+                this.send({ type: 'clipboard_get' });
+                window.haptics.click();
+            });
+        }
+
+        document.querySelectorAll('[data-launch-app]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const app = btn.getAttribute('data-launch-app');
+                this.send({ type: 'launch_app', app });
+                window.haptics.click();
+                this.showToast(`Açılıyor: ${app}`);
+            });
+        });
+
+        document.querySelectorAll('[data-power-action]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const action = btn.getAttribute('data-power-action');
+                if (action === 'sleep' && !confirm('Bilgisayarı uyku moduna almak istiyor musunuz?')) return;
+                this.send({ type: 'system_power', action });
+                window.haptics.rightClick();
+            });
         });
     }
 

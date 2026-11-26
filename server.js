@@ -27,26 +27,47 @@ try {
 const HTTP_PORT = process.env.PORT || settings.httpPort || 5000;
 const HTTPS_PORT = process.env.HTTPS_PORT || settings.httpsPort || 5443;
 
-// Yerel IP adresini bulalim (Wi-Fi veya Ethernet)
-function getLocalIpAddress() {
+const { execSync, exec } = require('child_process');
+
+// Sanal ag adaptörlerini (WSL, Hyper-V, Docker, VMware, VirtualBox, VPN) eleyerek gercek Wi-Fi/Ethernet LAN IP'lerini bul
+function getAllLanIps() {
     const interfaces = os.networkInterfaces();
-    for (const name of Object.keys(interfaces)) {
-        for (const iface of interfaces[name]) {
-            // Sadece IPv4 ve loopback olmayanlari alalim
-            if (iface.family === 'IPv4' && !iface.internal) {
-                return iface.address;
-            }
+    const candidates = [];
+    const virtualPattern = /(vethernet|wsl|docker|hyper-v|virtualbox|vmware|vbox|loopback|tailscale|zerotier|hamachi|nordlynx|wireguard|tun|tap|bluetooth)/i;
+
+    for (const [name, addrs] of Object.entries(interfaces)) {
+        if (!addrs) continue;
+        for (const iface of addrs) {
+            if (iface.family !== 'IPv4' || iface.internal) continue;
+            if (iface.address.startsWith('169.254.')) continue; // APIPA
+
+            let score = 0;
+            if (virtualPattern.test(name)) score -= 100;
+            if (/wi-?fi|wlan|wireless/i.test(name)) score += 50;
+            if (/ethernet|lan/i.test(name)) score += 45;
+            if (iface.address.startsWith('192.168.')) score += 30;
+            else if (iface.address.startsWith('10.')) score += 20;
+            else if (/^172\.(1[6-9]|2\d|3[0-1])\./.test(iface.address)) score += 10;
+
+            candidates.push({ name, address: iface.address, score });
         }
     }
-    return '127.0.0.1';
+
+    candidates.sort((a, b) => b.score - a.score);
+    return candidates;
 }
 
-const localIp = getLocalIpAddress();
+function getLocalIpAddress() {
+    const all = getAllLanIps();
+    return all.length > 0 ? all[0].address : '127.0.0.1';
+}
+
+const lanInterfaces = getAllLanIps();
+const localIp = lanInterfaces.length > 0 ? lanInterfaces[0].address : '127.0.0.1';
 const httpUrl = `http://${localIp}:${HTTP_PORT}`;
 const httpsUrl = `https://${localIp}:${HTTPS_PORT}`;
 
 // Gecerli modern TLS sertifikasi olustur veya yukle (ERR_SSL_VERSION_OR_CIPHER_MISMATCH hatasini onler)
-const { execSync } = require('child_process');
 
 function getOrGenerateCert(ip) {
     const certPath = path.join(__dirname, 'server.pfx');
@@ -310,6 +331,67 @@ function handleWebSocketConnection(ws, req) {
                         serverTime: Date.now()
                     }));
                     break;
+
+                // === YENI PRO OZELLIKLER: PANO, UYGULAMA ACICI, GUC KONTROLU ===
+                case 'clipboard_set':
+                    if (typeof data.text === 'string' && data.text.length <= 20000) {
+                        const b64 = Buffer.from(data.text, 'utf16le').toString('base64');
+                        const ps = `$t=[System.Text.Encoding]::Unicode.GetString([System.Convert]::FromBase64String('${b64}')); Set-Clipboard -Value $t`;
+                        exec(`powershell -NoProfile -Command "${ps}"`, (err) => {
+                            if (!err && data.paste) {
+                                win32.runCombo(['ctrl', 'v']);
+                            }
+                            ws.send(JSON.stringify({ type: 'clipboard_ack', success: !err, pasted: !!data.paste }));
+                        });
+                    }
+                    break;
+
+                case 'clipboard_get':
+                    exec('powershell -NoProfile -Command "[Console]::OutputEncoding=[System.Text.Encoding]::UTF8; Get-Clipboard -Raw"', { encoding: 'utf8' }, (err, stdout) => {
+                        ws.send(JSON.stringify({
+                            type: 'clipboard_data',
+                            text: err ? '' : (stdout || '').trim()
+                        }));
+                    });
+                    break;
+
+                case 'open_url':
+                    if (typeof data.url === 'string' && /^https?:\/\//i.test(data.url.trim())) {
+                        const safeUrl = data.url.trim().replace(/"/g, '');
+                        exec(`start "" "${safeUrl}"`, { shell: 'cmd.exe' });
+                        log('INFO', 'ACTION:URL', safeUrl);
+                    }
+                    break;
+
+                case 'launch_app': {
+                    const appCommands = {
+                        browser: 'start "" "https://www.google.com"',
+                        youtube: 'start "" "https://www.youtube.com"',
+                        spotify: 'start "" "spotify:"',
+                        explorer: 'start "" explorer.exe',
+                        notepad: 'start "" notepad.exe',
+                        calc: 'start "" calc.exe',
+                        settings: 'start "" ms-settings:',
+                        taskmgr: 'start "" taskmgr.exe'
+                    };
+                    const cmd = appCommands[data.app];
+                    if (cmd) {
+                        exec(cmd, { shell: 'cmd.exe' });
+                        log('INFO', 'ACTION:APP', `launch=${data.app}`);
+                    }
+                    break;
+                }
+
+                case 'system_power':
+                    log('INFO', 'ACTION:POWER', `action=${data.action}`);
+                    if (data.action === 'lock') {
+                        exec('rundll32.exe user32.dll,LockWorkStation');
+                    } else if (data.action === 'sleep') {
+                        exec('powershell -NoProfile -Command "Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.Application]::SetSuspendState([System.Windows.Forms.PowerState]::Suspend, $false, $false)"');
+                    } else if (data.action === 'display_off') {
+                        exec('powershell -NoProfile -Command "(Add-Type \'[DllImport(\\\"user32.dll\\\")]public static extern int SendMessage(int h,int m,int w,int l);\' -Name a -Pas)::SendMessage(-1,0x0112,0xF170,2)"');
+                    }
+                    break;
             }
         } catch (err) {
             log('ERROR', 'WS:MSG_ERR', err.message);
@@ -348,11 +430,26 @@ appDetector.on('contextChange', (info) => {
     }
 });
 
+// Hizli kesif (Discovery) ping ucu — Android/Web istemcilerin LAN taramasinda <5ms'de dogrulamasi icin
+app.get('/api/ping', (req, res) => {
+    res.json({
+        app: 'RemotePC+',
+        version: '2.1.0',
+        name: os.hostname(),
+        ip: localIp,
+        ips: lanInterfaces.map(i => i.address),
+        httpPort: HTTP_PORT,
+        httpsPort: HTTPS_PORT
+    });
+});
+
 // REST API Uclari
 app.get('/api/info', (req, res) => {
     res.json({
-        appName: 'Universal Wireless Control Hub (Remote-PC-Plus)',
+        appName: 'RemotePC+',
+        hostname: os.hostname(),
         localIp: localIp,
+        allIps: lanInterfaces,
         httpUrl: httpUrl,
         httpsUrl: httpsUrl,
         clientsCount: allClients.size,
@@ -442,9 +539,16 @@ udpServer.on('error', (err) => {
 udpServer.on('message', (msg, rinfo) => {
     const messageStr = msg.toString();
     if (messageStr.includes('DISCOVER_REMOTEPC')) {
+        // Istegi gonderen telefonla ayni /24 alt agindaki IP'yi sec (en dogru IP garantisi)
+        const remotePrefix = (rinfo.address || '').split('.').slice(0, 3).join('.');
+        const matchingIface = lanInterfaces.find(i => i.address.startsWith(remotePrefix + '.'));
+        const bestIp = matchingIface ? matchingIface.address : localIp;
+
         const responseData = JSON.stringify({
+            app: 'RemotePC+',
             name: os.hostname(),
-            ip: localIp,
+            ip: bestIp,
+            ips: lanInterfaces.map(i => i.address),
             httpPort: HTTP_PORT,
             httpsPort: HTTPS_PORT
         });
@@ -459,13 +563,16 @@ udpServer.bind(5055, () => {
     } catch (e) {}
 });
 
-// Sunuculari baslat
-httpServer.listen(HTTP_PORT, () => {
-    console.log(`[HTTP] Sunucu baslatildi: ${httpUrl}`);
+// Sunuculari 0.0.0.0 uzerinde baslat (tum yerel ag arayuzlerinden erisim garantisi)
+httpServer.listen(HTTP_PORT, '0.0.0.0', () => {
+    console.log(`[HTTP] Sunucu baslatildi: ${httpUrl} (Bind: 0.0.0.0:${HTTP_PORT})`);
+    if (lanInterfaces.length > 1) {
+        console.log(`[NET] Tum algilanan LAN IP'leri: ${lanInterfaces.map(i => `${i.address} (${i.name})`).join(', ')}`);
+    }
 });
 
 if (httpsServer) {
-    httpsServer.listen(HTTPS_PORT, () => {
+    httpsServer.listen(HTTPS_PORT, '0.0.0.0', () => {
         console.log(`[HTTPS] Guvenli sunucu baslatildi: ${httpsUrl}`);
     });
 }
