@@ -1,122 +1,80 @@
 <div align="center">
 
-<img src="public/assets/logo.svg" alt="RemotePC+ Logo" width="88" height="88" />
+<img src="public/assets/logo.svg" alt="RemotePC+" width="84" height="84" />
 
 # RemotePC+
 
-**Zero-latency wireless Magic Trackpad, multi-monitor controller, and media/presentation remote for Windows.**
+**Wireless trackpad, multi-monitor controller, and media remote for Windows.**
 
-[![Build Android APK](https://github.com/semih-aydin/RemotePC-Plus/actions/workflows/build-apk.yml/badge.svg)](https://github.com/semih-aydin/RemotePC-Plus/actions/workflows/build-apk.yml)
-[![Node.js](https://img.shields.io/badge/Node.js-18%2B-1C1C1E?style=flat-square&logo=nodedotjs&logoColor=30D158)](https://nodejs.org)
-[![Android](https://img.shields.io/badge/Android-Native_Kotlin-1C1C1E?style=flat-square&logo=android&logoColor=0A84FF)](android/)
-[![Windows](https://img.shields.io/badge/Windows-Win32_FFI_%26_Tray-1C1C1E?style=flat-square&logo=windows&logoColor=F5F5F7)](tray/)
+[![Download Latest](https://img.shields.io/github/v/release/semih-aydin/RemotePC-Plus?label=Download&color=0A84FF&style=flat-square)](https://github.com/semih-aydin/RemotePC-Plus/releases/latest)
+[![Build](https://github.com/semih-aydin/RemotePC-Plus/actions/workflows/build-apk.yml/badge.svg)](https://github.com/semih-aydin/RemotePC-Plus/actions/workflows/build-apk.yml)
+[![License](https://img.shields.io/badge/License-ISC-1C1C1E?style=flat-square)](package.json)
 
 </div>
 
 ---
 
-## Nedir?
+## Download
 
-**RemotePC+**, akıllı telefonunuzu Windows bilgisayarınız için ultra düşük gecikmeli bir kablosuz trackpad, medya oynatıcı ve sunum kumandasına dönüştürür. Tarayıcıyla uğraşmadan doğrudan kullanılabilen **minik bir Native Android APK**, Windows saatinin yanında sessizce çalışan **26 KB Sistem Tepsisi uygulaması (`RemotePCPlus.exe`)** ve **Web/PWA** arayüzü ile eksiksiz bir ekosistem sunar.
+| Platform | Package | Requirements |
+| :--- | :--- | :--- |
+| **Windows** | [`RemotePC-Plus-Windows.zip`](https://github.com/semih-aydin/RemotePC-Plus/releases/latest) | Windows 10 / 11 (x64) |
+| **Android** | [`RemotePC-Plus-Android.apk`](https://github.com/semih-aydin/RemotePC-Plus/releases/latest) | Android 7.0+ |
 
----
+### Setup
 
-## Öne Çıkan Özellikler
+1. **Windows:** Extract `RemotePC-Plus-Windows.zip` and launch `RemotePCPlus.exe`. The app runs in the system tray; double-click the tray icon to open the Control Center.
+2. **Android:** Install `RemotePC-Plus-Android.apk` and open it on the same Wi-Fi network. Your PC is discovered automatically via LAN broadcast.
 
-### 1. Native Android APK (`android/`)
-- **Otomatik PC Keşfi (UDP 5055):** Wi-Fi ağındaki bilgisayarı tek dokunuşla bulur ve kalıcı olarak eşleştirir. PC'nin yerel IP'si değişse bile arka planda otomatik günceller.
-- **Sıfır WebView — Tam Native Trackpad:** 120Hz dokunmatik örnekleme, dinamik ivmelenme, çift dokunup sürükleme, 2 parmak sağ tık / kaydırma / yakınlaştırma, 3 parmak orta tık ve ekranlar arası geçiş.
-- **Fiziksel Ses Tuşları:** Touchpad modunda PC sesini, Kumanda modunda sunum slaytlarını değiştirir.
-- **Apple Dark HIG Tasarımı:** OLED siyah zemin, vektör ikonlar ve parmak altında yumuşak temas halkası.
-
-### 2. Windows Sistem Tepsisi (`RemotePCPlus.exe`)
-- **Sessiz Çalışma:** CMD penceresi açmadan `node server.js` sunucusunu arka planda yönetir.
-- **Bağımsız Kontrol Merkezi Penceresi:** Tepsi simgesine çift tıklayınca macOS System Settings stilindeki kontrol panelini adres çubuksuz masaüstü penceresi olarak açar.
-- **Windows ile Başlat:** Sağ tık menüsünden tek tıkla başlangıca ekleme/çıkarma.
-
-### 3. Win32 FFI Motoru & Çoklu Monitör
-- **Doğrudan Win32 API (`koffi`):** C++ derleyicisi gerektirmeden `user32`, `gdi32` ve `kernel32` üzerinden 1–2ms gecikmeli girdi iletimi (`TCP_NODELAY`, `perMessageDeflate: false`).
-- **Tam Türkçe & Unicode Yazma:** `SendInput` + `KEYEVENTF_UNICODE` ile `ç, ğ, ı, İ, ö, ş, ü` ve tüm noktalama işaretleri eksiksiz yazılır.
-- **Çoklu Monitör & Sınır Direnci:** Bağlı tüm ekranların uzamsal haritasını otomatik çıkarır; ekran başına ayrı DPI ve kenar mıknatısı (Boundary Magnetism) uygular.
-- **Canlı İmleç Büyüteci:** İmleç etrafındaki alanı gerçek zamanlı yakalayıp telefonda gösterir.
-- **Güvenlik:** `/admin` ve ayar uçları yalnızca `localhost` erişimine açıktır; opsiyonel PIN doğrulaması kaba kuvvet (rate-limit) korumalıdır.
+> **Firewall:** On first launch, use **Tray Menu → Güvenlik Duvarını Ayarla** to allow TCP `5000`/`5443` and UDP `5055`.
 
 ---
 
-## İndir ve Çalıştır (Kurulum Gerektirmez)
+## Capabilities
 
-Hiçbir teknik kurulum veya Node.js indirmeden doğrudan kullanmak için **[GitHub Releases](https://github.com/semih-aydin/RemotePC-Plus/releases)** (veya **Actions → Build & Release**) sayfasından iki dosyayı indirmeniz yeterli:
-
-### 1. Windows Bilgisayar (`RemotePC-Plus-Windows.zip`)
-1. **`RemotePC-Plus-Windows.zip`** dosyasını indirip bir klasöre çıkarın *(Node.js içinde hazır gelir, kurmanız gerekmez)*.
-2. **`RemotePCPlus.exe`** dosyasına çift tıklayın — uygulama saatin yanında sessizce başlar.
-3. İlk kullanımda saatin yanındaki simgeye sağ tıklayıp **Güvenlik Duvarını Ayarla (Firewall)** seçeneğine tıklayın.
-4. *(İsteğe bağlı)* Sağ tık → **Windows ile Başlat** diyerek PC her açıldığında otomatik çalışmasını sağlayabilirsiniz.
-
-### 2. Android Telefon (`RemotePC-Plus-Android.apk`)
-1. **`RemotePC-Plus-Android.apk`** dosyasını telefonunuza indirip kurun.
-2. Telefon ve PC aynı Wi-Fi ağındayken uygulamayı açın — bilgisayarınız otomatik olarak listelenir, tek dokunuşla eşleştirin.
-
-*(İsterseniz APK kurmadan da telefon tarayıcısından `http://<PC-IP>:5000` adresini açarak Web/PWA sürümünü kullanabilirsiniz.)*
+- **Precision Trackpad** — 120Hz native touch input, velocity-based acceleration, tap-to-click, double-tap drag, two-finger scroll/zoom/right-click, and three-finger middle-click & display switching.
+- **Multi-Monitor Engine** — Automatic Win32 display layout detection, per-display DPI profiles, instant display jump, and boundary magnetism.
+- **Media & Presentation Remote** — Playback, volume, slide navigation, hardware volume key mapping, and quick desktop shortcuts.
+- **Native Windows Integration** — Direct Win32 FFI (`user32`, `gdi32`, `kernel32`) with full Unicode/Turkish keyboard support (`SendInput`), real-time cursor magnifier, and a lightweight 26 KB system tray app.
+- **Local-First Security** — Admin panel restricted to `localhost`, optional PIN authentication with rate limiting, and zero cloud dependency.
 
 ---
 
-## Geliştiriciler İçin (Kaynak Koddan Çalıştırma)
+## Architecture
 
-Gereksinim: **Windows 10 / 11** ve **Node.js 18+**
+```text
+RemotePC-Plus/
+├── android/                  # Native Kotlin Android client
+├── tray/                     # Windows System Tray app (C# / WinForms) & app.ico
+├── public/                   # Web/PWA client & Desktop Control Center
+├── scripts/                  # Firewall & tray build utilities
+├── server.js                 # HTTP/HTTPS, WebSocket & UDP discovery server
+├── win32_api.js              # Win32 FFI input & screen capture layer
+├── monitor_manager.js        # Multi-monitor layout, DPI & boundary engine
+├── app_detector.js           # Active window context detector
+└── test_integration.js       # Integration test suite
+```
+
+---
+
+## Building from Source
+
+Requires **Windows 10/11** and **Node.js 18+**.
 
 ```bash
 git clone https://github.com/semih-aydin/RemotePC-Plus.git
-cd Remote-PC-Plus
+cd RemotePC-Plus
 npm install
 npm start
 ```
 
-Yeni bir hazır sürüm (APK + Windows Portable ZIP) yayınlamak için yalnızca etiket atıp push etmeniz yeterli:
 ```bash
-git tag v2.0.0
-git push origin main --tags
+npm test            # Run Win32 & multi-monitor integration tests
+npm run build:tray  # Rebuild RemotePCPlus.exe
 ```
 
 ---
 
-## Proje Yapısı
+## License
 
-```text
-RemotePcPlus/
-├── RemotePCPlus.exe          # 26 KB Windows Sistem Tepsisi uygulaması
-├── server.js                 # HTTP/HTTPS, WebSocket, UDP Discovery (5055) & API
-├── win32_api.js              # Koffi Win32 FFI (fare, Unicode klavye, ekran yakalama)
-├── monitor_manager.js        # Çoklu monitör koordinatları, DPI ve sınır direnci
-├── app_detector.js           # Aktif pencere / uygulama bağlam tespiti
-├── settings.json             # Kalıcı kullanıcı ve monitör profilleri
-├── test_integration.js       # Sistem entegrasyon testleri (npm test)
-├── android/                  # Native Kotlin Android APK projesi
-├── tray/                     # Windows Sistem Tepsisi C# kaynağı ve app.ico
-├── scripts/
-│   ├── firewall_setup.bat    # Windows Firewall (TCP 5000/5443, UDP 5055)
-│   └── build_tray.bat        # RemotePCPlus.exe derleme betiği
-├── .github/workflows/
-│   └── build-apk.yml         # Otomatik Android Release APK derleme & Release
-└── public/
-    ├── assets/logo.svg       # Ana vektör logo
-    ├── index.html            # Mobil Web/PWA Touchpad & Kumanda
-    ├── admin.html            # Masaüstü Kontrol Merkezi (localhost)
-    ├── css/                  # Apple HIG koyu tema stilleri (OKLCH)
-    └── js/                   # Touchpad, çoklu monitör, büyüteç, medya/sunum
-```
-
----
-
-## Test & Geliştirme
-
-```bash
-npm test          # Win32, çoklu monitör, aktif pencere ve büyüteç testleri
-npm run build:tray # RemotePCPlus.exe sistem tepsisi uygulamasını yeniden derler
-```
-
----
-
-## Lisans
-
-ISC License — Semih Aydın
+ISC — Semih Aydın

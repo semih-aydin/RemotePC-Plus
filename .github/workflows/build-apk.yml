@@ -112,16 +112,10 @@ jobs:
         with:
           name: "RemotePC+ ${{ github.ref_name }}"
           body: |
-            ## İndir ve Çalıştır (Kurulum Gerektirmez)
+            ### Downloads
 
-            ### 1. Windows Masaüstü (`RemotePC-Plus-Windows.zip`)
-            1. `RemotePC-Plus-Windows.zip` dosyasını indirip bir klasöre çıkarın (**Node.js kurmanız gerekmez**).
-            2. **`RemotePCPlus.exe`** dosyasına çift tıklayın (saatin yanında sessizce başlar).
-            3. İlk kullanımda tepsi simgesine sağ tıklayıp **Güvenlik Duvarını Ayarla (Firewall)** seçeneğine tıklayın.
-
-            ### 2. Android Uygulaması (`RemotePC-Plus-Android.apk`)
-            1. `RemotePC-Plus-Android.apk` dosyasını telefonunuza indirip kurun.
-            2. Aynı Wi-Fi ağında uygulamayı açın — bilgisayarınız otomatik olarak listelenir, dokunup bağlanın.
+            - **Windows:** `RemotePC-Plus-Windows.zip` — Extract and run `RemotePCPlus.exe`.
+            - **Android:** `RemotePC-Plus-Android.apk` — Install on Android 7.0+ and pair automatically over Wi-Fi.
           files: |
             RemotePC-Plus-Android.apk
             RemotePC-Plus-Windows.zip
