@@ -447,7 +447,7 @@ class RemoteApp {
 
         const toast = document.createElement('div');
         toast.className = `toast-item toast-${type}`;
-        toast.innerHTML = message;
+        toast.textContent = message;
         container.appendChild(toast);
 
         setTimeout(() => {

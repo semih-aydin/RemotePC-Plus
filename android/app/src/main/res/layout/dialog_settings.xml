@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="#1C1C1E"
+    android:orientation="vertical"
+    android:padding="20dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Touchpad Ayarları"
+        android:textColor="#FFFFFF"
+        android:textSize="17sp"
+        android:textStyle="bold" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="14dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="İmleç Hassasiyeti"
+            android:textColor="#E2E8F0"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/tvSensValue"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="monospace"
+            android:text="1.4x"
+            android:textColor="#0A84FF"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <SeekBar
+        android:id="@+id/seekSens"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp" />
+
+    <CheckBox
+        android:id="@+id/chkNaturalScroll"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:text="Doğal Kaydırma (Natural Scroll)"
+        android:textColor="#E2E8F0"
+        android:textSize="14sp" />
+
+    <CheckBox
+        android:id="@+id/chkDoubleTapDrag"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:text="Çift Dokunarak Sürükleme"
+        android:textColor="#E2E8F0"
+        android:textSize="14sp" />
+
+    <CheckBox
+        android:id="@+id/chkHaptics"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:text="Titreşim Geri Bildirimi"
+        android:textColor="#E2E8F0"
+        android:textSize="14sp" />
+</LinearLayout>

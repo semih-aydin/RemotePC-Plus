@@ -82,11 +82,12 @@ class AppDetector extends EventEmitter {
                 }
             }
 
-            // Durum degistiyse haber verelim
-            if (detectedContext !== this.currentContext || proc !== this.currentProcess || title !== this.currentTitle) {
+            // Durum degistiyse haber verelim (orijinal baslik ile karsilastir)
+            const rawTitle = info.title || '';
+            if (detectedContext !== this.currentContext || proc !== this.currentProcess || rawTitle !== this.currentTitle) {
                 this.currentContext = detectedContext;
                 this.currentProcess = proc;
-                this.currentTitle = info.title;
+                this.currentTitle = rawTitle;
 
                 const ts = new Date().toISOString().replace('T', ' ').substring(0, 23);
                 console.log(`[${ts}] [INFO ] [APP_DETECTOR] Context shifted -> proc="${proc}" title="${info.title.substring(0, 40)}" context=[${detectedContext.toUpperCase()}]`);

@@ -1,0 +1,567 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#000000"
+    android:orientation="vertical"
+    android:padding="14dp">
+
+    <!-- ÜST BAR: PC Durumu + Vektör Araçlar -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="44dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:id="@+id/pcStatusPill"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_weight="1"
+            android:background="@drawable/bg_pill"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp">
+
+            <View
+                android:id="@+id/statusDot"
+                android:layout_width="8dp"
+                android:layout_height="8dp"
+                android:background="@drawable/dot_red" />
+
+            <TextView
+                android:id="@+id/tvPcName"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="9dp"
+                android:layout_weight="1"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:text="PC Seç"
+                android:textColor="#ECEEF2"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvPing"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:fontFamily="monospace"
+                android:text="Bağlı değil"
+                android:textColor="#EF4444"
+                android:textSize="11sp" />
+        </LinearLayout>
+
+        <ImageButton
+            android:id="@+id/btnKeyboard"
+            android:layout_width="44dp"
+            android:layout_height="40dp"
+            android:layout_marginStart="8dp"
+            android:background="@drawable/bg_btn_dark"
+            android:contentDescription="Klavye"
+            android:scaleType="center"
+            android:src="@drawable/ic_keyboard" />
+
+        <ImageButton
+            android:id="@+id/btnSettings"
+            android:layout_width="44dp"
+            android:layout_height="40dp"
+            android:layout_marginStart="6dp"
+            android:background="@drawable/bg_btn_dark"
+            android:contentDescription="Ayarlar"
+            android:scaleType="center"
+            android:src="@drawable/ic_settings" />
+    </LinearLayout>
+
+    <!-- SEGMENTED MOD SEKMELERİ -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/bg_pill"
+        android:orientation="horizontal"
+        android:padding="3dp">
+
+        <Button
+            android:id="@+id/tabTouchpad"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@drawable/bg_tab_active"
+            android:minHeight="0dp"
+            android:text="Touchpad"
+            android:textAllCaps="false"
+            android:textColor="#ECEEF2"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/tabMedia"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@drawable/bg_tab_idle"
+            android:minHeight="0dp"
+            android:text="Kumanda"
+            android:textAllCaps="false"
+            android:textColor="#8E95A5"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <!-- ÇOKLU MONİTÖR ÇUBUĞU (2+ ekran varsa görünür) -->
+    <LinearLayout
+        android:id="@+id/monitorBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:visibility="gone">
+
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:scrollbars="none">
+
+            <LinearLayout
+                android:id="@+id/monitorChipsContainer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal" />
+        </HorizontalScrollView>
+    </LinearLayout>
+
+    <!-- 1. TOUCHPAD GÖRÜNÜMÜ -->
+    <LinearLayout
+        android:id="@+id/viewTouchpad"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="10dp"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+
+            <com.semih.remotepcplus.TouchpadView
+                android:id="@+id/touchpadView"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1" />
+
+            <!-- Dikey Kaydırma Rayı -->
+            <LinearLayout
+                android:id="@+id/scrollStrip"
+                android:layout_width="34dp"
+                android:layout_height="match_parent"
+                android:layout_marginStart="8dp"
+                android:background="@drawable/bg_card"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <View
+                    android:layout_width="3dp"
+                    android:layout_height="44dp"
+                    android:background="#2E3440" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Alt Tıklama Çubuğu -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginTop="10dp"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btnLeftClick"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginEnd="5dp"
+                android:layout_weight="1.35"
+                android:background="@drawable/bg_btn_dark"
+                android:text="Sol Tık"
+                android:textAllCaps="false"
+                android:textColor="#ECEEF2"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+
+            <Button
+                android:id="@+id/btnDragLock"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginStart="2dp"
+                android:layout_marginEnd="2dp"
+                android:layout_weight="0.95"
+                android:background="@drawable/bg_btn_dark"
+                android:text="Sürükle"
+                android:textAllCaps="false"
+                android:textColor="#9AA1B1"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+
+            <Button
+                android:id="@+id/btnRightClick"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginStart="5dp"
+                android:layout_weight="1.1"
+                android:background="@drawable/bg_btn_dark"
+                android:text="Sağ Tık"
+                android:textAllCaps="false"
+                android:textColor="#ECEEF2"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- 2. MEDYA & SUNUM GÖRÜNÜMÜ -->
+    <ScrollView
+        android:id="@+id/viewMedia"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="10dp"
+        android:layout_weight="1"
+        android:scrollbars="none"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- Aktif Pencere -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_card"
+                android:orientation="vertical"
+                android:padding="14dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Aktif Pencere"
+                    android:textColor="#0A84FF"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvActiveWindow"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:ellipsize="end"
+                    android:fontFamily="monospace"
+                    android:maxLines="1"
+                    android:text="Masaüstü"
+                    android:textColor="#F5F5F7"
+                    android:textSize="12.5sp" />
+            </LinearLayout>
+
+            <!-- Medya Kontrolleri -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/bg_card"
+                android:orientation="vertical"
+                android:padding="14dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="monospace"
+                    android:letterSpacing="0.1"
+                    android:text="MEDYA OYNATICI"
+                    android:textColor="#6B7280"
+                    android:textSize="10sp"
+                    android:textStyle="bold" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="52dp"
+                    android:layout_marginTop="12dp"
+                    android:orientation="horizontal">
+
+                    <ImageButton
+                        android:id="@+id/btnMediaPrev"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_marginEnd="8dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/bg_btn_dark"
+                        android:contentDescription="Önceki"
+                        android:scaleType="center"
+                        android:src="@drawable/ic_prev" />
+
+                    <ImageButton
+                        android:id="@+id/btnMediaPlayPause"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1.35"
+                        android:background="@drawable/bg_btn_accent"
+                        android:contentDescription="Oynat Duraklat"
+                        android:scaleType="center"
+                        android:src="@drawable/ic_play_pause" />
+
+                    <ImageButton
+                        android:id="@+id/btnMediaNext"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_marginStart="8dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/bg_btn_dark"
+                        android:contentDescription="Sonraki"
+                        android:scaleType="center"
+                        android:src="@drawable/ic_next" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="46dp"
+                    android:layout_marginTop="8dp"
+                    android:orientation="horizontal">
+
+                    <ImageButton
+                        android:id="@+id/btnVolDown"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_marginEnd="8dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/bg_btn_dark"
+                        android:contentDescription="Ses Azalt"
+                        android:scaleType="center"
+                        android:src="@drawable/ic_vol_down" />
+
+                    <ImageButton
+                        android:id="@+id/btnVolMute"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:background="@drawable/bg_btn_dark"
+                        android:contentDescription="Sessiz"
+                        android:scaleType="center"
+                        android:src="@drawable/ic_vol_mute" />
+
+                    <ImageButton
+                        android:id="@+id/btnVolUp"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_marginStart="8dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/bg_btn_dark"
+                        android:contentDescription="Ses Artır"
+                        android:scaleType="center"
+                        android:src="@drawable/ic_vol_up" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Sunum Kontrolleri -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/bg_card"
+                android:orientation="vertical"
+                android:padding="14dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="monospace"
+                    android:letterSpacing="0.1"
+                    android:text="SUNUM KONTROLÜ"
+                    android:textColor="#6B7280"
+                    android:textSize="10sp"
+                    android:textStyle="bold" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:layout_marginTop="12dp"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/btnPresPrev"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_marginEnd="8dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/bg_btn_dark"
+                        android:text="Önceki"
+                        android:textAllCaps="false"
+                        android:textColor="#ECEEF2"
+                        android:textSize="13sp"
+                        android:textStyle="bold" />
+
+                    <Button
+                        android:id="@+id/btnPresNext"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1.3"
+                        android:background="@drawable/bg_btn_accent"
+                        android:text="Sonraki Slayt"
+                        android:textAllCaps="false"
+                        android:textColor="#FAF7F5"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="44dp"
+                    android:layout_marginTop="8dp"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/btnPresStart"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_marginEnd="6dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/bg_btn_dark"
+                        android:text="F5 Başlat"
+                        android:textAllCaps="false"
+                        android:textColor="#C9CDD6"
+                        android:textSize="12sp" />
+
+                    <Button
+                        android:id="@+id/btnPresStop"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:background="@drawable/bg_btn_dark"
+                        android:text="Esc Bitir"
+                        android:textAllCaps="false"
+                        android:textColor="#C9CDD6"
+                        android:textSize="12sp" />
+
+                    <Button
+                        android:id="@+id/btnPresBlack"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_marginStart="6dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/bg_btn_dark"
+                        android:text="Siyah Ekran"
+                        android:textAllCaps="false"
+                        android:textColor="#C9CDD6"
+                        android:textSize="12sp" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Hızlı Kısayollar -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/bg_card"
+                android:orientation="vertical"
+                android:padding="14dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="monospace"
+                    android:letterSpacing="0.1"
+                    android:text="HIZLI KISAYOLLAR"
+                    android:textColor="#6B7280"
+                    android:textSize="10sp"
+                    android:textStyle="bold" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="44dp"
+                    android:layout_marginTop="10dp"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/btnMacroCopy"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_marginEnd="6dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/bg_btn_dark"
+                        android:text="Kopyala"
+                        android:textAllCaps="false"
+                        android:textColor="#C9CDD6"
+                        android:textSize="12sp" />
+
+                    <Button
+                        android:id="@+id/btnMacroPaste"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:background="@drawable/bg_btn_dark"
+                        android:text="Yapıştır"
+                        android:textAllCaps="false"
+                        android:textColor="#C9CDD6"
+                        android:textSize="12sp" />
+
+                    <Button
+                        android:id="@+id/btnMacroUndo"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_marginStart="6dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/bg_btn_dark"
+                        android:text="Geri Al"
+                        android:textAllCaps="false"
+                        android:textColor="#C9CDD6"
+                        android:textSize="12sp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="44dp"
+                    android:layout_marginTop="8dp"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/btnMacroDesktop"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_marginEnd="6dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/bg_btn_dark"
+                        android:text="Masaüstü"
+                        android:textAllCaps="false"
+                        android:textColor="#C9CDD6"
+                        android:textSize="12sp" />
+
+                    <Button
+                        android:id="@+id/btnMacroTaskView"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:background="@drawable/bg_btn_dark"
+                        android:text="Görevler"
+                        android:textAllCaps="false"
+                        android:textColor="#C9CDD6"
+                        android:textSize="12sp" />
+
+                    <Button
+                        android:id="@+id/btnMacroClose"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_marginStart="6dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/bg_btn_dark"
+                        android:text="Kapat"
+                        android:textAllCaps="false"
+                        android:textColor="#FF453A"
+                        android:textSize="12sp" />
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

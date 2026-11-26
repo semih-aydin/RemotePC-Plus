@@ -6,11 +6,9 @@ const ASSETS = [
     '/css/style.css',
     '/js/app.js',
     '/js/haptics.js',
-    '/js/airmouse.js',
+    '/js/multi_monitor.js',
     '/js/touchpad.js',
     '/js/context_cards.js',
-    '/js/edge_drawers.js',
-    '/js/radial_menu.js',
     '/js/magnifier.js'
 ];
 

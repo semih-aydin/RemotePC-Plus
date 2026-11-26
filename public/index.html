@@ -4,6 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>RemotePC+</title>
+    <link rel="icon" type="image/svg+xml" href="/assets/logo.svg">
+    <link rel="apple-touch-icon" href="/assets/logo.svg">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#000000">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="/css/style.css">
 </head>
@@ -11,19 +18,20 @@
     <div id="app-root">
         <!-- Üst Bar -->
         <header class="top-bar">
-            <div class="logo"><i class="fas fa-satellite-dish"></i> RemotePC+</div>
+            <div class="logo">
+                <img src="/assets/logo.svg" alt="RemotePC+" style="width:22px; height:22px; border-radius:6px; display:block;">
+                <span>RemotePC+</span>
+            </div>
 
             <div class="tabs">
                 <button class="tab-btn active" data-mode="touchpad"><i class="fas fa-mouse"></i> Touchpad</button>
-                <button class="tab-btn" data-mode="context"><i class="fas fa-sliders-h"></i> Medya & Sunum</button>
+                <button class="tab-btn" data-mode="context"><i class="fas fa-sliders-h"></i> Kumanda</button>
             </div>
 
-            <div style="display:flex; align-items:center; gap:6px;">
-                <button id="btn-help-modal" class="icon-tool-btn" title="Kullanım Rehberi & Jestler"><i class="fas fa-question-circle"></i></button>
+            <div class="top-actions">
+                <button id="btn-help-modal" class="icon-tool-btn" title="Jest Rehberi"><i class="fas fa-question"></i></button>
                 <button id="btn-settings-modal" class="icon-tool-btn" title="Ayarlar"><i class="fas fa-cog"></i></button>
-                <button id="btn-fullscreen-toggle" class="tool-btn" style="background:#2563eb; color:#fff; border:none; padding:4px 8px;" title="Tam Ekran Yatay Mod">
-                    <i class="fas fa-expand"></i> Yatay
-                </button>
+                <button id="btn-fullscreen-toggle" class="icon-tool-btn" title="Tam Ekran Yatay Mod"><i class="fas fa-expand"></i></button>
                 <div id="latency-val" class="ping-badge">0ms</div>
             </div>
         </header>
@@ -87,10 +95,10 @@
             <!-- === 2. MEDYA & SUNUM EKRANI === -->
             <div id="view-context" class="context-view">
                 <!-- Aktif Uygulama Bilgi Kartı -->
-                <div class="card" style="background:#161922; border-color:#2a3348;">
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <span style="font-size:11px; font-weight:700; color:#3b82f6;"><i class="fas fa-window-maximize"></i> AKTİF PENCERE</span>
-                        <span id="context-app-title" style="font-size:12px; color:#fff; font-weight:600; font-family:monospace;">Masaüstü</span>
+                <div class="card active-win-card">
+                    <div class="active-win-row">
+                        <span class="active-win-label">AKTİF PENCERE</span>
+                        <span id="context-app-title" class="active-win-title">Masaüstü</span>
                     </div>
                 </div>
 
@@ -181,10 +189,10 @@
                 <div class="modal-body">
                     <div class="setting-item">
                         <div class="setting-label-row">
-                            <span>İmleç Hassasiyeti:</span>
-                            <span id="setting-sens-val" style="font-weight:700; color:#3b82f6;">1.35x</span>
+                            <span>İmleç Hassasiyeti</span>
+                            <span id="setting-sens-val" style="font-family:var(--font-mono); font-weight:700; color:var(--accent);">1.35x</span>
                         </div>
-                        <input id="setting-sens-slider" type="range" min="0.8" max="4.0" step="0.15" value="1.35" style="width:100%; accent-color:#2563eb; margin-top:6px;">
+                        <input id="setting-sens-slider" type="range" min="0.8" max="4.0" step="0.15" value="1.35" style="width:100%; margin-top:8px;">
                     </div>
 
                     <div class="setting-item">

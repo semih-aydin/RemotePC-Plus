@@ -13,6 +13,7 @@ class AdminDashboard {
 
     async init() {
         await this.loadInfo();
+        this.loadSelectedMonitorProfile();
         await this.loadQrCode();
         this.initEvents();
         this.initTestCanvas();
@@ -159,10 +160,10 @@ class AdminDashboard {
             const drawW = m.width * scale;
             const drawH = m.height * scale;
 
-            // Ekran kutusu
-            this.ctx.fillStyle = m.isPrimary ? 'rgba(0, 229, 255, 0.15)' : 'rgba(255, 255, 255, 0.05)';
-            this.ctx.strokeStyle = m.isPrimary ? '#00e5ff' : '#555';
-            this.ctx.lineWidth = 2;
+            // Ekran kutusu (macOS Displays Style)
+            this.ctx.fillStyle = m.isPrimary ? 'rgba(10, 132, 255, 0.16)' : 'rgba(255, 255, 255, 0.05)';
+            this.ctx.strokeStyle = m.isPrimary ? '#0A84FF' : 'rgba(255, 255, 255, 0.18)';
+            this.ctx.lineWidth = 1.5;
 
             this.ctx.beginPath();
             this.ctx.roundRect(drawX, drawY, drawW, drawH, 8);
@@ -190,6 +191,15 @@ class AdminDashboard {
 
         if (dpiInput) dpiInput.value = prof.dpi || 1.5;
         if (accelInput) accelInput.value = prof.acceleration || 1.2;
+
+        // Kenar Direnci (Boundary Magnetism) Durumu
+        const mag = this.info.settings.boundaryMagnetism || { enabled: true, resistance: 15 };
+        const magChk = document.getElementById('magnetism-enabled');
+        const magRes = document.getElementById('magnetism-resistance');
+        const magOpt = document.getElementById('magnetism-options');
+        if (magChk) magChk.checked = mag.enabled !== false;
+        if (magRes) magRes.value = mag.resistance || 15;
+        if (magOpt) magOpt.style.display = (mag.enabled !== false) ? 'block' : 'none';
 
         // Guvenlik PIN Durumu
         const pinEnabled = !!(this.info.settings.security && this.info.settings.security.pinAuthEnabled);
@@ -225,6 +235,7 @@ class AdminDashboard {
             perMonitorProfiles: {
                 ...this.info.settings.perMonitorProfiles,
                 [this.selectedMonId]: {
+                    ...(this.info.settings.perMonitorProfiles && this.info.settings.perMonitorProfiles[this.selectedMonId]),
                     dpi: monDpi,
                     acceleration: monAccel
                 }

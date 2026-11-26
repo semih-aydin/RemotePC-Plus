@@ -60,17 +60,35 @@ class MagnifierController {
         }
     }
 
-    // Sunucudan gelen cerceveyi ciz
+    // Sunucudan gelen ham RGBA cerceveyi ciz
     handleFrame(frameData) {
-        if (!this.isActive || !this.ctx || !this.canvas) return;
+        if (!this.isActive || !this.ctx || !this.canvas || !frameData.data) return;
 
-        const img = new Image();
-        img.onload = () => {
+        try {
+            const w = frameData.width || 100;
+            const h = frameData.height || 100;
+            const binary = atob(frameData.data);
+            const expectedLen = w * h * 4;
+            if (binary.length < expectedLen) return;
+
+            const bytes = new Uint8ClampedArray(expectedLen);
+            for (let i = 0; i < expectedLen; i++) {
+                bytes[i] = binary.charCodeAt(i);
+            }
+
+            if (!this.offscreen || this.offscreen.width !== w || this.offscreen.height !== h) {
+                this.offscreen = document.createElement('canvas');
+                this.offscreen.width = w;
+                this.offscreen.height = h;
+                this.offCtx = this.offscreen.getContext('2d');
+            }
+
+            const imgData = new ImageData(bytes, w, h);
+            this.offCtx.putImageData(imgData, 0, 0);
+
             this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-
-            // Goruntuyu tuvale buyuterek bas
             this.ctx.imageSmoothingEnabled = false; // Piksel netligi
-            this.ctx.drawImage(img, 0, 0, this.canvas.width, this.canvas.height);
+            this.ctx.drawImage(this.offscreen, 0, 0, this.canvas.width, this.canvas.height);
 
             // Hedef Noktasi / Arti Isareti (Crosshair Reticle) cizelim
             const cx = this.canvas.width / 2;
@@ -79,24 +97,22 @@ class MagnifierController {
             this.ctx.strokeStyle = '#00e5ff';
             this.ctx.lineWidth = 1.5;
 
-            // Yatay cizgi
             this.ctx.beginPath();
             this.ctx.moveTo(cx - 15, cy);
             this.ctx.lineTo(cx + 15, cy);
             this.ctx.stroke();
 
-            // Dikey cizgi
             this.ctx.beginPath();
             this.ctx.moveTo(cx, cy - 15);
             this.ctx.lineTo(cx, cy + 15);
             this.ctx.stroke();
 
-            // Merkez cember
             this.ctx.beginPath();
             this.ctx.arc(cx, cy, 4, 0, Math.PI * 2);
             this.ctx.stroke();
-        };
-        img.src = `data:image/png;base64,${frameData.data}`;
+        } catch (e) {
+            console.log('Loupe frame cizim hatasi:', e);
+        }
     }
 }
 

@@ -7,7 +7,6 @@ const os = require('os');
 const fs = require('fs');
 const dgram = require('dgram');
 const qrcode = require('qrcode');
-const selfsigned = require('selfsigned');
 
 const win32 = require('./win32_api');
 const monitorManager = require('./monitor_manager');
@@ -88,16 +87,27 @@ function recordTelemetry(sample) {
     });
 }
 
-// HTTP ve HTTPS Sunuculari olusturalim
+// HTTP ve HTTPS Sunuculari olusturalim (sslOptions null ise cokmeyi onle)
 const httpServer = http.createServer(app);
-const httpsServer = https.createServer(sslOptions, app);
+const httpsServer = sslOptions ? https.createServer(sslOptions, app) : null;
 
 // WebSocket sunuculari (perMessageDeflate devre disi: Gecikmeyi minimuma indirmek icin sikistirma kapatildi)
 const wssOptions = { perMessageDeflate: false, maxPayload: 1024 * 64 };
 const wssHttp = new WebSocketServer({ server: httpServer, ...wssOptions });
-const wssHttps = new WebSocketServer({ server: httpsServer, ...wssOptions });
+const wssHttps = httpsServer ? new WebSocketServer({ server: httpsServer, ...wssOptions }) : null;
 
 const allClients = new Set();
+const authFailures = new Map(); // IP -> { count, lockedUntil }
+
+// Yalnizca yerel makineden (localhost) erisim kontrolu
+function requireLocalhost(req, res, next) {
+    const ip = req.socket.remoteAddress || '';
+    const isLocal = ip === '127.0.0.1' || ip === '::1' || ip === '::ffff:127.0.0.1';
+    if (!isLocal) {
+        return res.status(403).json({ success: false, error: 'Bu uca yalnizca yerel bilgisayardan (localhost) erisilebilir.' });
+    }
+    next();
+}
 
 // Baglanan tum istemcilere WebSocket yonetimi
 function handleWebSocketConnection(ws, req) {
@@ -141,14 +151,29 @@ function handleWebSocketConnection(ws, req) {
             const data = JSON.parse(msgBuffer.toString());
             packetCount++;
 
-            // Kimlik Dogrulama Mesaji
+            // Kimlik Dogrulama Mesaji (Rate Limit korumali)
             if (data.type === 'auth') {
+                const now = Date.now();
+                const failRecord = authFailures.get(clientIp) || { count: 0, lockedUntil: 0 };
+                if (failRecord.lockedUntil > now) {
+                    const waitSec = Math.ceil((failRecord.lockedUntil - now) / 1000);
+                    ws.send(JSON.stringify({ type: 'auth_result', success: false, error: `Çok fazla hatalı deneme. ${waitSec} sn bekleyin.` }));
+                    return;
+                }
+
                 const targetPin = (monitorManager.settings.security && monitorManager.settings.security.pin) ? monitorManager.settings.security.pin : '1234';
                 if (data.pin === targetPin) {
+                    authFailures.delete(clientIp);
                     ws.isAuthenticated = true;
                     ws.send(JSON.stringify({ type: 'auth_result', success: true }));
                     log('INFO', 'AUTH', `Client authenticated successfully from ${clientIp}`);
                 } else {
+                    failRecord.count += 1;
+                    if (failRecord.count >= 5) {
+                        failRecord.lockedUntil = now + 30000;
+                        failRecord.count = 0;
+                    }
+                    authFailures.set(clientIp, failRecord);
                     ws.send(JSON.stringify({ type: 'auth_result', success: false, error: 'Hatalı PIN kodu!' }));
                     log('WARN', 'AUTH', `Client authentication failed from ${clientIp}`);
                 }
@@ -305,7 +330,7 @@ function handleWebSocketConnection(ws, req) {
 }
 
 wssHttp.on('connection', handleWebSocketConnection);
-wssHttps.on('connection', handleWebSocketConnection);
+if (wssHttps) wssHttps.on('connection', handleWebSocketConnection);
 
 // Aktif pencere degistiginde tum bagli telefonlara haber ver (Dinamik Arayuz Degisimi)
 appDetector.on('contextChange', (info) => {
@@ -337,8 +362,8 @@ app.get('/api/info', (req, res) => {
     });
 });
 
-// Ayarlari guncelle
-app.post('/api/settings', (req, res) => {
+// Ayarlari guncelle (Yalnizca localhost)
+app.post('/api/settings', requireLocalhost, (req, res) => {
     try {
         const newSettings = req.body;
         monitorManager.settings = Object.assign(monitorManager.settings, newSettings);
@@ -391,7 +416,7 @@ app.get('/api/qr', async (req, res) => {
             errorCorrectionLevel: 'M',
             margin: 2,
             scale: 8,
-            color: { dark: '#00e5ff', light: '#0d1117' }
+            color: { dark: '#f5f5f7', light: '#1c1c1e' }
         });
         res.json({ url: targetUrl, qr: qrSvg });
     } catch (e) {
@@ -400,7 +425,7 @@ app.get('/api/qr', async (req, res) => {
 });
 
 // Yonlendirmeler
-app.get('/admin', (req, res) => {
+app.get('/admin', requireLocalhost, (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'admin.html'));
 });
 
@@ -439,7 +464,7 @@ httpServer.listen(HTTP_PORT, () => {
     console.log(`[HTTP] Sunucu baslatildi: ${httpUrl}`);
 });
 
-if (sslOptions) {
+if (httpsServer) {
     httpsServer.listen(HTTPS_PORT, () => {
         console.log(`[HTTPS] Guvenli sunucu baslatildi: ${httpsUrl}`);
     });

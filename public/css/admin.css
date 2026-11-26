@@ -1,18 +1,34 @@
-/* Universal Wireless Control Hub - Desktop Admin Dashboard */
+/* RemotePC+ Desktop Control Center — macOS System Settings (Sequoia Dark) */
 :root {
-    --bg-dark: #0b0e14;
-    --bg-card: #151b26;
-    --bg-surface: #1e2638;
-    --primary: #00e5ff;
-    --primary-glow: rgba(0, 229, 255, 0.25);
-    --accent: #7928ca;
-    --success: #00ff88;
-    --danger: #ff0055;
-    --warning: #ffb800;
-    --text: #f0f4f8;
-    --text-muted: #8a99ad;
-    --border: rgba(255, 255, 255, 0.08);
-    --radius: 12px;
+    --bg: oklch(11% 0.004 260);
+    --surface-1: oklch(18.5% 0.005 260);       /* #1C1C1E */
+    --surface-2: oklch(24.5% 0.006 260);       /* #2C2C2E */
+    --surface-3: oklch(30.5% 0.006 260);       /* #3A3A3C */
+    --glass: oklch(16% 0.005 260 / 0.78);
+    --hairline: oklch(100% 0 0 / 0.09);
+    --hairline-strong: oklch(100% 0 0 / 0.16);
+
+    --ink: oklch(97% 0.003 260);               /* #F5F5F7 */
+    --ink-muted: oklch(68% 0.006 260);         /* #98989D */
+    --ink-subtle: oklch(48% 0.006 260);        /* #636366 */
+
+    --accent: oklch(64% 0.21 255);             /* #0A84FF Apple System Blue */
+    --accent-hover: oklch(69% 0.20 255);
+    --accent-ink: oklch(99% 0 0);
+    --accent-soft: oklch(64% 0.21 255 / 0.18);
+
+    --ok: oklch(73% 0.18 148);                 /* #30D158 */
+    --warn: oklch(78% 0.16 78);                /* #FF9F0A */
+    --err: oklch(64% 0.22 25);                 /* #FF453A */
+
+    --radius-sm: 10px;
+    --radius-md: 14px;
+    --radius-lg: 20px;
+    --radius-pill: 999px;
+    --ease-apple: cubic-bezier(0.25, 0.1, 0.25, 1);
+
+    --font-ui: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, monospace;
 }
 
 * {
@@ -22,84 +38,114 @@
 }
 
 body {
-    background-color: var(--bg-dark);
-    color: var(--text);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-ui);
+    -webkit-font-smoothing: antialiased;
+    letter-spacing: -0.012em;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
 }
 
-/* Header */
+/* macOS Translucent Window Toolbar */
 .admin-header {
-    height: 64px;
-    background: var(--bg-card);
-    border-bottom: 1px solid var(--border);
+    height: 60px;
+    background: var(--glass);
+    backdrop-filter: saturate(180%) blur(24px);
+    -webkit-backdrop-filter: saturate(180%) blur(24px);
+    border-bottom: 0.5px solid var(--hairline);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 24px;
+    padding: 0 28px;
+    position: sticky;
+    top: 0;
+    z-index: 20;
 }
 
 .logo-area {
     display: flex;
     align-items: center;
-    gap: 12px;
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--primary);
+    gap: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -0.025em;
+    color: var(--ink);
+}
+
+.logo-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--ok);
+    box-shadow: 0 0 10px oklch(73% 0.18 148 / 0.5);
 }
 
 .server-stats {
     display: flex;
-    gap: 16px;
+    gap: 10px;
 }
 
 .stat-chip {
-    background: var(--bg-surface);
-    border: 1px solid var(--border);
+    background: var(--surface-1);
+    border: 0.5px solid var(--hairline);
     padding: 6px 14px;
-    border-radius: 20px;
+    border-radius: var(--radius-pill);
     font-size: 12px;
     display: flex;
     align-items: center;
     gap: 8px;
-    color: var(--text-muted);
+    color: var(--ink-muted);
 }
 
 .stat-chip strong {
-    color: var(--text);
+    color: var(--ink);
+    font-weight: 600;
 }
 
-/* Dashboard Grid */
+/* macOS Settings Grid */
 .dashboard-grid {
     flex: 1;
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1.05fr 0.95fr;
     gap: 20px;
-    padding: 24px;
-    max-width: 1400px;
+    padding: 28px;
+    max-width: 1240px;
     margin: 0 auto;
     width: 100%;
 }
 
+@media (max-width: 900px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
 .card {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 20px;
+    background: var(--surface-1);
+    border: 0.5px solid var(--hairline);
+    border-radius: var(--radius-lg);
+    padding: 22px;
     display: flex;
     flex-direction: column;
     gap: 16px;
+    box-shadow: inset 0 0.5px 0 oklch(100% 0 0 / 0.06), 0 12px 32px oklch(0% 0 0 / 0.25);
 }
 
 .card-title {
-    font-size: 15px;
-    font-weight: 700;
-    color: var(--primary);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    color: var(--ink);
     display: flex;
     align-items: center;
     gap: 8px;
+}
+
+.card-title i {
+    color: var(--accent);
+    font-size: 13px;
 }
 
 /* QR Code Section */
@@ -107,41 +153,45 @@ body {
     display: flex;
     gap: 20px;
     align-items: center;
-    background: var(--bg-surface);
+    background: var(--surface-2);
+    border: 0.5px solid var(--hairline);
     padding: 16px;
-    border-radius: var(--radius);
+    border-radius: var(--radius-md);
 }
 
 .qr-img {
-    width: 130px;
-    height: 130px;
-    border-radius: 8px;
-    border: 2px solid var(--primary);
+    width: 124px;
+    height: 124px;
+    border-radius: 12px;
+    border: 0.5px solid var(--hairline-strong);
+    background: var(--surface-1);
 }
 
 .qr-links {
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    font-size: 13px;
+    gap: 6px;
+    font-size: 12.5px;
+    color: var(--ink-muted);
 }
 
 .qr-links a {
-    color: var(--primary);
+    color: var(--accent);
     text-decoration: none;
-    font-family: monospace;
-    font-weight: 600;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 500;
 }
 
 .qr-links a:hover {
     text-decoration: underline;
 }
 
-/* Monitor Canvas */
+/* macOS Displays Arrangement Canvas */
 .monitor-canvas-container {
-    background: #0d1117;
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
+    background: var(--bg);
+    border: 0.5px solid var(--hairline);
+    border-radius: var(--radius-md);
     overflow: hidden;
     display: flex;
     align-items: center;
@@ -150,7 +200,7 @@ body {
 }
 
 #monitor-canvas {
-    background: #0d1117;
+    background: transparent;
     width: 100%;
     height: 180px;
 }
@@ -164,65 +214,122 @@ body {
 
 .form-group label {
     font-size: 12px;
-    color: var(--text-muted);
-    font-weight: 600;
+    color: var(--ink-muted);
+    font-weight: 500;
 }
 
 .form-control {
-    background: var(--bg-surface);
-    border: 1px solid var(--border);
-    color: var(--text);
-    padding: 8px 12px;
-    border-radius: 6px;
+    background: var(--surface-2);
+    border: 0.5px solid var(--hairline);
+    color: var(--ink);
+    padding: 9px 12px;
+    border-radius: var(--radius-sm);
+    font-family: var(--font-ui);
     font-size: 13px;
+    outline: none;
+    transition: border-color 140ms var(--ease-apple), box-shadow 140ms var(--ease-apple);
+}
+
+.form-control:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+/* macOS Switch style for checkboxes */
+input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 42px;
+    height: 24px;
+    border-radius: 999px;
+    background: var(--surface-3);
+    position: relative;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background 200ms var(--ease-apple);
+}
+
+input[type="checkbox"]::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 1px 4px oklch(0% 0 0 / 0.35);
+    transition: transform 200ms var(--ease-apple);
+}
+
+input[type="checkbox"]:checked {
+    background: var(--ok);
+}
+
+input[type="checkbox"]:checked::after {
+    transform: translateX(18px);
+}
+
+input[type="range"] {
+    accent-color: var(--accent);
 }
 
 .btn-primary {
-    background: var(--primary);
-    color: #000;
+    background: var(--accent);
+    color: var(--accent-ink);
     border: none;
-    padding: 10px 16px;
-    border-radius: 6px;
-    font-weight: 700;
+    padding: 12px 20px;
+    border-radius: var(--radius-pill);
+    font-family: var(--font-ui);
+    font-size: 13.5px;
+    font-weight: 600;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: transform 120ms var(--ease-apple), background 140ms var(--ease-apple);
 }
 
 .btn-primary:hover {
-    box-shadow: 0 0 15px var(--primary-glow);
+    background: var(--accent-hover);
 }
 
-/* Badge */
+.btn-primary:active {
+    transform: scale(0.98);
+}
+
+/* Apple Pill Badge */
 .badge {
-    padding: 4px 8px;
-    border-radius: 6px;
-    font-size: 11px;
-    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: var(--radius-pill);
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
     text-transform: uppercase;
+    background: var(--surface-2);
+    color: var(--ink-muted);
 }
 
-.badge-media { background: #1db954; color: #000; }
-.badge-presentation { background: #ff7700; color: #fff; }
-.badge-browser { background: #0088ff; color: #fff; }
-.badge-code { background: #7928ca; color: #fff; }
-.badge-desktop { background: #555; color: #fff; }
+.badge-media { background: oklch(73% 0.18 148 / 0.16); color: var(--ok); }
+.badge-presentation { background: oklch(78% 0.16 78 / 0.16); color: var(--warn); }
+.badge-browser { background: var(--accent-soft); color: var(--accent); }
+.badge-code { background: oklch(68% 0.18 300 / 0.18); color: oklch(78% 0.16 300); }
+.badge-desktop { background: var(--surface-2); color: var(--ink-muted); }
 
-/* Live Diagnostics */
+/* Live Diagnostics Pad */
 .diagnostics-box {
-    background: #0d1117;
-    border: 1px solid var(--border);
-    height: 120px;
-    border-radius: var(--radius);
+    background: linear-gradient(180deg, oklch(16% 0.005 260) 0%, oklch(13% 0.004 260) 100%);
+    border: 0.5px solid var(--hairline-strong);
+    height: 132px;
+    border-radius: var(--radius-md);
     position: relative;
     overflow: hidden;
+    box-shadow: inset 0 1px 0 oklch(100% 0 0 / 0.06);
 }
 
 .diagnostics-cursor {
     width: 12px;
     height: 12px;
     border-radius: 50%;
-    background: var(--primary);
-    box-shadow: 0 0 10px var(--primary-glow);
+    background: var(--accent);
+    box-shadow: 0 0 0 6px var(--accent-soft);
     position: absolute;
     transform: translate(-50%, -50%);
     pointer-events: none;

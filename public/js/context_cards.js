@@ -66,14 +66,7 @@ class ContextCardsManager {
             });
         }
 
-        // Tarayici ve Kodlama Butonlari
-        document.querySelectorAll('[data-macro-key]').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const keys = btn.getAttribute('data-macro-key').split('+');
-                window.app.send({ type: 'macro', keys: keys });
-                window.haptics.click();
-            });
-        });
+        // Not: [data-macro-key] dinleyicisi app.js icinde merkezi olarak yonetilir (cift tetiklemeyi onlemek icin)
     }
 
     // Sunucudan gelen context degisimine gore karti degistir

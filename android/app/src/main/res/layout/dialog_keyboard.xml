@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="#1C1C1E"
+    android:orientation="vertical"
+    android:padding="20dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Bilgisayara Metin Gönder"
+        android:textColor="#FFFFFF"
+        android:textSize="16sp"
+        android:textStyle="bold" />
+
+    <EditText
+        android:id="@+id/etKeyboardInput"
+        android:layout_width="match_parent"
+        android:layout_height="46dp"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/bg_pill"
+        android:hint="Yazmak istediğiniz metin..."
+        android:imeOptions="actionSend"
+        android:inputType="text"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:textColor="#FFFFFF"
+        android:textColorHint="#64748B"
+        android:textSize="14sp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="42dp"
+        android:layout_marginTop="10dp"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btnKbSend"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginEnd="6dp"
+            android:layout_weight="1.2"
+            android:background="@drawable/bg_btn_accent"
+            android:text="Gönder"
+            android:textAllCaps="false"
+            android:textColor="#FFFFFF"
+            android:textSize="13sp" />
+
+        <Button
+            android:id="@+id/btnKbEnter"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@drawable/bg_btn_dark"
+            android:text="Enter"
+            android:textAllCaps="false"
+            android:textColor="#ECEEF2"
+            android:textSize="13sp" />
+
+        <Button
+            android:id="@+id/btnKbBackspace"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginStart="6dp"
+            android:layout_weight="1"
+            android:background="@drawable/bg_btn_dark"
+            android:text="Sil"
+            android:textAllCaps="false"
+            android:textColor="#ECEEF2"
+            android:textSize="13sp" />
+    </LinearLayout>
+</LinearLayout>

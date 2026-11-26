@@ -217,7 +217,7 @@ class TouchpadController {
         // === 3 PARMAK: Ekranlar Arası Işınlanma ===
         else if (e.touches.length === 3 && this.touchStartPositions.length >= 3) {
             const startX = (this.touchStartPositions[0].x + this.touchStartPositions[1].x + this.touchStartPositions[2].x) / 3;
-            const currentX = (curPositions[0].x + curPositions[0].x + curPositions[2].x) / 3;
+            const currentX = (curPositions[0].x + curPositions[1].x + curPositions[2].x) / 3;
             const deltaX = currentX - startX;
 
             if (Math.abs(deltaX) > 60 && !this.jumpTriggered) {

@@ -37,11 +37,40 @@ const BITMAPINFO = koffi.struct('BITMAPINFO', {
     bmiColors: koffi.array('uint32', 1)
 });
 
+// SendInput icin 64-bit uyumlu KEYBDINPUT & INPUT struct (Unicode karakter yazimi icin)
+const KEYBDINPUT = koffi.struct('KEYBDINPUT', {
+    wVk: 'uint16',
+    wScan: 'uint16',
+    dwFlags: 'uint32',
+    time: 'uint32',
+    dwExtraInfo: 'uintptr_t'
+});
+
+const MOUSEINPUT_PAD = koffi.struct('MOUSEINPUT_PAD', {
+    dx: 'long',
+    dy: 'long',
+    mouseData: 'uint32',
+    dwFlags: 'uint32',
+    time: 'uint32',
+    dwExtraInfo: 'uintptr_t'
+});
+
+const INPUT_UNION = koffi.union('INPUT_UNION', {
+    mi: MOUSEINPUT_PAD,
+    ki: KEYBDINPUT
+});
+
+const INPUT = koffi.struct('INPUT', {
+    type: 'uint32',
+    u: INPUT_UNION
+});
+
 // User32 fonksiyonlari
 const GetCursorPos = user32.func('bool GetCursorPos(_Out_ POINT* lpPoint)');
 const SetCursorPos = user32.func('bool SetCursorPos(int X, int Y)');
 const mouse_event = user32.func('void mouse_event(uint32 dwFlags, uint32 dx, uint32 dy, uint32 dwData, uintptr_t dwExtraInfo)');
 const keybd_event = user32.func('void keybd_event(uint8 bVk, uint8 bScan, uint32 dwFlags, uintptr_t dwExtraInfo)');
+const SendInput = user32.func('uint32 SendInput(uint32 cInputs, INPUT* pInputs, int cbSize)');
 const GetSystemMetrics = user32.func('int GetSystemMetrics(int nIndex)');
 const GetForegroundWindow = user32.func('intptr_t GetForegroundWindow()');
 const GetWindowTextW = user32.func('int GetWindowTextW(intptr_t hWnd, _Out_ uint16* lpString, int nMaxCount)');
@@ -83,6 +112,9 @@ const MOUSEEVENTF_ABSOLUTE = 0x8000;
 // Klavye bayraklari
 const KEYEVENTF_EXTENDEDKEY = 0x0001;
 const KEYEVENTF_KEYUP = 0x0002;
+const KEYEVENTF_UNICODE = 0x0004;
+const INPUT_KEYBOARD = 1;
+const SIZEOF_INPUT = koffi.sizeof(INPUT);
 
 // Sik kullanilan Tus Kodlari (Virtual Key Codes)
 const VK_MAP = {
@@ -112,6 +144,10 @@ VK_MAP['plus'] = 0xBB;
 VK_MAP['comma'] = 0xBC;
 VK_MAP['minus'] = 0xBD;
 VK_MAP['dot'] = 0xBE;
+VK_MAP['/'] = 0xBF;
+VK_MAP['slash'] = 0xBF;
+VK_MAP['`'] = 0xC0;
+VK_MAP['backtick'] = 0xC0;
 
 class Win32Api {
     // Farenin anlik ekran koordinatini alir
@@ -219,34 +255,44 @@ class Win32Api {
         }
     }
 
-    // Tek karakter yazma
+    // Tek karakter yazma (Turkce ve tum Unicode karakterler dahil)
     typeChar(char) {
-        const code = char.charCodeAt(0);
-        if (code >= 65 && code <= 90) { // Buyuk harf
-            keybd_event(VK_MAP['shift'], 0, 0, 0);
-            keybd_event(code, 0, 0, 0);
-            keybd_event(code, 0, KEYEVENTF_KEYUP, 0);
-            keybd_event(VK_MAP['shift'], 0, KEYEVENTF_KEYUP, 0);
-        } else if (code >= 97 && code <= 122) { // Kucuk harf
-            const vk = code - 32;
-            keybd_event(vk, 0, 0, 0);
-            keybd_event(vk, 0, KEYEVENTF_KEYUP, 0);
-        } else if (code >= 48 && code <= 57) { // Sayi
-            keybd_event(code, 0, 0, 0);
-            keybd_event(code, 0, KEYEVENTF_KEYUP, 0);
-        } else if (char === ' ') {
-            keybd_event(VK_MAP['space'], 0, 0, 0);
-            keybd_event(VK_MAP['space'], 0, KEYEVENTF_KEYUP, 0);
-        } else if (char === '\n') {
-            keybd_event(VK_MAP['enter'], 0, 0, 0);
-            keybd_event(VK_MAP['enter'], 0, KEYEVENTF_KEYUP, 0);
-        } else {
-            const vk = VK_MAP[char.toLowerCase()];
-            if (vk) {
-                keybd_event(vk, 0, 0, 0);
-                keybd_event(vk, 0, KEYEVENTF_KEYUP, 0);
-            }
+        if (char === '\n') {
+            this.keyPress('enter');
+            return;
         }
+        if (char === '\t') {
+            this.keyPress('tab');
+            return;
+        }
+        const code = char.charCodeAt(0);
+        const inputs = [
+            {
+                type: INPUT_KEYBOARD,
+                u: {
+                    ki: {
+                        wVk: 0,
+                        wScan: code,
+                        dwFlags: KEYEVENTF_UNICODE,
+                        time: 0,
+                        dwExtraInfo: 0
+                    }
+                }
+            },
+            {
+                type: INPUT_KEYBOARD,
+                u: {
+                    ki: {
+                        wVk: 0,
+                        wScan: code,
+                        dwFlags: KEYEVENTF_UNICODE | KEYEVENTF_KEYUP,
+                        time: 0,
+                        dwExtraInfo: 0
+                    }
+                }
+            }
+        ];
+        SendInput(2, inputs, SIZEOF_INPUT);
     }
 
     // Metin yazma
@@ -298,9 +344,11 @@ class Win32Api {
             case 'exit':
                 this.keyPress('esc');
                 break;
+            case 'black':
             case 'blank_black':
                 this.keyPress('b');
                 break;
+            case 'white':
             case 'blank_white':
                 this.keyPress('w');
                 break;
