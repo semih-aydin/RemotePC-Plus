@@ -10,6 +10,10 @@
 [![Build](https://github.com/semih-aydin/RemotePC-Plus/actions/workflows/build-apk.yml/badge.svg)](https://github.com/semih-aydin/RemotePC-Plus/actions/workflows/build-apk.yml)
 [![License](https://img.shields.io/badge/License-MIT-1C1C1E?style=flat-square)](LICENSE)
 
+<br />
+
+<img src='docs/hero.png' alt='RemotePC+ Hero' width='100%' />
+
 </div>
 
 ---
@@ -26,11 +30,15 @@
 1. **Windows:** Extract `RemotePC-Plus-Windows.zip` and launch `RemotePCPlus.exe`. The app runs in the system tray; double-click the tray icon to open the Control Center.
 2. **Android:** Install `RemotePC-Plus-Android.apk` and open it on the same Wi-Fi network. Your PC is discovered automatically via LAN broadcast.
 
-> **Firewall:** On first launch, use **Tray Menu → Güvenlik Duvarını Ayarla** to allow TCP `5000`/`5443` and UDP `5055`.
+> **Firewall:** On first launch, use **Tray Menu → Configure Firewall** to allow TCP `5000`/`5443` and UDP `5055`.
 
 ---
 
 ## Capabilities
+
+<p align='center'>
+  <img src='docs/capabilities.png' alt='RemotePC+ Capabilities' width='100%' />
+</p>
 
 - **Precision Trackpad** — 120Hz native touch input, velocity-based acceleration, tap-to-click, double-tap drag, two-finger scroll/zoom/right-click, and three-finger middle-click & display switching.
 - **Multi-Monitor Engine** — Automatic Win32 display layout detection, per-display DPI profiles, instant display jump, and boundary magnetism.
@@ -41,6 +49,10 @@
 ---
 
 ## Architecture
+
+<p align='center'>
+  <img src='docs/architecture.png' alt='RemotePC+ Architecture' width='100%' />
+</p>
 
 ```text
 RemotePC-Plus/
