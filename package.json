@@ -25,7 +25,7 @@
     "pwa"
   ],
   "author": "Semih Aydin",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "express": "^5.2.1",
     "koffi": "^3.1.6",

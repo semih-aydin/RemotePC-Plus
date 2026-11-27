@@ -8,7 +8,7 @@
 
 [![Download Latest](https://img.shields.io/github/v/release/semih-aydin/RemotePC-Plus?label=Download&color=0A84FF&style=flat-square)](https://github.com/semih-aydin/RemotePC-Plus/releases/latest)
 [![Build](https://github.com/semih-aydin/RemotePC-Plus/actions/workflows/build-apk.yml/badge.svg)](https://github.com/semih-aydin/RemotePC-Plus/actions/workflows/build-apk.yml)
-[![License](https://img.shields.io/badge/License-ISC-1C1C1E?style=flat-square)](package.json)
+[![License](https://img.shields.io/badge/License-MIT-1C1C1E?style=flat-square)](LICENSE)
 
 </div>
 
@@ -77,4 +77,4 @@ npm run build:tray  # Rebuild RemotePCPlus.exe
 
 ## License
 
-ISC — Semih Aydın
+MIT — Semih Aydın
