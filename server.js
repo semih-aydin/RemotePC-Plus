@@ -476,7 +476,7 @@ setInterval(() => {
 app.get('/api/ping', (req, res) => {
     res.json({
         app: 'RemotePC+',
-        version: '2.2.0',
+        version: '2.3.0',
         name: os.hostname(),
         ip: localIp,
         ips: lanInterfaces.map(i => i.address),

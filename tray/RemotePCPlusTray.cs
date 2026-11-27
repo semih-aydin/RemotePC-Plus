@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Globalization;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
@@ -53,29 +54,34 @@ namespace RemotePCPlusTray
         [DllImport("user32.dll", CharSet = CharSet.Auto)]
         private static extern bool DestroyIcon(IntPtr handle);
 
+        private static readonly bool IsTurkish =
+            CultureInfo.CurrentUICulture.TwoLetterISOLanguageName.Equals("tr", StringComparison.OrdinalIgnoreCase);
+
+        private static string T(string en, string tr) { return IsTurkish ? tr : en; }
+
         public TrayApplicationContext()
         {
             _projectDir = ResolveProjectDir();
             _httpPort = ReadHttpPort(_projectDir);
             _generatedIcon = LoadAppIcon();
 
-            _statusItem = new ToolStripMenuItem("RemotePC+ • Başlatılıyor...")
+            _statusItem = new ToolStripMenuItem(T("RemotePC+ • Starting...", "RemotePC+ • Başlatılıyor..."))
             {
                 Enabled = false
             };
 
-            var openItem = new ToolStripMenuItem("Kontrol Merkezini Aç", null, (s, e) => OpenControlCenter(_httpPort));
+            var openItem = new ToolStripMenuItem(T("Open Control Center", "Kontrol Merkezini Aç"), null, (s, e) => OpenControlCenter(_httpPort));
             openItem.Font = new Font(openItem.Font, FontStyle.Bold);
 
-            var restartItem = new ToolStripMenuItem("Sunucuyu Yeniden Başlat", null, (s, e) => RestartServer());
-            var firewallItem = new ToolStripMenuItem("Güvenlik Duvarını Ayarla (Firewall)", null, (s, e) => RunFirewallSetup());
+            var restartItem = new ToolStripMenuItem(T("Restart Server", "Sunucuyu Yeniden Başlat"), null, (s, e) => RestartServer());
+            var firewallItem = new ToolStripMenuItem(T("Configure Firewall", "Güvenlik Duvarını Ayarla"), null, (s, e) => RunFirewallSetup());
 
-            _startupItem = new ToolStripMenuItem("Windows ile Başlat", null, (s, e) => ToggleStartup())
+            _startupItem = new ToolStripMenuItem(T("Start with Windows", "Windows ile Başlat"), null, (s, e) => ToggleStartup())
             {
                 Checked = IsStartupEnabled()
             };
 
-            var exitItem = new ToolStripMenuItem("Çıkış", null, (s, e) => ExitApp());
+            var exitItem = new ToolStripMenuItem(T("Quit", "Çıkış"), null, (s, e) => ExitApp());
 
             var menu = new ContextMenuStrip();
             menu.Items.Add(_statusItem);
@@ -91,7 +97,7 @@ namespace RemotePCPlusTray
             _trayIcon = new NotifyIcon
             {
                 Icon = _generatedIcon,
-                Text = "RemotePC+ • Kablosuz Kontrol Merkezi",
+                Text = T("RemotePC+ • Wireless Control Hub", "RemotePC+ • Kablosuz Kontrol Merkezi"),
                 ContextMenuStrip = menu,
                 Visible = true
             };
@@ -203,20 +209,25 @@ namespace RemotePCPlusTray
 
                 _nodeProcess = Process.Start(psi);
                 string ip = GetLocalIp();
-                _statusItem.Text = string.Format("RemotePC+ • Aktif ({0}:{1})", ip, _httpPort);
+                _statusItem.Text = string.Format(T("RemotePC+ • Running ({0}:{1})", "RemotePC+ • Aktif ({0}:{1})"), ip, _httpPort);
                 _trayIcon.Text = string.Format("RemotePC+ ({0}:{1})", ip, _httpPort);
                 _trayIcon.ShowBalloonTip(
                     2500,
-                    "RemotePC+ Aktif",
-                    string.Format("Telefonunuzla bağlanabilirsiniz ({0}:{1}). Kontrol Merkezi için çift tıklayın.", ip, _httpPort),
+                    T("RemotePC+ is Ready", "RemotePC+ Aktif"),
+                    string.Format(
+                        T("Ready for mobile connection ({0}:{1}). Double-click for Control Center.",
+                          "Telefonunuzla bağlanabilirsiniz ({0}:{1}). Kontrol Merkezi için çift tıklayın."),
+                        ip, _httpPort
+                    ),
                     ToolTipIcon.None
                 );
             }
             catch (Exception ex)
             {
-                _statusItem.Text = "RemotePC+ • Node.js bulunamadı";
+                _statusItem.Text = T("RemotePC+ • Node.js not found", "RemotePC+ • Node.js bulunamadı");
                 var res = MessageBox.Show(
-                    "Node.js bulunamadı veya başlatılamadı.\n\nGitHub Releases'teki hazır Windows ZIP paketini kullanabilir veya Node.js indirip kurabilirsiniz.\n\nNode.js indirme sayfasını açmak ister misiniz?\n\nDetay: " + ex.Message,
+                    T("Node.js was not found. Use the portable Windows ZIP from GitHub Releases or install Node.js.\n\nOpen nodejs.org?\n\nDetails: ",
+                      "Node.js bulunamadı. GitHub Releases'teki taşınabilir Windows ZIP paketini kullanabilir veya Node.js kurabilirsiniz.\n\nnodejs.org açılsın mı?\n\nDetay: ") + ex.Message,
                     "RemotePC+",
                     MessageBoxButtons.YesNo,
                     MessageBoxIcon.Warning

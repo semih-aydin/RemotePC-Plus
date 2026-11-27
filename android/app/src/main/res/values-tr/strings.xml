@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">RemotePC+</string>
+    <string name="select_pc">PC Seç</string>
+    <string name="disconnected">Bağlı değil</string>
+    <string name="connecting">Bağlanıyor</string>
+    <string name="keyboard">Klavye</string>
+    <string name="settings">Ayarlar</string>
+    <string name="tab_touchpad">Touchpad</string>
+    <string name="tab_remote">Kumanda &amp; Araçlar</string>
+    <string name="left_click">Sol Tık</string>
+    <string name="drag">Sürükle</string>
+    <string name="drag_on">Sürükle: Açık</string>
+    <string name="right_click">Sağ Tık</string>
+    <string name="trackpad_title">Trackpad</string>
+    <string name="trackpad_dragging">Sürükleniyor</string>
+    <string name="trackpad_hint">1 Parmak: Tık  •  2 Parmak: Sağ Tık / Kaydır  •  3 Parmak: Ekran</string>
+
+    <string name="active_window">Aktif Pencere</string>
+    <string name="desktop">Masaüstü</string>
+    <string name="media">Medya</string>
+    <string name="clipboard_sync">Pano Paylaşımı</string>
+    <string name="paste_to_pc">PC\'ye Yapıştır</string>
+    <string name="copy_from_pc">PC\'den Kopyala</string>
+    <string name="presentation">Sunum</string>
+    <string name="prev_slide">Önceki</string>
+    <string name="next_slide">Sonraki Slayt</string>
+    <string name="pres_start">F5 Başlat</string>
+    <string name="pres_stop">Esc Bitir</string>
+    <string name="pres_black">Siyah Ekran</string>
+
+    <string name="quick_launcher">Hızlı Başlatıcı</string>
+    <string name="app_browser">Tarayıcı</string>
+    <string name="app_youtube">YouTube</string>
+    <string name="app_spotify">Spotify</string>
+    <string name="app_files">Dosyalar</string>
+    <string name="app_taskmgr">Görevler</string>
+    <string name="app_settings">Ayarlar</string>
+
+    <string name="window_desktop">Pencere &amp; Masaüstü</string>
+    <string name="snap_left">Sola</string>
+    <string name="snap_max">Tam Ekran</string>
+    <string name="snap_right">Sağa</string>
+    <string name="snap_min">Küçült</string>
+    <string name="prev_desktop">Önceki Masaüstü</string>
+    <string name="next_desktop">Sonraki Masaüstü</string>
+
+    <string name="shortcuts_system">Kısayollar &amp; Sistem</string>
+    <string name="copy">Kopyala</string>
+    <string name="paste">Yapıştır</string>
+    <string name="undo">Geri Al</string>
+    <string name="windows_view">Pencereler</string>
+    <string name="close">Kapat</string>
+    <string name="lock">Kilitle</string>
+    <string name="display_off">Ekranı Kapat</string>
+    <string name="sleep">Uyku</string>
+
+    <string name="connect_title">Bilgisayara Bağlan</string>
+    <string name="scanning_pcs">Ağdaki bilgisayarlar taranıyor...</string>
+    <string name="rescan">Tekrar Tara</string>
+    <string name="manual_ip">Manuel IP</string>
+    <string name="connect">Bağlan</string>
+    <string name="no_pc_found">Bilgisayar bulunamadı. PC\'de RemotePC+ açık olmalı veya IP girin.</string>
+    <string name="pcs_found">%1$d bilgisayar bulundu:</string>
+    <string name="enter_ip_error">IP adresi girin</string>
+
+    <string name="voice_type">Sesle Yaz</string>
+    <string name="type_hint">Metin yazın...</string>
+    <string name="send">Gönder</string>
+    <string name="backspace">Sil</string>
+    <string name="space">Boşluk</string>
+    <string name="key_left">Sol</string>
+    <string name="key_up">Yukarı</string>
+    <string name="key_down">Aşağı</string>
+    <string name="key_right">Sağ</string>
+    <string name="voice_prompt">Bilgisayara yazmak için konuşun...</string>
+    <string name="voice_not_supported">Sesle yazma bu cihazda desteklenmiyor</string>
+    <string name="typed_toast">Yazıldı: %1$s</string>
+
+    <string name="appearance">Görünüm</string>
+    <string name="theme_light">Açık</string>
+    <string name="theme_dark">Koyu</string>
+    <string name="theme_system">Sistem</string>
+    <string name="sensitivity">İmleç Hassasiyeti</string>
+    <string name="natural_scroll">Doğal Kaydırma</string>
+    <string name="double_tap_drag">Çift Dokunarak Sürükleme</string>
+    <string name="haptics">Titreşim Geri Bildirimi</string>
+    <string name="ok">Tamam</string>
+    <string name="cancel">İptal</string>
+
+    <string name="sleep_title">Uyku Modu</string>
+    <string name="sleep_confirm">Bilgisayarı uyku moduna almak istiyor musunuz?</string>
+    <string name="sleep_action">Uyku Moduna Al</string>
+    <string name="pin_title">PIN Doğrulaması</string>
+    <string name="pin_message">Bilgisayara bağlanmak için PIN kodunu girin:</string>
+    <string name="pin_hint">4 haneli PIN</string>
+    <string name="pin_verify">Doğrula</string>
+    <string name="pin_ok">PIN doğrulandı</string>
+    <string name="pin_invalid">Hatalı PIN</string>
+    <string name="clip_phone_empty">Telefon panosu boş</string>
+    <string name="clip_pc_empty">PC panosu boş</string>
+    <string name="clip_url_opened">Link PC\'de açıldı</string>
+    <string name="clip_copied_from_pc">PC panosu kopyalandı</string>
+    <string name="clip_pasted_to_pc">PC\'ye yapıştırıldı</string>
+    <string name="clip_copied_to_pc">PC panosuna kopyalandı</string>
+    <string name="connected_to">Bağlandı: %1$s (%2$s)</string>
+    <string name="battery_label">Pil</string>
+    <string name="charging_suffix">(Şarj)</string>
+</resources>

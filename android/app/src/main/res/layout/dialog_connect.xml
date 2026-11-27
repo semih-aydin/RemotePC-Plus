@@ -15,14 +15,14 @@
         <ImageView
             android:layout_width="32dp"
             android:layout_height="32dp"
-            android:contentDescription="RemotePC+"
+            android:contentDescription="@string/app_name"
             android:src="@drawable/ic_app_icon" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
-            android:text="Bilgisayara Bağlan"
+            android:text="@string/connect_title"
             android:textColor="@color/ink_primary"
             android:textSize="17sp"
             android:textStyle="bold" />
@@ -33,7 +33,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
-        android:text="Ağdaki bilgisayarlar taranıyor..."
+        android:text="@string/scanning_pcs"
         android:textColor="@color/ink_secondary"
         android:textSize="12.5sp" />
 
@@ -50,7 +50,7 @@
         android:layout_height="42dp"
         android:layout_marginTop="4dp"
         android:background="@drawable/bg_btn_dark"
-        android:text="Tekrar Tara"
+        android:text="@string/rescan"
         android:textAllCaps="false"
         android:textColor="@color/ink_primary"
         android:textSize="13sp"
@@ -66,7 +66,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Manuel IP"
+        android:text="@string/manual_ip"
         android:textColor="@color/ink_secondary"
         android:textSize="12sp"
         android:textStyle="bold" />
@@ -113,7 +113,7 @@
         android:layout_height="44dp"
         android:layout_marginTop="10dp"
         android:background="@drawable/bg_btn_accent"
-        android:text="Bağlan"
+        android:text="@string/connect"
         android:textAllCaps="false"
         android:textColor="#FFFFFF"
         android:textSize="14sp"

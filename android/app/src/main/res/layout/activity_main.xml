@@ -6,7 +6,7 @@
     android:orientation="vertical"
     android:padding="14dp">
 
-    <!-- ÜST BAR: PC Durumu + Vektör Araçlar -->
+    <!-- Top Bar -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="44dp"
@@ -40,7 +40,7 @@
                 android:layout_weight="1"
                 android:ellipsize="end"
                 android:maxLines="1"
-                android:text="PC Seç"
+                android:text="@string/select_pc"
                 android:textColor="@color/ink_primary"
                 android:textSize="13.5sp"
                 android:textStyle="bold" />
@@ -51,7 +51,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 android:fontFamily="monospace"
-                android:text="Bağlı değil"
+                android:text="@string/disconnected"
                 android:textColor="@color/signal_red"
                 android:textSize="11sp" />
         </LinearLayout>
@@ -62,7 +62,7 @@
             android:layout_height="40dp"
             android:layout_marginStart="8dp"
             android:background="@drawable/bg_card"
-            android:contentDescription="Klavye"
+            android:contentDescription="@string/keyboard"
             android:scaleType="center"
             android:src="@drawable/ic_keyboard"
             android:tint="@color/ink_primary" />
@@ -73,13 +73,13 @@
             android:layout_height="40dp"
             android:layout_marginStart="6dp"
             android:background="@drawable/bg_card"
-            android:contentDescription="Ayarlar"
+            android:contentDescription="@string/settings"
             android:scaleType="center"
             android:src="@drawable/ic_settings"
             android:tint="@color/ink_primary" />
     </LinearLayout>
 
-    <!-- APPLE SEGMENTED CONTROL -->
+    <!-- Apple Segmented Control -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="40dp"
@@ -95,7 +95,7 @@
             android:layout_weight="1"
             android:background="@drawable/bg_tab_active"
             android:minHeight="0dp"
-            android:text="Touchpad"
+            android:text="@string/tab_touchpad"
             android:textAllCaps="false"
             android:textColor="@color/ink_primary"
             android:textSize="12.5sp"
@@ -108,14 +108,14 @@
             android:layout_weight="1"
             android:background="@drawable/bg_tab_idle"
             android:minHeight="0dp"
-            android:text="Kumanda &amp; Araçlar"
+            android:text="@string/tab_remote"
             android:textAllCaps="false"
             android:textColor="@color/ink_secondary"
             android:textSize="12.5sp"
             android:textStyle="bold" />
     </LinearLayout>
 
-    <!-- ÇOKLU MONİTÖR ÇUBUĞU -->
+    <!-- Multi-Monitor Bar -->
     <LinearLayout
         android:id="@+id/monitorBar"
         android:layout_width="match_parent"
@@ -138,7 +138,7 @@
         </HorizontalScrollView>
     </LinearLayout>
 
-    <!-- 1. TOUCHPAD GÖRÜNÜMÜ -->
+    <!-- 1. TOUCHPAD VIEW -->
     <LinearLayout
         android:id="@+id/viewTouchpad"
         android:layout_width="match_parent"
@@ -159,7 +159,6 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1" />
 
-            <!-- Dikey Kaydırma Rayı -->
             <LinearLayout
                 android:id="@+id/scrollStrip"
                 android:layout_width="34dp"
@@ -176,7 +175,7 @@
             </LinearLayout>
         </LinearLayout>
 
-        <!-- Alt Tıklama Çubuğu -->
+        <!-- Bottom Click Bar -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="56dp"
@@ -190,7 +189,7 @@
                 android:layout_marginEnd="5dp"
                 android:layout_weight="1.35"
                 android:background="@drawable/bg_card"
-                android:text="Sol Tık"
+                android:text="@string/left_click"
                 android:textAllCaps="false"
                 android:textColor="@color/ink_primary"
                 android:textSize="13.5sp"
@@ -204,7 +203,7 @@
                 android:layout_marginEnd="2dp"
                 android:layout_weight="0.95"
                 android:background="@drawable/bg_card"
-                android:text="Sürükle"
+                android:text="@string/drag"
                 android:textAllCaps="false"
                 android:textColor="@color/ink_secondary"
                 android:textSize="12.5sp"
@@ -217,7 +216,7 @@
                 android:layout_marginStart="5dp"
                 android:layout_weight="1.1"
                 android:background="@drawable/bg_card"
-                android:text="Sağ Tık"
+                android:text="@string/right_click"
                 android:textAllCaps="false"
                 android:textColor="@color/ink_primary"
                 android:textSize="13.5sp"
@@ -225,7 +224,7 @@
         </LinearLayout>
     </LinearLayout>
 
-    <!-- 2. KUMANDA & ARAÇLAR GÖRÜNÜMÜ -->
+    <!-- 2. REMOTE & TOOLS VIEW -->
     <ScrollView
         android:id="@+id/viewMedia"
         android:layout_width="match_parent"
@@ -241,7 +240,7 @@
             android:orientation="vertical"
             android:paddingBottom="10dp">
 
-            <!-- Aktif Pencere -->
+            <!-- Active Window & System Telemetry -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -252,7 +251,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Aktif Pencere"
+                    android:text="@string/active_window"
                     android:textColor="@color/accent_blue"
                     android:textSize="12sp"
                     android:textStyle="bold" />
@@ -265,7 +264,7 @@
                     android:ellipsize="end"
                     android:fontFamily="monospace"
                     android:maxLines="1"
-                    android:text="Masaüstü"
+                    android:text="@string/desktop"
                     android:textColor="@color/ink_primary"
                     android:textSize="12.5sp" />
 
@@ -280,7 +279,7 @@
                     android:textSize="11sp" />
             </LinearLayout>
 
-            <!-- Medya Kontrolleri -->
+            <!-- Media -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -292,7 +291,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Medya"
+                    android:text="@string/media"
                     android:textColor="@color/ink_secondary"
                     android:textSize="12sp"
                     android:textStyle="bold" />
@@ -310,7 +309,7 @@
                         android:layout_marginEnd="8dp"
                         android:layout_weight="1"
                         android:background="@drawable/bg_btn_dark"
-                        android:contentDescription="Önceki"
+                        android:contentDescription="@string/prev_slide"
                         android:scaleType="center"
                         android:src="@drawable/ic_prev"
                         android:tint="@color/ink_primary" />
@@ -321,7 +320,7 @@
                         android:layout_height="match_parent"
                         android:layout_weight="1.35"
                         android:background="@drawable/bg_btn_accent"
-                        android:contentDescription="Oynat Duraklat"
+                        android:contentDescription="@string/media"
                         android:scaleType="center"
                         android:src="@drawable/ic_play_pause"
                         android:tint="#FFFFFF" />
@@ -333,7 +332,7 @@
                         android:layout_marginStart="8dp"
                         android:layout_weight="1"
                         android:background="@drawable/bg_btn_dark"
-                        android:contentDescription="Sonraki"
+                        android:contentDescription="@string/next_slide"
                         android:scaleType="center"
                         android:src="@drawable/ic_next"
                         android:tint="@color/ink_primary" />
@@ -352,7 +351,7 @@
                         android:layout_marginEnd="8dp"
                         android:layout_weight="1"
                         android:background="@drawable/bg_btn_dark"
-                        android:contentDescription="Ses Azalt"
+                        android:contentDescription="Vol -"
                         android:scaleType="center"
                         android:src="@drawable/ic_vol_down"
                         android:tint="@color/ink_primary" />
@@ -363,7 +362,7 @@
                         android:layout_height="match_parent"
                         android:layout_weight="1"
                         android:background="@drawable/bg_btn_dark"
-                        android:contentDescription="Sessiz"
+                        android:contentDescription="Mute"
                         android:scaleType="center"
                         android:src="@drawable/ic_vol_mute"
                         android:tint="@color/ink_primary" />
@@ -375,14 +374,14 @@
                         android:layout_marginStart="8dp"
                         android:layout_weight="1"
                         android:background="@drawable/bg_btn_dark"
-                        android:contentDescription="Ses Artır"
+                        android:contentDescription="Vol +"
                         android:scaleType="center"
                         android:src="@drawable/ic_vol_up"
                         android:tint="@color/ink_primary" />
                 </LinearLayout>
             </LinearLayout>
 
-            <!-- Pano Paylaşımı (Clipboard Sync) -->
+            <!-- Clipboard Sync -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -394,7 +393,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Pano Paylaşımı"
+                    android:text="@string/clipboard_sync"
                     android:textColor="@color/ink_secondary"
                     android:textSize="12sp"
                     android:textStyle="bold" />
@@ -412,7 +411,7 @@
                         android:layout_marginEnd="6dp"
                         android:layout_weight="1"
                         android:background="@drawable/bg_btn_accent"
-                        android:text="PC'ye Yapıştır"
+                        android:text="@string/paste_to_pc"
                         android:textAllCaps="false"
                         android:textColor="#FFFFFF"
                         android:textSize="12sp"
@@ -424,7 +423,7 @@
                         android:layout_height="match_parent"
                         android:layout_weight="1"
                         android:background="@drawable/bg_btn_dark"
-                        android:text="PC'den Kopyala"
+                        android:text="@string/copy_from_pc"
                         android:textAllCaps="false"
                         android:textColor="@color/ink_primary"
                         android:textSize="12sp"
@@ -432,7 +431,7 @@
                 </LinearLayout>
             </LinearLayout>
 
-            <!-- Sunum Kontrolleri -->
+            <!-- Presentation -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -444,7 +443,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Sunum"
+                    android:text="@string/presentation"
                     android:textColor="@color/ink_secondary"
                     android:textSize="12sp"
                     android:textStyle="bold" />
@@ -462,7 +461,7 @@
                         android:layout_marginEnd="8dp"
                         android:layout_weight="1"
                         android:background="@drawable/bg_btn_dark"
-                        android:text="Önceki"
+                        android:text="@string/prev_slide"
                         android:textAllCaps="false"
                         android:textColor="@color/ink_primary"
                         android:textSize="13sp"
@@ -474,7 +473,7 @@
                         android:layout_height="match_parent"
                         android:layout_weight="1.3"
                         android:background="@drawable/bg_btn_accent"
-                        android:text="Sonraki Slayt"
+                        android:text="@string/next_slide"
                         android:textAllCaps="false"
                         android:textColor="#FFFFFF"
                         android:textSize="14sp"
@@ -494,7 +493,7 @@
                         android:layout_marginEnd="6dp"
                         android:layout_weight="1"
                         android:background="@drawable/bg_btn_dark"
-                        android:text="F5 Başlat"
+                        android:text="@string/pres_start"
                         android:textAllCaps="false"
                         android:textColor="@color/ink_primary"
                         android:textSize="12sp" />
@@ -505,7 +504,7 @@
                         android:layout_height="match_parent"
                         android:layout_weight="1"
                         android:background="@drawable/bg_btn_dark"
-                        android:text="Esc Bitir"
+                        android:text="@string/pres_stop"
                         android:textAllCaps="false"
                         android:textColor="@color/ink_primary"
                         android:textSize="12sp" />
@@ -517,14 +516,14 @@
                         android:layout_marginStart="6dp"
                         android:layout_weight="1"
                         android:background="@drawable/bg_btn_dark"
-                        android:text="Siyah Ekran"
+                        android:text="@string/pres_black"
                         android:textAllCaps="false"
                         android:textColor="@color/ink_primary"
                         android:textSize="12sp" />
                 </LinearLayout>
             </LinearLayout>
 
-            <!-- Hızlı Başlatıcı -->
+            <!-- Quick Launcher -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -536,7 +535,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Hızlı Başlatıcı"
+                    android:text="@string/quick_launcher"
                     android:textColor="@color/ink_secondary"
                     android:textSize="12sp"
                     android:textStyle="bold" />
@@ -554,7 +553,7 @@
                         android:layout_marginEnd="6dp"
                         android:layout_weight="1"
                         android:background="@drawable/bg_btn_dark"
-                        android:text="Tarayıcı"
+                        android:text="@string/app_browser"
                         android:textAllCaps="false"
                         android:textColor="@color/ink_primary"
                         android:textSize="12sp" />
@@ -565,7 +564,7 @@
                         android:layout_height="match_parent"
                         android:layout_weight="1"
                         android:background="@drawable/bg_btn_dark"
-                        android:text="YouTube"
+                        android:text="@string/app_youtube"
                         android:textAllCaps="false"
                         android:textColor="@color/ink_primary"
                         android:textSize="12sp" />
@@ -577,7 +576,7 @@
                         android:layout_marginStart="6dp"
                         android:layout_weight="1"
                         android:background="@drawable/bg_btn_dark"
-                        android:text="Spotify"
+                        android:text="@string/app_spotify"
                         android:textAllCaps="false"
                         android:textColor="@color/ink_primary"
                         android:textSize="12sp" />
@@ -596,7 +595,7 @@
                         android:layout_marginEnd="6dp"
                         android:layout_weight="1"
                         android:background="@drawable/bg_btn_dark"
-                        android:text="Dosyalar"
+                        android:text="@string/app_files"
                         android:textAllCaps="false"
                         android:textColor="@color/ink_primary"
                         android:textSize="12sp" />
@@ -607,7 +606,7 @@
                         android:layout_height="match_parent"
                         android:layout_weight="1"
                         android:background="@drawable/bg_btn_dark"
-                        android:text="Görevler"
+                        android:text="@string/app_taskmgr"
                         android:textAllCaps="false"
                         android:textColor="@color/ink_primary"
                         android:textSize="12sp" />
@@ -619,14 +618,14 @@
                         android:layout_marginStart="6dp"
                         android:layout_weight="1"
                         android:background="@drawable/bg_btn_dark"
-                        android:text="Ayarlar"
+                        android:text="@string/app_settings"
                         android:textAllCaps="false"
                         android:textColor="@color/ink_primary"
                         android:textSize="12sp" />
                 </LinearLayout>
             </LinearLayout>
 
-            <!-- Pencere & Sanal Masaüstü Yönetimi -->
+            <!-- Window & Desktop -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -638,7 +637,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Pencere &amp; Masaüstü"
+                    android:text="@string/window_desktop"
                     android:textColor="@color/ink_secondary"
                     android:textSize="12sp"
                     android:textStyle="bold" />
@@ -656,7 +655,7 @@
                         android:layout_marginEnd="6dp"
                         android:layout_weight="1"
                         android:background="@drawable/bg_btn_dark"
-                        android:text="Sola"
+                        android:text="@string/snap_left"
                         android:textAllCaps="false"
                         android:textColor="@color/ink_primary"
                         android:textSize="12sp" />
@@ -668,7 +667,7 @@
                         android:layout_marginEnd="6dp"
                         android:layout_weight="1"
                         android:background="@drawable/bg_btn_dark"
-                        android:text="Tam Ekran"
+                        android:text="@string/snap_max"
                         android:textAllCaps="false"
                         android:textColor="@color/ink_primary"
                         android:textSize="11.5sp" />
@@ -680,7 +679,7 @@
                         android:layout_marginEnd="6dp"
                         android:layout_weight="1"
                         android:background="@drawable/bg_btn_dark"
-                        android:text="Sağa"
+                        android:text="@string/snap_right"
                         android:textAllCaps="false"
                         android:textColor="@color/ink_primary"
                         android:textSize="12sp" />
@@ -691,7 +690,7 @@
                         android:layout_height="match_parent"
                         android:layout_weight="1"
                         android:background="@drawable/bg_btn_dark"
-                        android:text="Küçült"
+                        android:text="@string/snap_min"
                         android:textAllCaps="false"
                         android:textColor="@color/ink_primary"
                         android:textSize="12sp" />
@@ -710,7 +709,7 @@
                         android:layout_marginEnd="6dp"
                         android:layout_weight="1"
                         android:background="@drawable/bg_btn_dark"
-                        android:text="Önceki Masaüstü"
+                        android:text="@string/prev_desktop"
                         android:textAllCaps="false"
                         android:textColor="@color/ink_primary"
                         android:textSize="12sp" />
@@ -721,14 +720,14 @@
                         android:layout_height="match_parent"
                         android:layout_weight="1"
                         android:background="@drawable/bg_btn_dark"
-                        android:text="Sonraki Masaüstü"
+                        android:text="@string/next_desktop"
                         android:textAllCaps="false"
                         android:textColor="@color/ink_primary"
                         android:textSize="12sp" />
                 </LinearLayout>
             </LinearLayout>
 
-            <!-- Hızlı Kısayollar & Güç -->
+            <!-- Shortcuts & System -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -740,7 +739,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Kısayollar &amp; Sistem"
+                    android:text="@string/shortcuts_system"
                     android:textColor="@color/ink_secondary"
                     android:textSize="12sp"
                     android:textStyle="bold" />
@@ -758,7 +757,7 @@
                         android:layout_marginEnd="6dp"
                         android:layout_weight="1"
                         android:background="@drawable/bg_btn_dark"
-                        android:text="Kopyala"
+                        android:text="@string/copy"
                         android:textAllCaps="false"
                         android:textColor="@color/ink_primary"
                         android:textSize="12sp" />
@@ -769,7 +768,7 @@
                         android:layout_height="match_parent"
                         android:layout_weight="1"
                         android:background="@drawable/bg_btn_dark"
-                        android:text="Yapıştır"
+                        android:text="@string/paste"
                         android:textAllCaps="false"
                         android:textColor="@color/ink_primary"
                         android:textSize="12sp" />
@@ -781,7 +780,7 @@
                         android:layout_marginStart="6dp"
                         android:layout_weight="1"
                         android:background="@drawable/bg_btn_dark"
-                        android:text="Geri Al"
+                        android:text="@string/undo"
                         android:textAllCaps="false"
                         android:textColor="@color/ink_primary"
                         android:textSize="12sp" />
@@ -800,7 +799,7 @@
                         android:layout_marginEnd="6dp"
                         android:layout_weight="1"
                         android:background="@drawable/bg_btn_dark"
-                        android:text="Masaüstü"
+                        android:text="@string/desktop"
                         android:textAllCaps="false"
                         android:textColor="@color/ink_primary"
                         android:textSize="12sp" />
@@ -811,7 +810,7 @@
                         android:layout_height="match_parent"
                         android:layout_weight="1"
                         android:background="@drawable/bg_btn_dark"
-                        android:text="Pencereler"
+                        android:text="@string/windows_view"
                         android:textAllCaps="false"
                         android:textColor="@color/ink_primary"
                         android:textSize="12sp" />
@@ -823,7 +822,7 @@
                         android:layout_marginStart="6dp"
                         android:layout_weight="1"
                         android:background="@drawable/bg_btn_dark"
-                        android:text="Kapat"
+                        android:text="@string/close"
                         android:textAllCaps="false"
                         android:textColor="@color/signal_red"
                         android:textSize="12sp" />
@@ -842,7 +841,7 @@
                         android:layout_marginEnd="6dp"
                         android:layout_weight="1"
                         android:background="@drawable/bg_btn_dark"
-                        android:text="Kilitle"
+                        android:text="@string/lock"
                         android:textAllCaps="false"
                         android:textColor="@color/ink_primary"
                         android:textSize="12sp" />
@@ -853,7 +852,7 @@
                         android:layout_height="match_parent"
                         android:layout_weight="1"
                         android:background="@drawable/bg_btn_dark"
-                        android:text="Ekranı Kapat"
+                        android:text="@string/display_off"
                         android:textAllCaps="false"
                         android:textColor="@color/ink_primary"
                         android:textSize="12sp" />
@@ -865,7 +864,7 @@
                         android:layout_marginStart="6dp"
                         android:layout_weight="1"
                         android:background="@drawable/bg_btn_dark"
-                        android:text="Uyku"
+                        android:text="@string/sleep"
                         android:textAllCaps="false"
                         android:textColor="@color/signal_red"
                         android:textSize="12sp" />

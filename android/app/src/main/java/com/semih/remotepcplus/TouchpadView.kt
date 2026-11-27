@@ -161,13 +161,13 @@ class TouchpadView @JvmOverloads constructor(
         val cx = width / 2f
         val cy = height / 2f
         canvas.drawText(
-            if (isDragging) "Sürükleniyor" else "Trackpad",
+            context.getString(if (isDragging) R.string.trackpad_dragging else R.string.trackpad_title),
             cx,
             cy - 6f * density,
             hintTitlePaint
         )
         canvas.drawText(
-            "1 Parmak: Tık  •  2 Parmak: Sağ Tık / Kaydır  •  3 Parmak: Ekran",
+            context.getString(R.string.trackpad_hint),
             cx,
             cy + 14f * density,
             hintSubPaint

@@ -30,6 +30,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import java.util.Locale
 
 class MainActivity : AppCompatActivity(), RemoteClient.Listener {
 
@@ -68,7 +69,7 @@ class MainActivity : AppCompatActivity(), RemoteClient.Listener {
             if (!spoken.isNullOrEmpty()) {
                 client.sendType("$spoken ")
                 haptics.click()
-                Toast.makeText(this, "Yazıldı: $spoken", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.typed_toast, spoken), Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -306,7 +307,7 @@ class MainActivity : AppCompatActivity(), RemoteClient.Listener {
         btnDragLock.setTextColor(
             if (isDragLocked) 0xFFFFFFFF.toInt() else ContextCompat.getColor(this, R.color.ink_secondary)
         )
-        btnDragLock.text = if (isDragLocked) "Sürükle: Açık" else "Sürükle"
+        btnDragLock.text = getString(if (isDragLocked) R.string.drag_on else R.string.drag)
     }
 
     private fun setupMediaAndTools() {
@@ -323,10 +324,10 @@ class MainActivity : AppCompatActivity(), RemoteClient.Listener {
             val cm = getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
             val text = cm?.primaryClip?.getItemAt(0)?.coerceToText(this)?.toString()?.trim()
             if (text.isNullOrEmpty()) {
-                Toast.makeText(this, "Telefon panosu boş", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.clip_phone_empty), Toast.LENGTH_SHORT).show()
             } else if (text.startsWith("http://", true) || text.startsWith("https://", true)) {
                 client.sendOpenUrl(text)
-                Toast.makeText(this, "Link PC'de açıldı", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.clip_url_opened), Toast.LENGTH_SHORT).show()
             } else {
                 client.sendClipboardSet(text, paste = true)
             }
@@ -373,13 +374,13 @@ class MainActivity : AppCompatActivity(), RemoteClient.Listener {
         findViewById<View>(R.id.btnPowerDisplayOff).setOnClickListener { client.sendSystemPower("display_off"); haptics.rightClick() }
         findViewById<View>(R.id.btnPowerSleep).setOnClickListener {
             AlertDialog.Builder(this, R.style.Theme_RemotePCPlus_Dialog)
-                .setTitle("Uyku Modu")
-                .setMessage("Bilgisayarı uyku moduna almak istiyor musunuz?")
-                .setPositiveButton("Uyku Moduna Al") { _, _ ->
+                .setTitle(R.string.sleep_title)
+                .setMessage(R.string.sleep_confirm)
+                .setPositiveButton(R.string.sleep_action) { _, _ ->
                     client.sendSystemPower("sleep")
                     haptics.rightClick()
                 }
-                .setNegativeButton("İptal", null)
+                .setNegativeButton(R.string.cancel, null)
                 .show()
         }
     }
@@ -469,13 +470,13 @@ class MainActivity : AppCompatActivity(), RemoteClient.Listener {
 
             ConnectionState.CONNECTING -> {
                 statusDot.setBackgroundResource(R.drawable.dot_yellow)
-                tvPing.text = "Bağlanıyor"
+                tvPing.text = getString(R.string.connecting)
                 tvPing.setTextColor(ContextCompat.getColor(this, R.color.signal_orange))
             }
 
             ConnectionState.DISCONNECTED -> {
                 statusDot.setBackgroundResource(R.drawable.dot_red)
-                tvPing.text = "Bağlı değil"
+                tvPing.text = getString(R.string.disconnected)
                 tvPing.setTextColor(ContextCompat.getColor(this, R.color.signal_red))
             }
         }
@@ -498,7 +499,7 @@ class MainActivity : AppCompatActivity(), RemoteClient.Listener {
         val label = when {
             windowTitle.isNotBlank() && processName.isNotBlank() -> "${processName.uppercase()}: $windowTitle"
             processName.isNotBlank() -> processName.uppercase()
-            else -> "Masaüstü"
+            else -> getString(R.string.desktop)
         }
         tvActiveWindow.text = label
     }
@@ -520,32 +521,32 @@ class MainActivity : AppCompatActivity(), RemoteClient.Listener {
 
     override fun onAuthResult(success: Boolean, error: String?) {
         if (success) {
-            Toast.makeText(this, "PIN doğrulandı", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.pin_ok), Toast.LENGTH_SHORT).show()
         } else {
             prefs.pin = ""
-            showPinDialog(error ?: "Hatalı PIN")
+            showPinDialog(error ?: getString(R.string.pin_invalid))
         }
     }
 
     override fun onClipboardReceived(text: String) {
         if (text.isBlank()) {
-            Toast.makeText(this, "PC panosu boş", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.clip_pc_empty), Toast.LENGTH_SHORT).show()
             return
         }
         val cm = getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
         cm?.setPrimaryClip(ClipData.newPlainText("RemotePC+", text))
-        Toast.makeText(this, "PC panosu kopyalandı", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, getString(R.string.clip_copied_from_pc), Toast.LENGTH_SHORT).show()
     }
 
     override fun onClipboardAck(success: Boolean, pasted: Boolean) {
         if (success) {
-            Toast.makeText(this, if (pasted) "PC'ye yapıştırıldı" else "PC panosuna kopyalandı", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(if (pasted) R.string.clip_pasted_to_pc else R.string.clip_copied_to_pc), Toast.LENGTH_SHORT).show()
         }
     }
 
     override fun onSystemStatsUpdated(cpu: Int, ram: Int, battery: Int?, charging: Boolean) {
         val batText = if (battery != null) {
-            "  •  Pil $battery%${if (charging) " (Şarj)" else ""}"
+            "  •  ${getString(R.string.battery_label)} $battery%${if (charging) " ${getString(R.string.charging_suffix)}" else ""}"
         } else ""
         tvSystemStats.text = "CPU $cpu%  •  RAM $ram%$batText"
     }
@@ -562,7 +563,7 @@ class MainActivity : AppCompatActivity(), RemoteClient.Listener {
                 } ?: found.first()
                 if (match.ip != prefs.host || match.httpPort != prefs.port) {
                     prefs.savePc(match.name, match.ip, match.httpPort)
-                    Toast.makeText(this@MainActivity, "Bağlandı: ${match.name} (${match.ip})", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@MainActivity, getString(R.string.connected_to, match.name, match.ip), Toast.LENGTH_SHORT).show()
                     connectToSavedPc()
                 }
             }
@@ -587,16 +588,16 @@ class MainActivity : AppCompatActivity(), RemoteClient.Listener {
             .create()
 
         fun runScan() {
-            tvScanStatus.text = "Ağdaki bilgisayarlar taranıyor..."
+            tvScanStatus.text = getString(R.string.scanning_pcs)
             discoveredList.removeAllViews()
             btnRescan.isEnabled = false
             uiScope.launch {
                 val pcs = DiscoveryManager.discoverPcs(this@MainActivity, prefs.port)
                 btnRescan.isEnabled = true
                 if (pcs.isEmpty()) {
-                    tvScanStatus.text = "Bilgisayar bulunamadı. PC'de RemotePC+ açık olmalı veya IP girin."
+                    tvScanStatus.text = getString(R.string.no_pc_found)
                 } else {
-                    tvScanStatus.text = "${pcs.size} bilgisayar bulundu:"
+                    tvScanStatus.text = getString(R.string.pcs_found, pcs.size)
                     val density = resources.displayMetrics.density
                     for (pc in pcs) {
                         val itemBtn = Button(this@MainActivity).apply {
@@ -625,7 +626,7 @@ class MainActivity : AppCompatActivity(), RemoteClient.Listener {
             val ip = etIp.text.toString().trim()
             val port = etPort.text.toString().trim().toIntOrNull() ?: 5000
             if (ip.isBlank()) {
-                etIp.error = "IP adresi girin"
+                etIp.error = getString(R.string.enter_ip_error)
                 return@setOnClickListener
             }
             prefs.savePc(ip, ip, port)
@@ -654,12 +655,12 @@ class MainActivity : AppCompatActivity(), RemoteClient.Listener {
             try {
                 val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
                     putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
-                    putExtra(RecognizerIntent.EXTRA_LANGUAGE, "tr-TR")
-                    putExtra(RecognizerIntent.EXTRA_PROMPT, "Bilgisayara yazmak için konuşun...")
+                    putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault().toLanguageTag())
+                    putExtra(RecognizerIntent.EXTRA_PROMPT, getString(R.string.voice_prompt))
                 }
                 voiceLauncher.launch(intent)
             } catch (_: Exception) {
-                Toast.makeText(this, "Sesle yazma bu cihazda desteklenmiyor", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.voice_not_supported), Toast.LENGTH_SHORT).show()
             }
         }
         dialogView.findViewById<View>(R.id.btnKbSend).setOnClickListener { sendCurrentText() }
@@ -682,7 +683,7 @@ class MainActivity : AppCompatActivity(), RemoteClient.Listener {
 
         AlertDialog.Builder(this, R.style.Theme_RemotePCPlus_Dialog)
             .setView(dialogView)
-            .setNegativeButton("Kapat", null)
+            .setNegativeButton(R.string.close, null)
             .show()
     }
 
@@ -711,7 +712,7 @@ class MainActivity : AppCompatActivity(), RemoteClient.Listener {
 
         val dialog = AlertDialog.Builder(this, R.style.Theme_RemotePCPlus_Dialog)
             .setView(dialogView)
-            .setPositiveButton("Tamam", null)
+            .setPositiveButton(R.string.ok, null)
             .create()
 
         fun selectTheme(mode: String) {
@@ -757,25 +758,25 @@ class MainActivity : AppCompatActivity(), RemoteClient.Listener {
     private fun showPinDialog(errorMessage: String?) {
         val input = EditText(this).apply {
             inputType = InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_VARIATION_PASSWORD
-            hint = "4 haneli PIN"
+            hint = getString(R.string.pin_hint)
             setTextColor(ContextCompat.getColor(this@MainActivity, R.color.ink_primary))
             setHintTextColor(ContextCompat.getColor(this@MainActivity, R.color.ink_tertiary))
             setPadding(40, 30, 40, 30)
         }
 
         AlertDialog.Builder(this, R.style.Theme_RemotePCPlus_Dialog)
-            .setTitle("PIN Doğrulaması")
-            .setMessage(errorMessage ?: "Bilgisayara bağlanmak için PIN kodunu girin:")
+            .setTitle(R.string.pin_title)
+            .setMessage(errorMessage ?: getString(R.string.pin_message))
             .setView(input)
             .setCancelable(false)
-            .setPositiveButton("Doğrula") { _, _ ->
+            .setPositiveButton(R.string.pin_verify) { _, _ ->
                 val pin = input.text.toString().trim()
                 if (pin.isNotEmpty()) {
                     prefs.pin = pin
                     client.sendAuth(pin)
                 }
             }
-            .setNegativeButton("İptal", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
 }
